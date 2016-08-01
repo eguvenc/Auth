@@ -15,7 +15,7 @@ Yetki doğrulama,
 * Kimlikleri önbellekleme ve yönetebilme
 * Sona erme süreleri belirleyerek ile sonlandırılabilir kimlikler yaratabilme
 * Veritabanı sorgularını özelleştirebilme
-* Yetki doğrulama onaylandırma
+* Kimlik Onaylama
 * Beni hatırla özelliği
 
 ### Akış Şeması
@@ -24,6 +24,6 @@ Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarında
 
 ![Authentication](example/images/auth-flowchart.png?raw=true "Authentication")
 
-Şemada görüldüğü üzere <kbd>GenericUser</kbd> ve <kbd>AuthorizedUser</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. GenericUser <kbd>yetkilendirilmemiş</kbd> AuhtorizedUser ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.
+Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.
 
-Akış şemasına göre GenericUser login butonuna bastığı anda ilk önce önbelleğe bir sorgu yapılır ve daha önceden kullanıcının önbellekte kalıcı bir kimliği olup olmadığında bakılır. Eğer hafıza bloğunda kalıcı yetki var ise kullanıcı kimliği buradan okunur yok ise veritabanına sorgu gönderilir ve elde edilen kimlik kartı tekrar önbelleğe yazılır.
+Akış şemasına göre Guest login butonuna bastığı anda ilk önce önbelleğe bir sorgu yapılır ve daha önceden kullanıcının önbellekte kalıcı bir kimliği olup olmadığında bakılır. Eğer hafıza bloğunda kalıcı yetki var ise kullanıcı kimliği buradan okunur yok ise veritabanına sorgu gönderilir ve elde edilen kimlik kartı tekrar önbelleğe yazılır.
