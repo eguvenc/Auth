@@ -54,9 +54,9 @@ class Recaller
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->table = $container->get('auth:table');
-        $this->storage = $container->get('auth:storage');
-        $this->identity = $container->get('auth:identity');
+        $this->table     = $container->get('Auth:Table');
+        $this->storage   = $container->get('Auth:Storage');
+        $this->identity  = $container->get('Auth:Identity');
     }
 
     /**
@@ -90,7 +90,7 @@ class Recaller
         /**
          * Generate authenticated user
          */
-        $this->container->get('auth:adapter')->generateUser($data, $resultRowArray);
+        $this->container->get('Auth:Adapter')->generateUser($data, $resultRowArray);
         
         $this->removeInactiveSessions(); // Kill all inactive sessions of current user
     }

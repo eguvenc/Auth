@@ -65,7 +65,7 @@ class Mongo extends AbstractTable
     {
         $row = $this->collection->finOne(
             array(
-                $this->getColumnRememberToken() => $tokenValue
+                $this->getRememberTokenColumn() => $tokenValue
             ),
             implode(", ", $this->getColumns())
         );
@@ -90,7 +90,7 @@ class Mongo extends AbstractTable
                 $this->getIdentityColumn() => $identityValue
             ],
             [
-                '$set' => array($this->getColumnRememberToken() => $tokenValue),
+                '$set' => array($this->getRememberTokenColumn() => $tokenValue),
             ]
         );
     }

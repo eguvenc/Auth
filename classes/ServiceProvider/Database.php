@@ -19,7 +19,7 @@ class Database extends AbstractServiceProvider
      * @var array
      */
     protected $provides = [
-        'database:default'
+        'Database:Default'
     ];
 
     /**
@@ -44,6 +44,6 @@ class Database extends AbstractServiceProvider
         );
         $conn = DriverManager::getConnection($connectionParams, $config);
 
-        $container->share('database:default', $conn);
+        $container->share('Database:Default', $conn);
     }
 }

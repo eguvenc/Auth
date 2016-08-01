@@ -16,11 +16,11 @@ class Authentication extends AbstractServiceProvider
      * @var array
      */
     protected $provides = [
-        'auth:table',
-        'auth:adapter',
-        'auth:storage',
-        'auth:identity',
-        'auth:rememberMe',
+        'Auth:Table',
+        'Auth:Adapter',
+        'Auth:Storage',
+        'Auth:Identity',
+        'Auth:RememberMe',
     ];
 
     /**
@@ -37,27 +37,27 @@ class Authentication extends AbstractServiceProvider
 
         // Auth Config
         //
-        $container->share('auth.passwordCost', 6);
-        $container->share('auth.passwordAlgorithm', PASSWORD_BCRYPT);
+        $container->share('Auth.PASSWORD_COST', 6);
+        $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
 
         // Auth Services
         //
-        $container->share('auth:storage', 'Obullo\Authentication\Storage\Redis')
-            ->withArgument($container->get('redis:default'))
-            ->withArgument($container->get('request'))
-            ->withMethodCall('setPermanentBlockLifetime', [3600])  // Should be same with app session lifetime.
+        $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
+            ->withArgument($container->get('Redis:Default'))
+            ->withArgument($container->get('Request'))
+            ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
             ->withMethodCall('setTemporaryBlockLifetime', [300]);
 
-        $container->share('auth:table', 'Obullo\Authentication\Adapter\Database\Table\Db')
-            ->withArgument($container->get('database:default'))
+        $container->share('Auth:Table', 'Obullo\Authentication\Adapter\Database\Table\Db')
+            ->withArgument($container->get('Database:Default'))
             ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
             ->withMethodCall('setTableName', ['users'])
             ->withMethodCall('setIdentityColumn', ['email'])
             ->withMethodCall('setPasswordColumn', ['password'])
             ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 
-        $container->share('auth:rememberMe', 'Obullo\Authentication\RememberMe')
-            ->withArgument($container->get('request'))
+        $container->share('Auth:RememberMe', 'Obullo\Authentication\RememberMe')
+            ->withArgument($container->get('Request'))
             ->withArgument(
                 [
                     'name' => '__rm',
@@ -68,10 +68,10 @@ class Authentication extends AbstractServiceProvider
                     'expire' => 6 * 30 * 24 * 3600,
                 ]
             );
-        $container->share('auth:adapter', 'Obullo\Authentication\Adapter\Database\Database')
+        $container->share('Auth:Adapter', 'Obullo\Authentication\Adapter\Database\Database')
             ->withArgument($container);
 
-        $container->share('auth:identity', 'My\Identity')
+        $container->share('Auth:Identity', 'My\Identity')
             ->withArgument($container);
     }
 }

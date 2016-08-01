@@ -67,7 +67,7 @@ class RememberMe
             $cookie['path'],
             $cookie['domain'],
             $cookie['secure'],
-            $cookie['httponly']
+            $cookie['httpOnly']
         );
         return $token;
     }

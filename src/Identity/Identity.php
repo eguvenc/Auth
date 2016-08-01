@@ -21,6 +21,13 @@ class Identity extends AbstractIdentity
     protected $block;
 
     /**
+     * Table
+     *
+     * @var object
+     */
+    protected $table;
+
+    /**
      * Storage
      *
      * @var object
@@ -42,7 +49,8 @@ class Identity extends AbstractIdentity
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->storage   = $container->get('auth:storage');
+        $this->table     = $container->get('Auth:Table');
+        $this->storage   = $container->get('Auth:Storage');
         $this->initialize();
         
         if ($tokenValue = $this->recallerExists()) {   // Remember the user if recaller cookie exists
@@ -114,7 +122,7 @@ class Identity extends AbstractIdentity
             unset($_SESSION['Auth_IgnoreRecaller']);
             return false;
         }
-        $token = $this->container->get('auth:rememberMe')->readToken();
+        $token = $this->container->get('Auth:RememberMe')->readToken();
 
         // Check recaller cookie value is alfanumeric
 
@@ -324,7 +332,7 @@ class Identity extends AbstractIdentity
         if ($this->getRememberMe() == 1) {  // If user checked rememberMe option
 
             $tokenValue = $this->refreshRememberToken();
-            $this->set($this->container->get('auth:table')->getRememberTokenColumn(), $tokenValue);
+            $this->set($this->container->get('Auth:Table')->getRememberTokenColumn(), $tokenValue);
             return;
         }
     }
@@ -336,8 +344,8 @@ class Identity extends AbstractIdentity
      */
     public function refreshRememberToken()
     {
-        $tokenValue = $this->container->get('auth:rememberMe')->getToken();
-        $this->container->get('auth:table')->updateRememberToken($tokenValue, $this->getIdentifier());
+        $tokenValue = $this->container->get('Auth:RememberMe')->getToken();
+        $this->container->get('Auth:Table')->updateRememberToken($tokenValue, $this->getIdentifier());
 
         return $tokenValue;
     }
@@ -349,7 +357,7 @@ class Identity extends AbstractIdentity
      */
     public function forgetMe()
     {
-        $this->container->get('auth:rememberMe')->removeToken();
+        $this->container->get('Auth:RememberMe')->removeToken();
     }
 
     /**

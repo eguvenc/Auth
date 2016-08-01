@@ -92,10 +92,10 @@ class Database extends AbstractAdapter
      */
     public function __construct(Container $container)
     {
-        $this->table     = $container->get('auth:table');
         $this->container = $container;
-        $this->storage   = $container->get('auth:storage');
-        $this->identity  = $container->get('auth:identity');
+        $this->table     = $container->get('Auth:Table');
+        $this->storage   = $container->get('Auth:Storage');
+        $this->identity  = $container->get('Auth:Identity');
     }
 
     /**
@@ -234,7 +234,7 @@ class Database extends AbstractAdapter
             $this->regenerateSessionId(true); // Delete old session after regenerate !
         }
         if ($credentials->getRememberMeValue()) {  // If user choosed remember feature
-            $token = $this->container->get('auth:rememberMe')->getToken();
+            $token = $this->container->get('Auth:RememberMe')->getToken();
             $this->table->updateRememberToken($token, $credentials->getIdentityValue()); // refresh rememberToken
         }
         if ($this->storage->isEmpty('__temporary')) {  // If user has NOT got a temporay identity
@@ -333,8 +333,8 @@ class Database extends AbstractAdapter
      */
     public function verifyPassword($plain, $hash)
     {
-        $cost = $this->container->get('auth.passwordCost');
-        $algo = $this->container->get('auth.passwordAlgorithm');
+        $cost = $this->container->get('Auth.PASSWORD_COST');
+        $algo = $this->container->get('Auth.PASSWORD_ALGORITHM');
 
         if (password_verify($plain, $hash)) {
             if (password_needs_rehash($hash, $algo, array('cost' => $cost))) {
@@ -354,7 +354,7 @@ class Database extends AbstractAdapter
      */
     public function ignoreRecaller()
     {
-        if ($this->container->get('auth:rememberMe')->readToken()) {
+        if ($this->container->get('Auth:RememberMe')->readToken()) {
             $_SESSION['Auth_IgnoreRecaller'] = 1;
         }
     }

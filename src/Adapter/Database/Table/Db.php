@@ -68,7 +68,7 @@ class Db extends AbstractTable
                 'SELECT %s FROM %s WHERE %s = ?',
                 $this->getColumns(),
                 $this->getTablename(),
-                $this->getColumnRememberToken()
+                $this->getRememberTokenColumn()
             )
         );
         $stmt->bindValue(1, $tokenValue, \PDO::PARAM_STR);
@@ -91,7 +91,7 @@ class Db extends AbstractTable
             sprintf(
                 'UPDATE %s SET %s = ? WHERE BINARY %s = ?',
                 $this->getTablename(),
-                $this->getColumnRememberToken(),
+                $this->getRememberTokenColumn(),
                 $this->getIdentityColumn()
             )
         );
