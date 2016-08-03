@@ -44,7 +44,7 @@ class Authentication extends AbstractServiceProvider
         //
         $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
             ->withArgument($container->get('Redis:Default'))
-            ->withArgument($container->get('Request'))
+            ->withArgument($container->get('request'))
             ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
             ->withMethodCall('setTemporaryBlockLifetime', [300]);
 
@@ -57,7 +57,7 @@ class Authentication extends AbstractServiceProvider
             ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 
         $container->share('Auth:RememberMe', 'Obullo\Authentication\RememberMe')
-            ->withArgument($container->get('Request'))
+            ->withArgument($container->get('request'))
             ->withArgument(
                 [
                     'name' => '__rm',

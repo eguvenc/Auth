@@ -12,7 +12,7 @@ session_start();
 
 $container = new League\Container\Container;
 $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-$container->share('Request', $request);
+$container->share('request', $request);
 
 $container->addServiceProvider('ServiceProvider\Redis');
 $container->addServiceProvider('ServiceProvider\Database');
@@ -34,11 +34,11 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) {  // Perform
     $credentials->setPasswordValue($parsedBody['password']);
     $credentials->setRememberMeValue($rememberMe);
 
-    $result = $authAdapter->login($credentials);
+    $authResult = $authAdapter->login($credentials);
 
-    if (! $result->isValid()) {
+    if (! $authResult->isValid()) {
         $messages = array();
-        foreach ($result->getMessages() as $msg) {
+        foreach ($authResult->getMessages() as $msg) {
             $messages['error'][] = $msg;
         };
         header("Location: /example/index.php?".http_build_query($messages));

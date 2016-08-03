@@ -12,7 +12,7 @@ session_start();
 
 $container = new League\Container\Container;
 $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-$container->share('Request', $request);
+$container->share('request', $request);
 
 $container->addServiceProvider('ServiceProvider\Redis');
 $container->addServiceProvider('ServiceProvider\Database');
