@@ -12,5 +12,9 @@ use Obullo\Authentication\Identity\Identity as AuthIdentity;
  */
 class Identity extends AuthIdentity
 {
+	public function getUsername()
+	{
+		
+	}
 
 }

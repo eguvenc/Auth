@@ -20,7 +20,7 @@ Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id ler
 
 Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarından nasıl geçtiği ve servisin nasıl çalıştığı hakkında size bir ön bilgi verecektir:
 
-![Authentication](auth_flowchart.png?raw=true "Authentication")
+![Authentication](https://github.com/obullo/authentication/blob/master/auth_flowchart.png?raw=true "Authentication")
 
 Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.
 
@@ -67,7 +67,7 @@ $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
 
 <a name="adapters"></a>
 
-#### Adaptörler
+### Adaptörler
 
 Yetki doğrulama adaptörleri uygulamaya esneklik kazandıran sorgulama arabirimleridir, yetki doğrulamanın bir veritabanı ile mi yoksa farklı bir protokol üzerinden mi yapılacağını belirleyen sınıflardır. Varsayılan arabirim türü <kbd>Database</kbd> dir. ( RDBMS veya NoSQL türündeki veritabanları için ortak kullanılır ).
 
@@ -75,7 +75,7 @@ Farklı adaptörlerin farklı seçenekler ve davranışları olması muhtemeldir
 
 <a name="storages"></a>
 
-#### Hafıza Depoları
+### Hafıza Depoları
 
 Hazıfa deposu yetki doğrulama esnasında kullanıcı kimliğini ön belleğe alır ve tekrar tekrar oturum açıldığında database ile bağlantı kurmayarak uygulamanın performans kaybetmesini önler. 
 
@@ -173,7 +173,7 @@ if ($auhtResult->isValid()) {
 
 <a name="login-error-results"></a>
 
-#### Hata Tablosu
+### Hata Tablosu
 
 <table>
     <thead>
@@ -265,7 +265,7 @@ Array
 
 <a name="identity-keys"></a>
 
-#### Kimlik anahtarları
+### Kimlik anahtarları
 
 <table>
     <thead>
@@ -301,23 +301,35 @@ Array
 
 <a name="identity-method-reference"></a>
 
-#### Kimlik Sınıfı Referansı
+### Kimlik Sınıfı Referansı
 
 ------
 
-##### $identity->check();
+#### $identity->check();
 
 Kullanıcı yetki doğrulamadan geçmiş ise <kbd>true</kbd> aksi durumda <kbd>false</kbd> değerine döner.
 
-##### $identity->guest();
+#### $identity->guest();
 
 Kullanıcının yetkisi doğrulanmamış kullanıcı, yani bir ziyaretçi olup olmadığını kontrol eder. Ziyaretçi ise <kbd>true</kbd> değilse <kbd>false</kbd> değerine döner.
 
-##### $identity->expire($ttl);
+#### $identity->set($key, $value);
+
+Kimlik dizisine girilen anahtara bir değer atar.
+
+#### $identity->get($key);
+
+Kimlik dizisinden girilen anahtara ait değere geri döner. Anahtar yoksa false değerine döner.
+
+#### $identity->remove($key);
+
+Kimlik dizisinden varolan anahtarı siler.
+
+#### $identity->expire($ttl);
 
 Kullanıcı kimliğinin girilen süre göre geçtikten sonra yok olması için __expire anahtarı içerisine sona erme süresini kaydeder.
 
-##### $identity->isExpired();
+#### $identity->isExpired();
 
 Kimliğe expire() metodu ile kaydedilmiş süre sona erdiyse <kbd>true</kbd> aksi durumda <kbd>false</kbd> değerine döner. Bu method Http Auth katmanında aşağıdaki gibi kullanılabilir.
 
@@ -327,77 +339,67 @@ if ($identity->isExpired()) {
 }
 ```
 
-##### $identity->makeTemporary();
+#### $identity->makeTemporary();
 
 Başarılı giriş yapmış bir kullanıcıya ait kalıcı kimliği konfigurasyon dosyasından belirlenmiş sona erme süresine göre geçici hale getirir. Süre sona erdiğinde kimlik hafıza deposundan silinir.
 
-##### $identity->makePermanent();
+#### $identity->makePermanent();
 
 Başarılı giriş yapmış kullanıcıya ait geçici kimliği konfigurasyon dosyasından belirlenmiş kalıcı süreye göre kalıcı hale getirir. Süre sona erdiğinde veritabanına tekrar sql sorgusu yapılarak kimlik tekrar hafızaya yazılır.
 
-##### $identity->isTemporary();
+#### $identity->isTemporary();
 
 Kullanıcı kimliğinin geçici olup olmadığını gösterir, geçici ise <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerine döner.
 
-##### $identity->updateTemporary(string $key, mixed $val);
+#### $identity->updateTemporary(string $key, mixed $val);
 
 Geçici olarak oluşturulmuş kimlik bilgilerini güncellemenize olanak tanır.
 
-##### $identity->logout();
+#### $identity->logout();
 
 Önbellekteki <kbd>isAuthenticated</kbd> anahtarını <kbd>0</kbd> değeri ile güncelleyerek oturumu kapatır. Bu method önbellekteki kullanıcı kimliğini bütünü ile silmez sadece kullanıcıyı oturumu kapattı olarak kaydeder. Önbellekleme sayesinde <kbd>3600</kbd> saniye içerisinde kullanıcı bir daha sisteme giriş yaptığında <kbd>isAuthenticated</kbd> değeri <kbd>1</kbd> olarak güncellenir ve veritabanı sorgusunun önüne geçilmiş olur.
 
-##### $identity->destroy();
+#### $identity->destroy();
 
 Önbellekteki kimliği bütünüyle yok eder.
 
-##### $identity->kill(string $loginId);
+#### $identity->kill(string $loginId);
 
 Bir kullanıcıya ait bir veya birden fazla oturum tarayıcıya göre numaralandırılır. Kill fonksiyonu girilen oturum numarasına ait kimliği yok eder.
 
-##### $identity->forgetMe();
+#### $identity->forgetMe();
 
 Beni hatırla çerezinin bütünüyle tarayıcıdan siler. Çerez http başlıkları dizisinden silindiyse fonksiyon true değerine döner.
 
-##### $identity->refreshRememberToken(array $credentials);
+#### $identity->refreshRememberToken(array $credentials);
 
 Beni hatırla çerezini yenileyerek veritabanı ve çereze kaydeder.
 
-##### $identity->validate(array $credentials);
+#### $identity->validate(array $credentials);
 
 Sisteme giriş yapmış kullanıcı kimliğine ait oturum açma bilgilerini dışarıdan gelen yeni bilgiler ile karşılaştırır bilgiler doğru ise <kbd>true</kbd> aksi durumda <kbd>false</kbd> değerine geri döner.
 
-<a name="identity-get-methods"></a>
+#### $identity->getIdentifier();
 
-#### Identity "Get" Metotları
+Kullanıcın kimlik tanımlayıcısına geri döner. Tanımlayıcı genellikle <kbd>username</kbd> yada <kbd>email</kbd> değeridir.
 
-------
-
-##### $identity->get($key);
-
-Kimlik dizisinden girilen anahtara ait değere geri döner. Anahtar yoksa false değerine döner.
-
-##### $identity->getIdentifier();
-
-Kullanıcın tekil tanımlayıcısına geri döner. Tanımlayıcı genellikle kullanıcı adı yada kullanıcı id değeridir.
-
-##### $identity->getPassword();
+#### $identity->getPassword();
 
 Kullanıcının hash edilmiş şifresine geri döner.
 
-##### $identity->getRememberMe();
+#### $identity->getRememberMe();
 
 Eğer kullanıcı beni hatırla özelliğini kullanıyorsa <kbd>1</kbd> değerine aksi durumda <kbd>0</kbd> değerine döner.
 
-##### $identity->getTime();
+#### $identity->getTime();
 
 Kimliğin ilk yaratılma zamanını verir. ( Unix microtime ).
 
-##### $identity->getRememberMe();
+#### $identity->getRememberMe();
 
 Kullanıcı beni hatırla özelliğini kullandı ise <kbd>1</kbd> değerine, kullanmadı ise <kbd>0</kbd> değerine döner.
 
-##### $identity->getPasswordNeedsReHash();
+#### $identity->getPasswordNeedsReHash();
 
 Kullanıcı giriş yaptıktan sonra eğer şifresi yenilenmesi gerekiyorsa <kbd>true</kbd> gerekmiyorsa <kbd>false</kbd> değerine döner.
 
@@ -414,71 +416,96 @@ if ($identity->getPasswordNeedsReHash()) {
 }
 ```
 
-##### $identity->getRememberToken();
+#### $identity->getRememberToken();
 
 Beni hatırla çerezi değerine döner.
 
-##### $identity->getLoginId();
+#### $identity->getLoginId();
 
 Bir veya birden fazla oturumlar numaralandırılır. Giriş yapmış kullanıcıya ait oturum numarasına aksi durumda false değerine döner.
 
-##### $identity->getArray()
+#### $identity->getArray()
 
 Kullanıcının tüm kimlik değerlerine bir dizi içerisinde geri döner.
 
-<a name="identity-store-methods"></a>
-
-#### Identity "Set" Metotları
-
-------
-
-##### $identity->set($key, $value);
-
-Kimlik dizisine yeni bir değer ekler.
-
-##### $identity->remove($key);
-
-Kimlik dizisinde varolan değeri siler.
 
 <a name="authResult-reference"></a>
 
-#### AuthResult Sınıfı Referansı
+### AuthResult Sınıfı Referansı
 
 ------
 
-##### $authResult->isValid();
+#### $authResult->isValid();
 
 Login attempt methodundan geri dönen hata kodu <kbd>0</kbd> değerinden büyük ise <kbd>true</kbd> küçük ise <kbd>false</kbd> değerine döner. Başarılı oturum açma işlermlerinde hata kodu <kbd>1</kbd> değerine döner diğer durumlarda negatif değerlere döner.
 
-##### $authResult->getCode();
+#### $authResult->getCode();
 
 Login denemesinden sonra geçerli hata koduna geri döner.
 
-##### $authResult->getIdentifier();
+#### $authResult->getIdentifier();
 
 Login denemesinden sonra geçerli kullanıcı kimliğine göre döner. ( id, username, email gibi. )
 
-##### $authResult->getMessages();
+#### $authResult->getMessages();
 
 Login denemesinden sonra hata mesajlarına geri döner.
 
-##### $authResult->setCode(int $code);
+#### $authResult->setCode(int $code);
 
 Login denemesinden varsayılan sonuca hata kodu ekler.
 
-##### $authResult->setMessage(string $message);
+#### $authResult->setMessage(string $message);
 
 Login denemesinden sonra sonuçlara bir hata mesajı ekler.
 
-##### $authResult->getArray();
+#### $authResult->getArray();
 
 Login denemesinden sonra tüm sonuçları bir dizi içerisinde verir.
 
-##### $authResult->getResultRow();
+#### $authResult->getResultRow();
 
 Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada varsa önbellekte oluşturulmuş sorgu sonucuna geri döner.
 
+### Yetki Doğrulama Onayı
 
-#### Ek Özellikler
+Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil application</b> gibi yöntemlerle onay işlemi sağlar.
 
-Auth paketi yetki doğrulama onayı bazı ek özellikler ile gelir. Bu türden özelliklere ihtiyacınız varsa [Auth-AdditionalFeatures.md](Auth-AdditionalFeatures.md) dökümentasyonuna gözatın.
+Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity->makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur. Belirtilen süreler konfigürasyon dosyasından ayarlanabilir.
+
+<a name="temporary-identity"></a>
+
+#### Geçiçi Kimlikler
+
+Kullanıcı sisteme giriş yaptıktan sonra <kbd>$identity->makeTemporary()</kbd> metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması sizin ona doğrulama yöntemlerinden herhangi biriyle göndermiş olacağınız onay kodu ile gerçekleşir. Eğer kullanıcı 300 saniye içerisinde kendisine gönderilen onay kodunu onaylayamaz ise geçiçi kimlik kendiliğinden yok olur.
+
+Eğer kullanıcı onay işlemini başarılı bir şekilde gerçekleştirir ise geçici kimliğin <kbd>$identity->makePermanent()</kbd> metodu ile kalıcı hale getirilmesi gereklidir. Bir kimlik kalıcı yapıldığında kullanıcı sisteme giriş yapmış olur.
+
+Oturum bilgileri doğru ise kimliği geçici hale getirebilirsiniz.
+
+```php
+if ($authResult->isValid()) {
+    
+    $identity->makeTemporary();
+    
+    echo "Verification code has been sent.";
+
+    // Url redirect ..
+}
+```
+
+Sonraki adımda <kbd>$identity->makePermanent()</kbd> metodunu kullanarak kimliği kalıcı hale getirin. Ve yetkilendirmeden sonra kullanıcıyı <kbd>dashboard</kbd> sayfanıza yönlendirin.
+
+<a name="permanent-identity"></a>
+
+#### Kalıcı Kimlikler
+
+Bir geçici kimliği kalıcı hale dönüştürmek için,
+
+```php
+$identity->makePermanent();
+```
+
+metodu kullanılır.
+
+Kalıcı kimliğe sahip olan kullanıcı artık sisteme giriş yapabilir. Kalıcı olan kimlikler önbelleklenirler. Böylece önbelleklenen kimlik tekrar oturum açıldığında veritabanı sorgusuna gidilmeden elde edilmiş olur. Kalıcı kimliğin önbelleklenme süresi konfigürasyon dosyasından ayarlanabilir. Eğer geçici kimlik oluşturma fonksiyonu kullanılmamışsa sistem her kimliği varsayılan olarak <kbd>kalıcı</kbd> olarak kaydeder.
