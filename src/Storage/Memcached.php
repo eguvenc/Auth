@@ -228,6 +228,7 @@ class Memcached extends AbstractStorage
     {
         $sessions = array();
         $dbSessions = $this->memcached->get($this->getMemoryBlockKey('__permanent'));
+
         if ($dbSessions == false) {
             return $sessions;
         }
@@ -235,8 +236,10 @@ class Memcached extends AbstractStorage
             if (isset($val['__isAuthenticated'])) {
                 $sessions[$loginID]['__isAuthenticated'] = $val['__isAuthenticated'];
                 $sessions[$loginID]['__time'] = $val['__time'];
-                $sessions[$loginID]['id']  = $this->getUserId();
-                $sessions[$loginID]['key'] = $this->getMemoryBlockKey('__permanent');
+                $sessions[$loginID]['__id']  = $this->getUserId();
+                $sessions[$loginID]['__key'] = $this->getMemoryBlockKey('__permanent');
+                $sessions[$loginID]['__agent'] = $val['__agent'];
+                $sessions[$loginID]['__ip']  = $val['__ip'];
             }
         }
         return $sessions;

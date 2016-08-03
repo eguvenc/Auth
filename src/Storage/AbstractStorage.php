@@ -230,10 +230,8 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function setLoginId()
     {
-        $server = $this->request->getServerParams();
-
-        $agentStr  = isset($server['HTTP_USER_AGENT']) ? $server['HTTP_USER_AGENT'] : null;
-        $userAgent = substr($agentStr, 0, 50);  // First 50 characters of the user agent
+        $client = $this->request->getAttribute('Auth_Client');
+        $userAgent = substr($client['HTTP_USER_AGENT'], 0, 50); // First 50 characters of the user agent
         $loginId   = md5(trim($userAgent).time());
 
         $_SESSION[$this->getCacheKey().'_LoginId'] = $loginId;

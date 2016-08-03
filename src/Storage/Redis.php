@@ -191,7 +191,7 @@ class Redis extends AbstractStorage
         $identifier = $this->getUserId();
         $key        = $this->cacheKey.':__permanent:';
         $dbSessions = $this->redis->keys($key.$identifier.':*');
-        
+
         if ($dbSessions == false) {
             return $sessions;
         }
@@ -200,12 +200,13 @@ class Redis extends AbstractStorage
             $loginID = end($exp);
 
             $value = $this->redis->hGet($key.$identifier.':'.$loginID, '__isAuthenticated');
-            
             if ($value !== false) {
                 $sessions[$loginID]['__isAuthenticated'] = $value;
                 $sessions[$loginID]['__time'] = $this->redis->hGet($key.$identifier.':'.$loginID, '__time');
-                $sessions[$loginID]['id'] = $identifier;
-                $sessions[$loginID]['key'] = $key.$identifier.':'.$loginID;
+                $sessions[$loginID]['__id']  = $identifier;
+                $sessions[$loginID]['__key'] = $key.$identifier.':'.$loginID;
+                $sessions[$loginID]['__agent'] = $this->redis->hGet($key.$identifier.':'.$loginID, '__agent');
+                $sessions[$loginID]['__ip']  = $this->redis->hGet($key.$identifier.':'.$loginID, '__ip');
             }
         }
         return $sessions;

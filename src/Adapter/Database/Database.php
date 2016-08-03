@@ -5,6 +5,7 @@ namespace Obullo\Authentication\Adapter\Database;
 use Obullo\Authentication\AuthResult;
 use Obullo\Authentication\Adapter\AbstractAdapter;
 use Interop\Container\ContainerInterface as Container;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Obullo\Authentication\CredentialsInterface as Credentials;
 
 /**
@@ -21,6 +22,13 @@ class Database extends AbstractAdapter
      * @var object
      */
     protected $table;
+
+    /**
+     * Request
+     *
+     * @var object
+     */
+    protected $request;
     
     /**
      * Storage
@@ -89,9 +97,11 @@ class Database extends AbstractAdapter
      * Constructor
      *
      * @param Container $container container
+     * @param Request   $request   http server request
      */
-    public function __construct(Container $container)
+    public function __construct(Container $container, Request $request)
     {
+        $this->request   = $request;
         $this->container = $container;
         $this->table     = $container->get('Auth:Table');
         $this->storage   = $container->get('Auth:Storage');
@@ -219,11 +229,15 @@ class Database extends AbstractAdapter
      */
     public function generateUser(Credentials $credentials, $resultRowArray, $passwordNeedsRehash = array())
     {
+        $client = $this->request->getAttribute('Auth_Request');
+
         $attributes = array(
             $this->table->getIdentityColumn() => $credentials->getIdentityValue(),
             $this->table->getPasswordColumn() => $resultRowArray[$this->table->getPasswordColumn()],
             '__rememberMe' => $credentials->getRememberMeValue(),
             '__time' => time(),
+            '__agent' => $client['HTTP_USER_AGENT'],
+            '__ip' => $client['REMOTE_ADDR'],
         );
         /**
          * Authenticate the user and fornat auth data
@@ -254,9 +268,8 @@ class Database extends AbstractAdapter
      */
     protected function formatAttributes(array $attributes, $rehashedPassword = array())
     {
-        if (is_array($rehashedPassword) && isset($rehashedPassword['hash'])) {
-            $attributes[$this->columnPassword] = $rehashedPassword['hash'];
-            $attributes['__passwordNeedsRehash'] = 1;  // Developer needs to update password field
+        if (is_array($rehashedPassword) && ! empty($rehashedPassword['hash'])) {
+            $attributes['__passwordNeedsRehash'] = $rehashedPassword['hash'];  // Developer needs to update password field
         }
         return $attributes;
     }

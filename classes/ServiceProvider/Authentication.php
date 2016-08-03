@@ -35,16 +35,26 @@ class Authentication extends AbstractServiceProvider
     {
         $container = $this->getContainer();
 
-        // Auth Config
+        // Password Config
         //
         $container->share('Auth.PASSWORD_COST', 6);
         $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
-
-        // Auth Services
+        
+        // Request Config
+        //
+        $server  = $container->get('request')->getServerParams();
+        $request = $container->get('request')->withAttribute(
+            'Auth_Request',
+            [
+                'REMOTE_ADDR'     => $server['REMOTE_ADDR'],
+                'HTTP_USER_AGENT' => $server['HTTP_USER_AGENT']
+            ]
+        );
+        // Service Config
         //
         $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
             ->withArgument($container->get('Redis:Default'))
-            ->withArgument($container->get('request'))
+            ->withArgument($request)
             ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
             ->withMethodCall('setTemporaryBlockLifetime', [300]);
 
@@ -57,7 +67,7 @@ class Authentication extends AbstractServiceProvider
             ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 
         $container->share('Auth:RememberMe', 'Obullo\Authentication\RememberMe')
-            ->withArgument($container->get('request'))
+            ->withArgument($request)
             ->withArgument(
                 [
                     'name' => '__rm',
@@ -69,9 +79,10 @@ class Authentication extends AbstractServiceProvider
                 ]
             );
         $container->share('Auth:Adapter', 'Obullo\Authentication\Adapter\Database\Database')
-            ->withArgument($container);
+            ->withArgument($container)
+            ->withArgument($request);
 
-        $container->share('Auth:Identity', 'My\Identity')
+        $container->share('Auth:Identity', 'Obullo\Authentication\Identity\Identity')
             ->withArgument($container);
     }
 }

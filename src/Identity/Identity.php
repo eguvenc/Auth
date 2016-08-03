@@ -215,7 +215,7 @@ class Identity extends AbstractIdentity
     }
 
     /**
-     * Get the password needs rehash array.
+     * Get the password needs rehash.
      *
      * @return boolean
      */
@@ -223,7 +223,7 @@ class Identity extends AbstractIdentity
     {
         $passwordNeedsRehash = $this->get('__passwordNeedsRehash');
 
-        return $passwordNeedsRehash ? true : false;
+        return $passwordNeedsRehash ? $passwordNeedsRehash : false;
     }
 
     /**
@@ -358,17 +358,5 @@ class Identity extends AbstractIdentity
     public function forgetMe()
     {
         $this->container->get('Auth:RememberMe')->removeToken();
-    }
-
-    /**
-     * Kill authority of user using auth id
-     *
-     * @param integer $loginId e.g: 87060e89
-     *
-     * @return boolean
-     */
-    public function kill($loginId)
-    {
-        $this->storage->killSession($loginId);
     }
 }

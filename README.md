@@ -9,7 +9,7 @@ Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id ler
 
 * Hafıza depoları, ( Storages ) 
 * Adaptörler,
-* Çoklu oturumları görebilme ve sonlandırma
+* Google oturumları gibi çoklu oturumları görebilme ve sonlandırma
 * Kimlikleri önbellekleme ve yönetebilme
 * Sona erme süreleri belirleyerek ile sonlandırılabilir kimlikler yaratabilme
 * Veritabanı sorgularını özelleştirebilme
@@ -49,21 +49,15 @@ $container->addServiceProvider('ServiceProvider\Authentication');
 Tüm auth konfigürasyonu <kbd>classes/ServiceProvider/Authentication</kbd> sınıfı register metodu içerisinden düzenlenebilir.
 
 ```php
-// Auth Config
-//
 $container->share('Auth.PASSWORD_COST', 6);
 $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
 
-// Auth Services
-//
 $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
     ->withArgument($container->get('Redis:Default'))
     ->withArgument($container->get('request'))
     ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
     ->withMethodCall('setTemporaryBlockLifetime', [300]);
 ```
-
-
 
 <a name="adapters"></a>
 
@@ -83,6 +77,21 @@ Desteklenen sürücüler
 
 * Redis
 * Memcached
+
+Hafıza deposu servis konfigurasyonundan değiştirilebilir.
+
+```php
+$container->share('Auth:Storage', 'Obullo\Authentication\Storage\Memcached')
+    ->withArgument($container->get('Memcached:Default'))
+```
+
+Ayrıca anasayfadan servis sağlayıcınızı çağırmanız gerekir.
+
+```php
+$container->addServiceProvider('ServiceProvider\Memcached');
+$container->addServiceProvider('ServiceProvider\Database');
+$container->addServiceProvider('ServiceProvider\Authentication');
+```
 
 ### Database
 
@@ -217,44 +226,31 @@ if ($auhtResult->isValid()) {
 
 ### Kimlikler
 
-Yetkilendirilmiş kimliği yönetebilmek için <kbd>app/classes/Auth</kbd> içerisindeki kimlik sınıfı kullanılır. Bu klasör içerisindeki Identity sınıfı <kbd>Obullo/Authentication/User/Identity</kbd> auth paketine genişler ve aşağıdaki gibidir.
+Kimlik sınıfı kullanıcı kimliğine ait <kbd>okuma</kbd> ve <kbd>yazma</kbd> işlemlerini yürütür. Kimliğe veri kaydetmek için set metodu,
 
 ```php
-namespace Auth;
-
-use Obullo\Authentication\AbstractIdentity;
-use Obullo\Authentication\User\Identity as AuthIdentity;
-
-class Identity extends AuthIdentity
-{
-    /**
-     * Implement your methods.
-     */
-    
-     public function getCountry()
-     {
-        return $this->get('user_country');
-     }
-
-}
+$identity->set('test', 'my_value');
 ```
 
-Bu sınıf yetkili kullanıcıların kimliklerine ait metotları içermelidir. Sınıf içerisindeki <kbd>get</kbd> metotları kullanıcı kimliğinden <kbd>okuma</kbd>, <kbd>set</kbd> metotları ise kimliğe <kbd>yazma</kbd> işlemlerini yürütür. Bu sınıfa metotlar ekleyerek ihtiyaçlarınıza göre düzenleme yapabilirsiniz. Kimliğe ait tüm bilgileri almak için aşağıdaki metodu kullanabilirsiniz.
+Kimlik bilgilerini elde etmek için ise get metodu kullanılır.
+
+
+```php
+echo $identity->get('test');  // my_value
+```
+
+Kimliğe ait tüm bilgileri almak için ise aşağıdaki metot kullanılır.
 
 ```php
 print_r($identity->getArray());
-```
 
-Çıktı
-
-```php
 /*
 Array
 (
     [__isAuthenticated] => 1
     [__isTemporary] => 0
     [__rememberMe] => 0
-    [__time] => 1414244130.719945
+    [__time] => 1414244130
     [id] => 1
     [password] => $2y$10$0ICQkMUZBEAUMuyRYDlXe.PaOT4LGlbj6lUWXg6w3GCOMbZLzM7bm
     [remember_token] => bqhiKfIWETlSRo7wB2UByb1Oyo2fpb86
@@ -277,19 +273,19 @@ Array
     <tbody>
         <tr>
             <td>__isAuthenticated</td>
-            <td>Eğer kullanıcı yetkisi doğrulanmış ise bu anahtar <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerini içerir.</td>
+            <td>Eğer kullanıcı yetkilendirilmiş ise bu anahtar <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerini içerir.</td>
         </tr>
         <tr>
             <td>__isTemporary</td>
-            <td>Yetki doğrulama onay özelliği için kullanılır. Bknz <a href="#additional-features">Ek Özellikler</a>.</td>
+            <td>Yetki doğrulama onay özelliği için kullanılır.</td>
         </tr>
         <tr>
             <td>__rememberMe</td>
-            <td>Kullanıcı giriş yaparken beni hatırla özelliğini kullandıysa bu değer <kbd>1</kbd> değerini aksi durumda <kbd>0</kbd> değerini içerir.</td>
+            <td>Kullanıcı giriş yaparken beni hatırla özelliğini kullandıysa bu değer <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerini alır.</td>
         </tr>
         <tr>
             <td>__time</td>
-            <td>Kimliğin ilk oluşturulma zamanıdır. Unix microtime(true) formatında kaydedilir.</td>
+            <td>Kimliğin ilk oluşturulma zamanıdır. Unix time() formatında kaydedilir.</td>
         </tr>
         <tr>
             <td>__expire</td>
@@ -301,7 +297,7 @@ Array
 
 <a name="identity-method-reference"></a>
 
-### Kimlik Sınıfı Referansı
+### Identity
 
 ------
 
@@ -363,21 +359,13 @@ Geçici olarak oluşturulmuş kimlik bilgilerini güncellemenize olanak tanır.
 
 Önbellekteki kimliği bütünüyle yok eder.
 
-#### $identity->kill(string $loginId);
-
-Bir kullanıcıya ait bir veya birden fazla oturum tarayıcıya göre numaralandırılır. Kill fonksiyonu girilen oturum numarasına ait kimliği yok eder.
-
 #### $identity->forgetMe();
 
-Beni hatırla çerezinin bütünüyle tarayıcıdan siler. Çerez http başlıkları dizisinden silindiyse fonksiyon true değerine döner.
+Beni hatırla çerezini kullanıcı tarayıcısından siler.
 
-#### $identity->refreshRememberToken(array $credentials);
+#### $identity->refreshRememberToken();
 
 Beni hatırla çerezini yenileyerek veritabanı ve çereze kaydeder.
-
-#### $identity->validate(array $credentials);
-
-Sisteme giriş yapmış kullanıcı kimliğine ait oturum açma bilgilerini dışarıdan gelen yeni bilgiler ile karşılaştırır bilgiler doğru ise <kbd>true</kbd> aksi durumda <kbd>false</kbd> değerine geri döner.
 
 #### $identity->getIdentifier();
 
@@ -404,13 +392,11 @@ Kullanıcı beni hatırla özelliğini kullandı ise <kbd>1</kbd> değerine, kul
 Kullanıcı giriş yaptıktan sonra eğer şifresi yenilenmesi gerekiyorsa <kbd>true</kbd> gerekmiyorsa <kbd>false</kbd> değerine döner.
 
 ```php
-if ($identity->getPasswordNeedsReHash()) {
-    
-    $newPassword = $identity->getPassword();  // Yeni hash
+if ($hash = $identity->getPasswordNeedsReHash()) {
 
     $this->db->update(     // Yeni hash değerini veritabanına kaydedin.
         'users', 
-        ['password' => $newPassword],
+        ['password' => $hash],
         ['id' => 55]
     );
 }
@@ -429,9 +415,62 @@ Bir veya birden fazla oturumlar numaralandırılır. Giriş yapmış kullanıcı
 Kullanıcının tüm kimlik değerlerine bir dizi içerisinde geri döner.
 
 
+### Storage
+
+------
+
+#### $storage->getUserSessions();
+
+Kullanıcının bir yada birden fazla oturumu varsa bir dizi içerisinde bu oturumlara geri döner.
+
+```php
+$sessions = $storage->getUserSessions();
+```
+
+Bir kullanıcının iki farklı tarayıcıdan oturum açtığını varsayarsak nu metot aşağıdaki gibi bir çıktı verir.
+
+```php
+print_r($sesssion);
+
+Array
+(
+    [048f7b509a22800088f1cd8c1cc04b96] => Array
+        (
+            [__isAuthenticated] => 1
+            [__time] => 1470251639
+            [__id] => user@example.com
+            [__key] => Auth:__permanent:user@example.com:048f7b509a22800088f1cd8c1cc04b96
+            [__agent] => Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,..
+            [__ip] => 212.124.16.1
+        )
+
+    [1dd468dbea32e8ed6f58cb00b40af76c] => Array
+        (
+            [__isAuthenticated] => 1
+            [__time] => 1470251614
+            [__id] => user@example.com
+            [__key] => Auth:__permanent:user@example.com:1dd468dbea32e8ed6f58cb00b40af76c
+            [__agent] => Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0
+            [__ip] => 88.169.1.7
+        )
+);
+```
+
+#### $storage->killSession($loginID);
+
+Oturum id değerine göre kullanıcın seçilen oturumunu sonlandırır.
+
+
+```php
+$storage->killSession("1dd468dbea32e8ed6f58cb00b40af76c");
+```
+
+Bir önceki örnekte Firefox tarayıcısına ait login ID değerini bu metoda gönderdiğimizde Firefox tarayıcısında açılmış bu oturum sonlandırılır.
+
+
 <a name="authResult-reference"></a>
 
-### AuthResult Sınıfı Referansı
+### AuthResult
 
 ------
 
@@ -475,9 +514,15 @@ Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak 
 
 <a name="temporary-identity"></a>
 
-#### Geçiçi Kimlikler
+### Geçiçi Kimlikler
 
-Kullanıcı sisteme giriş yaptıktan sonra <kbd>$identity->makeTemporary()</kbd> metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması sizin ona doğrulama yöntemlerinden herhangi biriyle göndermiş olacağınız onay kodu ile gerçekleşir. Eğer kullanıcı 300 saniye içerisinde kendisine gönderilen onay kodunu onaylayamaz ise geçiçi kimlik kendiliğinden yok olur.
+Kullanıcı sisteme giriş yaptıktan sonra,
+
+```php
+$identity->makeTemporary();
+```
+
+metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması sizin ona doğrulama yöntemlerinden herhangi biriyle göndermiş olacağınız onay kodu ile gerçekleşir. Eğer kullanıcı 300 saniye içerisinde kendisine gönderilen onay kodunu onaylayamaz ise geçiçi kimlik kendiliğinden yok olur.
 
 Eğer kullanıcı onay işlemini başarılı bir şekilde gerçekleştirir ise geçici kimliğin <kbd>$identity->makePermanent()</kbd> metodu ile kalıcı hale getirilmesi gereklidir. Bir kimlik kalıcı yapıldığında kullanıcı sisteme giriş yapmış olur.
 
@@ -498,7 +543,7 @@ Sonraki adımda <kbd>$identity->makePermanent()</kbd> metodunu kullanarak kimli�
 
 <a name="permanent-identity"></a>
 
-#### Kalıcı Kimlikler
+### Kalıcı Kimlikler
 
 Bir geçici kimliği kalıcı hale dönüştürmek için,
 

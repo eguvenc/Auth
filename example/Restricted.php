@@ -19,6 +19,7 @@ $container->addServiceProvider('ServiceProvider\Database');
 $container->addServiceProvider('ServiceProvider\Authentication');
 
 $identity = $container->get('Auth:Identity');
+$storage  = $container->get('Auth:Storage');
 
 /**
  * Don't forget check to user in your restricted pages !
@@ -27,11 +28,17 @@ if ($identity->guest()) {
     header("Location: /example/index.php?error[]=Your session has expired.");
 }
 ?>
-
 <h2>User Identity</h2>
 
 <pre><?php print_r($identity->getArray()) ?></pre>
 
+
 <a href="/example/Logout.php?action=logout">Logout</a> ( Standart Logout ) | 
 <a href="/example/Logout.php?action=destroy">Destroy</a> ( Destroy Cached Identity ) |
 <a href="/example/Logout.php?action=forgetMe">Forget Me</a> ( Remove Me From This Computer )
+
+<h2>User Sessions</h2>
+
+<?php $sessions = $storage->getUserSessions(); ?>
+
+<pre><?php print_r($sessions) ?></pre>
