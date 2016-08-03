@@ -427,7 +427,7 @@ Kullanıcının bir yada birden fazla oturumu varsa bir dizi içerisinde bu otur
 $sessions = $storage->getUserSessions();
 ```
 
-Bir kullanıcının iki farklı tarayıcıdan oturum açtığını varsayarsak nu metot aşağıdaki gibi bir çıktı verir.
+Bir kullanıcının iki farklı tarayıcıdan oturum açtığını varsayarsak bu metot aşağıdaki gibi bir çıktı verir.
 
 ```php
 print_r($sesssion);
