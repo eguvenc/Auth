@@ -43,6 +43,9 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) {  // Perform
         };
         header("Location: /example/index.php?".http_build_query($messages));
     } else {
+        if ($hash = $authAdapter->passwordNeedsRehash()) {
+            // Set new user password to db
+        }
         header("Location: /example/Restricted.php");
     }
 } else {

@@ -207,6 +207,8 @@ class Redis extends AbstractStorage
                 $sessions[$loginID]['__key'] = $key.$identifier.':'.$loginID;
                 $sessions[$loginID]['__agent'] = $this->redis->hGet($key.$identifier.':'.$loginID, '__agent');
                 $sessions[$loginID]['__ip']  = $this->redis->hGet($key.$identifier.':'.$loginID, '__ip');
+                $sessions[$loginID]['__lastActivity']  = $this->redis->hGet($key.$identifier.':'.$loginID, '__lastActivity');
+
             }
         }
         return $sessions;

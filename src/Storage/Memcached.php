@@ -240,6 +240,7 @@ class Memcached extends AbstractStorage
                 $sessions[$loginID]['__key'] = $this->getMemoryBlockKey('__permanent');
                 $sessions[$loginID]['__agent'] = $val['__agent'];
                 $sessions[$loginID]['__ip']  = $val['__ip'];
+                $sessions[$loginID]['__lastActivity']  = $val['__lastActivity'];
             }
         }
         return $sessions;

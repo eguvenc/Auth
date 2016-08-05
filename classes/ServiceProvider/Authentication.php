@@ -53,13 +53,13 @@ class Authentication extends AbstractServiceProvider
         // Service Config
         //
         $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
-            ->withArgument($container->get('Redis:Default'))
+            ->withArgument($container->get('redis:default'))
             ->withArgument($request)
             ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
             ->withMethodCall('setTemporaryBlockLifetime', [300]);
 
         $container->share('Auth:Table', 'Obullo\Authentication\Adapter\Database\Table\Db')
-            ->withArgument($container->get('Database:Default'))
+            ->withArgument($container->get('database:default'))
             ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
             ->withMethodCall('setTableName', ['users'])
             ->withMethodCall('setIdentityColumn', ['email'])

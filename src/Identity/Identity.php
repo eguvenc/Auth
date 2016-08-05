@@ -215,18 +215,6 @@ class Identity extends AbstractIdentity
     }
 
     /**
-     * Get the password needs rehash.
-     *
-     * @return boolean
-     */
-    public function getPasswordNeedsReHash()
-    {
-        $passwordNeedsRehash = $this->get('__passwordNeedsRehash');
-
-        return $passwordNeedsRehash ? $passwordNeedsRehash : false;
-    }
-
-    /**
      * Returns to remember token
      *
      * @return integer

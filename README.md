@@ -7,10 +7,9 @@ Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id ler
 
 ### Özellikler
 
-* Hafıza depoları, ( Storages ) 
+* Hafıza depoları,
 * Adaptörler,
 * Google oturumları gibi çoklu oturumları görebilme ve sonlandırma
-* Kimlikleri önbellekleme ve yönetebilme
 * Sona erme süreleri belirleyerek ile sonlandırılabilir kimlikler yaratabilme
 * Veritabanı sorgularını özelleştirebilme
 * Kimlik Onaylama
@@ -53,7 +52,7 @@ $container->share('Auth.PASSWORD_COST', 6);
 $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
 
 $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
-    ->withArgument($container->get('Redis:Default'))
+    ->withArgument($container->get('redis:default'))
     ->withArgument($container->get('request'))
     ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
     ->withMethodCall('setTemporaryBlockLifetime', [300]);
@@ -82,7 +81,7 @@ Hafıza deposu servis konfigurasyonundan değiştirilebilir.
 
 ```php
 $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Memcached')
-    ->withArgument($container->get('Memcached:Default'))
+    ->withArgument($container->get('memcached:default'))
 ```
 
 Ayrıca anasayfadan servis sağlayıcınızı çağırmanız gerekir.
@@ -124,7 +123,7 @@ Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözüm�
 
 ```php
 $container->share('Auth:Table', 'My\Database\Table\Db')
-    ->withArgument($container->get('Database:Default'))
+    ->withArgument($container->get('database:default'))
     ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
     ->withMethodCall('setTableName', ['users'])
     ->withMethodCall('setIdentityColumn', ['email'])
@@ -132,7 +131,7 @@ $container->share('Auth:Table', 'My\Database\Table\Db')
     ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 ```
 
-Mongo Db için bir örnek.
+Mongo Db için örnek.
 
 ```php
 $container->share('Auth:Table', 'Obullo\Authentication\Adapter\Database\Table\Mongo');
@@ -153,11 +152,9 @@ $credentials->setRememberMeValue(false);
 $authResult = $authAdapter->login($credentials);
 
 if (! $authResult->isValid()) {
-    $messages = array();
-    foreach ($authResult->getMessages() as $msg) {
-        $messages['error'][] = $msg;
-    };
-    print_r($messages);
+        
+    print_r($authResult->getMessages());
+
 } else {
     header("Location: /example/Restricted.php");
 }
@@ -178,7 +175,7 @@ if ($auhtResult->isValid()) {
 }
 ```
 
-<kbd>examples</kbd> klasörü içerisinde oluşturulmuş örneğe göz atmayı unutmayın.
+**Not:** <kbd>example</kbd> klasörü içerisinde oluşturulmuş örneğe göz atmayı unutmayın.
 
 <a name="login-error-results"></a>
 
@@ -251,6 +248,9 @@ Array
     [__isTemporary] => 0
     [__rememberMe] => 0
     [__time] => 1414244130
+    [__ip] => 127.0.0.1
+    [__agent] => Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0
+    [__lastActivity] => 1470419173
     [id] => 1
     [password] => $2y$10$0ICQkMUZBEAUMuyRYDlXe.PaOT4LGlbj6lUWXg6w3GCOMbZLzM7bm
     [remember_token] => bqhiKfIWETlSRo7wB2UByb1Oyo2fpb86
@@ -288,12 +288,32 @@ Array
             <td>Kimliğin ilk oluşturulma zamanıdır. Unix time() formatında kaydedilir.</td>
         </tr>
         <tr>
-            <td>__expire</td>
-            <td><kbd>$identity->expire()</kbd> metodu tarafından kimliğin belirli bir süre sonra yok olmasını sağlamak için kullanılır.</td>
+            <td>__ip</td>
+            <td>Kullanıcının en son giriş yaptığı ip adresi.</td>
         </tr>
-
+        <tr>
+            <td>__agent</td>
+            <td>Kullanıcının kullandığı tarayıcı ve işletim sistemi bilgisi.</td>
+        </tr>
+        <tr>
+            <td>__lastActivity</td>
+            <td>Kullanıcının en son aktivite zamanı.</td>
+        </tr>
     </tbody>
 </table>
+
+
+### Şifre Yenileme
+
+Eğer login aşamasından sonra giriş başarısız ise <kbd>$authAdapter->passwordNeedsRehash()</kbd> metodu ile kullanıcının şifresinin yenilenip yenilenmeyeceğine karar verilir.Bu metot php <kbd>password_needs_rehash()</kbd> ve <kbd>password_hash()</kbd> metotlarını kullanarak yenilenen şifrenin hash değerine döner.
+
+```php
+if ($hash = $authAdapter->passwordNeedsRehash()) {
+    // UPDATE `users` WHERE email = `$email` SET password = "$hash";
+}
+```
+
+Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash değeri ile yenilenmelidir.
 
 <a name="identity-method-reference"></a>
 
@@ -387,21 +407,6 @@ Kimliğin ilk yaratılma zamanını verir. ( Unix microtime ).
 
 Kullanıcı beni hatırla özelliğini kullandı ise <kbd>1</kbd> değerine, kullanmadı ise <kbd>0</kbd> değerine döner.
 
-#### $identity->getPasswordNeedsReHash();
-
-Kullanıcı giriş yaptıktan sonra eğer şifresi yenilenmesi gerekiyorsa <kbd>true</kbd> gerekmiyorsa <kbd>false</kbd> değerine döner.
-
-```php
-if ($hash = $identity->getPasswordNeedsReHash()) {
-
-    $this->db->update(     // Yeni hash değerini veritabanına kaydedin.
-        'users', 
-        ['password' => $hash],
-        ['id' => 55]
-    );
-}
-```
-
 #### $identity->getRememberToken();
 
 Beni hatırla çerezi değerine döner.
@@ -441,7 +446,8 @@ Array
             [__id] => user@example.com
             [__key] => Auth:__permanent:user@example.com:048f7b509a22800088f1cd8c1cc04b96
             [__agent] => Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,..
-            [__ip] => 212.124.16.1
+            [__ip] => 212.124.16.1,
+            [__lastActivity] => 1470419674
         )
 
     [1dd468dbea32e8ed6f58cb00b40af76c] => Array
@@ -451,7 +457,8 @@ Array
             [__id] => user@example.com
             [__key] => Auth:__permanent:user@example.com:1dd468dbea32e8ed6f58cb00b40af76c
             [__agent] => Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0
-            [__ip] => 88.169.1.7
+            [__ip] => 88.169.1.7,
+            [__lastActivity] => 1470419665
         )
 );
 ```
@@ -508,7 +515,7 @@ Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada var
 
 ### Yetki Doğrulama Onayı
 
-Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil application</b> gibi yöntemlerle onay işlemi sağlar.
+Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil uygulama</b> gibi yöntemlerle onay işlemi sağlar.
 
 Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity->makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur. Belirtilen süreler konfigürasyon dosyasından ayarlanabilir.
 
@@ -553,4 +560,4 @@ $identity->makePermanent();
 
 metodu kullanılır.
 
-Kalıcı kimliğe sahip olan kullanıcı artık sisteme giriş yapabilir. Kalıcı olan kimlikler önbelleklenirler. Böylece önbelleklenen kimlik tekrar oturum açıldığında veritabanı sorgusuna gidilmeden elde edilmiş olur. Kalıcı kimliğin önbelleklenme süresi konfigürasyon dosyasından ayarlanabilir. Eğer geçici kimlik oluşturma fonksiyonu kullanılmamışsa sistem her kimliği varsayılan olarak <kbd>kalıcı</kbd> olarak kaydeder.
+Kalıcı kimliğe sahip olan kullanıcı artık sisteme giriş yapabilir. Kalıcı olan kimlikler önbelleklenirler. Böylece önbelleklenen kimlik tekrar oturum açıldığında veritabanı sorgusuna gidilmeden elde edilmiş olur. Kalıcı kimliğin önbelleklenme süresi servis konfigürasyonundan ayarlanabilir. Eğer geçici kimlik oluşturma fonksiyonu kullanılmamışsa sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.

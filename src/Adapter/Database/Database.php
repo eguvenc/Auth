@@ -94,6 +94,13 @@ class Database extends AbstractAdapter
     protected $regenerateSessionId = true;
 
     /**
+     * Password needs rehash value
+     *
+     * @var string
+     */
+    protected $passwordHash;
+
+    /**
      * Constructor
      *
      * @param Container $container container
@@ -205,10 +212,13 @@ class Database extends AbstractAdapter
             $plain = $credentials->getPasswordValue();
             $hash  = $this->resultRowArray[$this->table->getPasswordColumn()];
             
-            if ($passwordNeedsRehash = $this->verifyPassword($plain, $hash)) {  // In here hash may cause performance bottleneck depending to passwordNeedHash "cost" value
-                                                                                // default is 6 for best performance. // set 10-12 for max security.
+            if ($this->verifyPassword($plain, $hash)) {
+            // In here hash may cause performance bottleneck
+            // depending to passwordNeedHash "cost" value default is 6
+            // for best performance, set 10-12 for max security.
+
                 if ($this->authenticate) {  // If login process allowed.
-                    $this->generateUser($credentials, $this->resultRowArray, $passwordNeedsRehash);
+                    $this->generateUser($credentials, $this->resultRowArray);
                 }
                 return true;
             }
@@ -227,7 +237,7 @@ class Database extends AbstractAdapter
      *
      * @return object
      */
-    public function generateUser(Credentials $credentials, $resultRowArray, $passwordNeedsRehash = array())
+    public function generateUser(Credentials $credentials, $resultRowArray)
     {
         $client = $this->request->getAttribute('Auth_Request');
 
@@ -242,7 +252,7 @@ class Database extends AbstractAdapter
         /**
          * Authenticate the user and fornat auth data
          */
-        $attributes = $this->formatAttributes(array_merge($resultRowArray, $attributes), $passwordNeedsRehash);
+        $attributes = array_merge($resultRowArray, $attributes);
 
         if ($this->regenerateSessionId) {
             $this->regenerateSessionId(true); // Delete old session after regenerate !
@@ -256,22 +266,6 @@ class Database extends AbstractAdapter
         } else {
             $this->storage->createTemporary($attributes); // If user has a temporay identity go on as temporary.
         }
-    }
-
-    /**
-     * Format Attributes
-     *
-     * @param array $attributes       attributes
-     * @param array $rehashedPassword marks attribute if password needs rehash
-     *
-     * @return array
-     */
-    protected function formatAttributes(array $attributes, $rehashedPassword = array())
-    {
-        if (is_array($rehashedPassword) && ! empty($rehashedPassword['hash'])) {
-            $attributes['__passwordNeedsRehash'] = $rehashedPassword['hash'];  // Developer needs to update password field
-        }
-        return $attributes;
     }
 
     /**
@@ -351,13 +345,21 @@ class Database extends AbstractAdapter
 
         if (password_verify($plain, $hash)) {
             if (password_needs_rehash($hash, $algo, array('cost' => $cost))) {
-                $value = password_hash($plain, $algo, array('cost' => $cost));
-
-                return array('hash' => $value);
+                $this->passwordHash = password_hash($plain, $algo, array('cost' => $cost));
             }
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns to rehashed password if needs rehash
+     *
+     * @return string
+     */
+    public function passwordNeedsRehash()
+    {
+        return $this->passwordHash;
     }
 
     /**

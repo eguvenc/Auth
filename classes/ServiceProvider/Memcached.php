@@ -16,7 +16,7 @@ class Memcached extends AbstractServiceProvider
      * @var array
      */
     protected $provides = [
-        'Memcached:Default'
+        'memcached:default'
     ];
 
     /**
@@ -34,6 +34,6 @@ class Memcached extends AbstractServiceProvider
         $memcached = new \Memcached();
         $memcached->addServer('127.0.0.1', 11211);
 
-        $container->share('Memcached:Default', $memcached);
+        $container->share('memcached:default', $memcached);
     }
 }
