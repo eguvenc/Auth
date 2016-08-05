@@ -19,7 +19,7 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @return boolean
      */
-    public function validateCredentials(Credentials $credentials)
+    public function checkCredentials(Credentials $credentials)
     {
         $identity = $credentials->getIdentityValue();
         $password = $credentials->getPasswordValue();

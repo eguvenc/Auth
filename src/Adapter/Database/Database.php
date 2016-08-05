@@ -80,13 +80,6 @@ class Database extends AbstractAdapter
     protected $failure = false;
 
     /**
-     * Whether to generate user identity
-     *
-     * @var boolean
-     */
-    protected $authenticate = true;
-
-    /**
      * Whether to regenerate session id after login
      *
      * @var boolean
@@ -116,21 +109,11 @@ class Database extends AbstractAdapter
     }
 
     /**
-     * Set authenticate option
-     *
-     * @param boolean $enabled true or false
-     */
-    public function setAuthenticate($enabled = true)
-    {
-        $this->authenticate = $enabled;
-    }
-
-    /**
      * Set session regenerate id functionality
      *
      * @param boolean $enabled true or false
      */
-    public function setRegenerateSessionId($enabled = true)
+    public function regenerateSessionId($enabled = true)
     {
         $this->regenerateSessionId = $enabled;
     }
@@ -169,7 +152,7 @@ class Database extends AbstractAdapter
     {
         $this->ignoreRecaller($credentials);  // Ignore recaller if user has remember cookie
 
-        if ($this->validateCredentials($credentials) == false) {
+        if ($this->checkCredentials($credentials) == false) {
             $message = 'Login attempt requires username and plain password values.';
             return new AuthResult(
                 AuthResult::FAILURE,
@@ -188,6 +171,20 @@ class Database extends AbstractAdapter
     }
 
     /**
+     * Validate user credentials without login
+     *
+     * @param  Credentials $credentials object
+     *
+     * @return boolean returns false if validation failed
+     */
+    public function validateCredentials(Credentials $credentials)
+    {
+        $this->ignoreRecaller($credentials);  // Ignore recaller if user has remember cookie
+
+        return $this->authenticate($credentials, false);  // validate credentials
+    }
+
+    /**
      * This method is called to attempt an authentication. Previous to this
      * call, this adapter would have already been configured with all
      * necessary information to successfully connect to "memory storage".
@@ -195,11 +192,11 @@ class Database extends AbstractAdapter
      * query to find a record matching the provided identity.
      *
      * @param array   $credentials username and plain password
-     * @param array   $options     login options
+     * @param array   $login       whether to generate user
      *
      * @return object
      */
-    public function authenticate(Credentials $credentials)
+    protected function authenticate(Credentials $credentials, $login = true)
     {
         $storageResult = $this->storage->query();  // if identity exists returns to cached data
 
@@ -217,7 +214,7 @@ class Database extends AbstractAdapter
             // depending to passwordNeedHash "cost" value default is 6
             // for best performance, set 10-12 for max security.
 
-                if ($this->authenticate) {  // If login process allowed.
+                if ($login) {  // If login process allowed.
                     $this->generateUser($credentials, $this->resultRowArray);
                 }
                 return true;
@@ -237,7 +234,7 @@ class Database extends AbstractAdapter
      *
      * @return object
      */
-    public function generateUser(Credentials $credentials, $resultRowArray)
+    protected function generateUser(Credentials $credentials, $resultRowArray)
     {
         $client = $this->request->getAttribute('Auth_Request');
 
@@ -338,7 +335,7 @@ class Database extends AbstractAdapter
      *
      * @return boolean | array
      */
-    public function verifyPassword($plain, $hash)
+    protected function verifyPassword($plain, $hash)
     {
         $cost = $this->container->get('Auth.PASSWORD_COST');
         $algo = $this->container->get('Auth.PASSWORD_ALGORITHM');
@@ -367,7 +364,7 @@ class Database extends AbstractAdapter
      *
      * @return void
      */
-    public function ignoreRecaller()
+    protected function ignoreRecaller()
     {
         if ($this->container->get('Auth:RememberMe')->readToken()) {
             $_SESSION['Auth_IgnoreRecaller'] = 1;

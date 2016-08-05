@@ -11,7 +11,7 @@ trait UniqueSessionTrait
      *
      * @return void
      */
-    public function killRemoteSessions(Storage $storage)
+    public function killSessions(Storage $storage)
     {
         $sessions = $storage->getUserSessions();
 

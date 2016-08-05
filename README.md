@@ -315,6 +315,23 @@ if ($hash = $authAdapter->passwordNeedsRehash()) {
 
 Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash değeri ile yenilenmelidir.
 
+### Adapter
+
+------
+
+#### $authAdapter->regenerateSessionId(true);
+
+Kullanıcı giriş yaptıktan sonra oturum id sinin yeniden yaratılıp yaratılmayacağını belirler.
+
+#### $authAdapter->login(Credentials $credentials);
+
+Kullanıcıyı yetkilendirir.
+
+#### $authAdapter->validateCredentials(Credentials $credentials);
+
+Kullanıcıyı yetkilendirmeden kimlik bilgilerinin doğruluğunu kontrol eder. Doğru ise true aksi durumda false değerine geri döner.
+
+
 <a name="identity-method-reference"></a>
 
 ### Identity
