@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Obullo Authentication by obullo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Obullo Authentication</h1>
+      <h2 class="project-tagline">Standalone auth package for php.</h2>
+      <a href="https://github.com/obullo/authentication" class="btn">View on GitHub</a>
+      <a href="https://github.com/obullo/authentication/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/obullo/authentication/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="obullo-authentication" class="anchor" href="#obullo-authentication" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Obullo Authentication</h1>
+
+<p>Authentication paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar için size bir API sağlar. Yetki doğrulama sorgu bellekleme özelliği ile birlikte gelir, yetkisi doğrulanmış kullanıcı kimliklerini hafızada bellekler ve yetki doğrulama isteklerinde veritabanı sorgusu sadece 1 kere çalışmış olur.</p>
+
+<p>Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id lerine göre kolayca yönetilebilirler. Orta ve büyük ölçekli uygulamar için gelişmiş bir yetki doğrulama çözümüdür.</p>
+
+<h3>
+<a id="Özellikler" class="anchor" href="#%C3%96zellikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Özellikler</h3>
+
+<ul>
+<li>Hafıza depoları,</li>
+<li>Adaptörler,</li>
+<li>Google oturumları gibi çoklu oturumları görebilme ve sonlandırma</li>
+<li>Sona erme süreleri belirleyerek ile sonlandırılabilir kimlikler yaratabilme</li>
+<li>Veritabanı sorgularını özelleştirebilme</li>
+<li>Kimlik Onaylama</li>
+<li>Beni hatırla özelliği</li>
+</ul>
+
+<h3>
+<a id="akış-Şeması" class="anchor" href="#ak%C4%B1%C5%9F-%C5%9Eemas%C4%B1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Akış Şeması</h3>
+
+<p>Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarından nasıl geçtiği ve servisin nasıl çalıştığı hakkında size bir ön bilgi verecektir:</p>
+
+<p><img src="https://github.com/obullo/authentication/blob/master/auth_flowchart.png?raw=true" alt="Authentication" title="Authentication"></p>
+
+<p>Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.</p>
+
+<p>Akış şemasına göre Guest login butonuna bastığı anda ilk önce önbelleğe bir sorgu yapılır ve daha önceden kullanıcının önbellekte kalıcı bir kimliği olup olmadığında bakılır. Eğer hafıza bloğunda kalıcı yetki var ise kullanıcı kimliği buradan okunur yok ise veritabanına sorgu gönderilir ve elde edilen kimlik kartı tekrar önbelleğe yazılır.</p>
+
+<p><a name="configuration"></a></p>
+
+<h3>
+<a id="konfigürasyon" class="anchor" href="#konfig%C3%BCrasyon" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Konfigürasyon</h3>
+
+<p>Authenticaiton sınıfı varsayılan olarak <a href="http://container.thephpleague.com/">Php League Container</a> paketi ile çalışır.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">require_once</span> <span class="pl-s"><span class="pl-pds">"</span>vendor/autoload.php<span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">session_start</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$container</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">League\Container\</span><span class="pl-c1">Container</span>;</span>
+<span class="pl-s1"><span class="pl-smi">$request</span> <span class="pl-k">=</span> <span class="pl-c1">Zend\Diactoros\</span><span class="pl-c1">ServerRequestFactory</span><span class="pl-k">::</span>fromGlobals();</span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>request<span class="pl-pds">'</span></span>, <span class="pl-smi">$request</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>addServiceProvider(<span class="pl-s"><span class="pl-pds">'</span>ServiceProvider\Redis<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>addServiceProvider(<span class="pl-s"><span class="pl-pds">'</span>ServiceProvider\Database<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>addServiceProvider(<span class="pl-s"><span class="pl-pds">'</span>ServiceProvider\Authentication<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<p>Tüm auth konfigürasyonu <kbd>classes/ServiceProvider/Authentication</kbd> sınıfı register metodu içerisinden düzenlenebilir.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth.PASSWORD_COST<span class="pl-pds">'</span></span>, <span class="pl-c1">6</span>);</span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth.PASSWORD_ALGORITHM<span class="pl-pds">'</span></span>, <span class="pl-c1">PASSWORD_BCRYPT</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Storage\Redis<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>redis:default<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>request<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setPermanentBlockLifetime<span class="pl-pds">'</span></span>, [<span class="pl-c1">3600</span>]) <span class="pl-c">// Should be same with app session lifetime.</span></span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setTemporaryBlockLifetime<span class="pl-pds">'</span></span>, [<span class="pl-c1">300</span>]);</span></pre></div>
+
+<p><a name="adapters"></a></p>
+
+<h3>
+<a id="adaptörler" class="anchor" href="#adapt%C3%B6rler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Adaptörler</h3>
+
+<p>Yetki doğrulama adaptörleri uygulamaya esneklik kazandıran sorgulama arabirimleridir, yetki doğrulamanın bir veritabanı ile mi yoksa farklı bir protokol üzerinden mi yapılacağını belirleyen sınıflardır. Varsayılan arabirim türü <kbd>Database</kbd> dir. ( RDBMS veya NoSQL türündeki veritabanları için ortak kullanılır ).</p>
+
+<p>Farklı adaptörlerin farklı seçenekler ve davranışları olması muhtemeldir , ama bazı temel şeyler kimlik doğrulama adaptörleri arasında ortaktır. Örneğin, kimlik doğrulama hizmeti sorgularını gerçekleştirmek ve sorgulardan dönen sonuçlar yetki doğrulama adaptörleri için ortak kullanılır.</p>
+
+<p><a name="storages"></a></p>
+
+<h3>
+<a id="hafıza-depoları" class="anchor" href="#haf%C4%B1za-depolar%C4%B1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Hafıza Depoları</h3>
+
+<p>Hazıfa deposu yetki doğrulama esnasında kullanıcı kimliğini ön belleğe alır ve tekrar tekrar oturum açıldığında database ile bağlantı kurmayarak uygulamanın performans kaybetmesini önler. </p>
+
+<p>Desteklenen sürücüler</p>
+
+<ul>
+<li>Redis</li>
+<li>Memcached</li>
+</ul>
+
+<p>Hafıza deposu servis konfigurasyonundan değiştirilebilir.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Storage\Memcached<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>memcached:default<span class="pl-pds">'</span></span>))</span></pre></div>
+
+<p>Ayrıca anasayfadan servis sağlayıcınızı çağırmanız gerekir.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>addServiceProvider(<span class="pl-s"><span class="pl-pds">'</span>ServiceProvider\Memcached<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>addServiceProvider(<span class="pl-s"><span class="pl-pds">'</span>ServiceProvider\Database<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>addServiceProvider(<span class="pl-s"><span class="pl-pds">'</span>ServiceProvider\Authentication<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<h3>
+<a id="database" class="anchor" href="#database" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Database</h3>
+
+<p>Mysql benzeri ilişkili bir database kullanıyorsanız aşağıdaki sql kodunu çalıştırarak demo için bir tablo yaratın.</p>
+
+<div class="highlight highlight-source-sql"><pre><span class="pl-k">CREATE</span> <span class="pl-k">DATABASE</span> <span class="pl-en">IF</span> NOT EXISTS test;
+
+use test;
+
+<span class="pl-k">CREATE</span> <span class="pl-k">TABLE</span> <span class="pl-en">IF</span> NOT EXISTS <span class="pl-s"><span class="pl-pds">`</span>users<span class="pl-pds">`</span></span> (
+  <span class="pl-s"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span> <span class="pl-k">int</span>(<span class="pl-c1">11</span>) <span class="pl-k">NOT NULL</span> AUTO_INCREMENT,
+  <span class="pl-s"><span class="pl-pds">`</span>username<span class="pl-pds">`</span></span> <span class="pl-k">varchar</span>(<span class="pl-c1">100</span>) <span class="pl-k">NOT NULL</span>,
+  <span class="pl-s"><span class="pl-pds">`</span>password<span class="pl-pds">`</span></span> <span class="pl-k">varchar</span>(<span class="pl-c1">80</span>) <span class="pl-k">NOT NULL</span>,
+  <span class="pl-s"><span class="pl-pds">`</span>remember_token<span class="pl-pds">`</span></span> <span class="pl-k">varchar</span>(<span class="pl-c1">64</span>) <span class="pl-k">NOT NULL</span>,
+  <span class="pl-k">PRIMARY KEY</span> (<span class="pl-s"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span>),
+  KEY <span class="pl-s"><span class="pl-pds">`</span>username<span class="pl-pds">`</span></span> (<span class="pl-s"><span class="pl-pds">`</span>username<span class="pl-pds">`</span></span>),
+  KEY <span class="pl-s"><span class="pl-pds">`</span>remember_token<span class="pl-pds">`</span></span> (<span class="pl-s"><span class="pl-pds">`</span>remember_token<span class="pl-pds">`</span></span>)
+) ENGINE<span class="pl-k">=</span>InnoDB  DEFAULT CHARSET<span class="pl-k">=</span>utf8;
+
+<span class="pl-k">INSERT INTO</span> <span class="pl-s"><span class="pl-pds">`</span>users<span class="pl-pds">`</span></span> (<span class="pl-s"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span>, <span class="pl-s"><span class="pl-pds">`</span>username<span class="pl-pds">`</span></span>, <span class="pl-s"><span class="pl-pds">`</span>password<span class="pl-pds">`</span></span>, <span class="pl-s"><span class="pl-pds">`</span>remember_token<span class="pl-pds">`</span></span>) <span class="pl-k">VALUES</span> 
+(<span class="pl-c1">1</span>, <span class="pl-s"><span class="pl-pds">'</span>user@example.com<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>$2y$06$6k9aYbbOiVnqgvksFR4zXO.kNBTXFt3cl8xhvZLWj4Qi/IpkYXeP.<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>);</pre></div>
+
+<p>Test kullanıcı adı <kbd><a href="mailto:user@example.com">user@example.com</a></kbd> ve şifre <kbd>123456</kbd> dır.</p>
+
+<h3>
+<a id="auth-table" class="anchor" href="#auth-table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Auth Table</h3>
+
+<p>Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\Authentication\Adapter\Database\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>My\Database\Table\Db<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>database:default<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setColumns<span class="pl-pds">'</span></span>, [<span class="pl-c1">array</span>(<span class="pl-s"><span class="pl-pds">'</span>username<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>remember_token<span class="pl-pds">'</span></span>)])</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setTableName<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>users<span class="pl-pds">'</span></span>])</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setIdentityColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>])</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setPasswordColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span>])</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setRememberTokenColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>remember_token<span class="pl-pds">'</span></span>]);</span></pre></div>
+
+<p>Mongo Db için örnek.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Adapter\Database\Table\Mongo<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<h3>
+<a id="oturum-açma" class="anchor" href="#oturum-a%C3%A7ma" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Oturum Açma</h3>
+
+<p>Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>Auth:Adapter<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Authentication\</span><span class="pl-c1">Credentials</span>;</span>
+<span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setIdentityValue(<span class="pl-s"><span class="pl-pds">'</span>user@example.com<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setPasswordValue(<span class="pl-s"><span class="pl-pds">'</span>123456<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setRememberMeValue(<span class="pl-c1">false</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$authResult</span> <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>login(<span class="pl-smi">$credentials</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-k">!</span> <span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>isValid()) {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c1">print_r</span>(<span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>getMessages());</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">} <span class="pl-k">else</span> {</span>
+<span class="pl-s1">    <span class="pl-c1">header</span>(<span class="pl-s"><span class="pl-pds">"</span>Location: /example/Restricted.php<span class="pl-pds">"</span></span>);</span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>Oturum açma sonucunun doğruluğu <kbd>AuthResult-&gt;isValid()</kbd> metodu ile kontrol edilir eğer oturum açma denemesi başarısız ise dönen tüm hata mesajlarına getArray() metodu ile ulaşılabilir.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$auhtResult</span><span class="pl-k">-&gt;</span>isValid()) {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c">// Success</span></span>
+<span class="pl-s1"></span>
+<span class="pl-s1">} <span class="pl-k">else</span> {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c">// Fail</span></span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c1">print_r</span>(<span class="pl-smi">$auhtResult</span><span class="pl-k">-&gt;</span>getArray());</span>
+<span class="pl-s1">}</span></pre></div>
+
+<p><strong>Not:</strong> <kbd>example</kbd> klasörü içerisinde oluşturulmuş örneğe göz atmayı unutmayın.</p>
+
+<p><a name="login-error-results"></a></p>
+
+<h3>
+<a id="hata-tablosu" class="anchor" href="#hata-tablosu" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Hata Tablosu</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Kod</th>    
+            <th>Sabit</th>    
+            <th>Açıklama</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>0</td>
+            <td>AuthResult::FAILURE</td>
+            <td>Genel başarısız yetki doğrulama.</td>
+        </tr>
+        <tr>
+            <td>-1</td>
+            <td>AuthResult::FAILURE_IDENTITY_AMBIGUOUS</td>
+            <td>Kimlik belirsiz olması nedeniyle başarısız yetki doğrulama.( Sorgu sonucunda 1 den fazla kimlik bulunduğunu gösterir ).</td>
+        </tr>
+        <tr>
+            <td>-2</td>
+            <td>AuthResult::FAILURE_CREDENTIAL_INVALID</td>
+            <td>Geçersiz kimlik bilgileri girildiğini gösterir.</td>
+        </tr>
+        <tr>
+            <td>-3</td>
+            <td>AuthResult::TEMPORARY_AUTH</td>
+            <td>Geçici kimlik bilgilerinin oluşturulduğuna dair bir bilgidir.</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>AuthResult::SUCCESS</td>
+            <td>Yetki doğrulama başarılıdır.</td>
+        </tr>
+
+    </tbody>
+</table>
+
+<p><a name="identities"></a></p>
+
+<h3>
+<a id="kimlikler" class="anchor" href="#kimlikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Kimlikler</h3>
+
+<p>Kimlik sınıfı kullanıcı kimliğine ait <kbd>okuma</kbd> ve <kbd>yazma</kbd> işlemlerini yürütür. Kimliğe veri kaydetmek için set metodu,</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>set(<span class="pl-s"><span class="pl-pds">'</span>test<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>my_value<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<p>Kimlik bilgilerini elde etmek için ise get metodu kullanılır.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>test<span class="pl-pds">'</span></span>);  <span class="pl-c">// my_value</span></span></pre></div>
+
+<p>Kimliğe ait tüm bilgileri almak için ise aşağıdaki metot kullanılır.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c1">print_r</span>(<span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>getArray());</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c">/*</span></span>
+<span class="pl-s1"><span class="pl-c">Array</span></span>
+<span class="pl-s1"><span class="pl-c">(</span></span>
+<span class="pl-s1"><span class="pl-c">    [__isAuthenticated] =&gt; 1</span></span>
+<span class="pl-s1"><span class="pl-c">    [__isTemporary] =&gt; 0</span></span>
+<span class="pl-s1"><span class="pl-c">    [__rememberMe] =&gt; 0</span></span>
+<span class="pl-s1"><span class="pl-c">    [__time] =&gt; 1414244130</span></span>
+<span class="pl-s1"><span class="pl-c">    [__ip] =&gt; 127.0.0.1</span></span>
+<span class="pl-s1"><span class="pl-c">    [__agent] =&gt; Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0</span></span>
+<span class="pl-s1"><span class="pl-c">    [__lastActivity] =&gt; 1470419173</span></span>
+<span class="pl-s1"><span class="pl-c">    [id] =&gt; 1</span></span>
+<span class="pl-s1"><span class="pl-c">    [password] =&gt; $2y$10$0ICQkMUZBEAUMuyRYDlXe.PaOT4LGlbj6lUWXg6w3GCOMbZLzM7bm</span></span>
+<span class="pl-s1"><span class="pl-c">    [remember_token] =&gt; bqhiKfIWETlSRo7wB2UByb1Oyo2fpb86</span></span>
+<span class="pl-s1"><span class="pl-c">    [username] =&gt; user@example.com</span></span>
+<span class="pl-s1"><span class="pl-c">)</span></span>
+<span class="pl-s1"><span class="pl-c">*/</span></span></pre></div>
+
+<p><a name="identity-keys"></a></p>
+
+<h3>
+<a id="kimlik-anahtarları" class="anchor" href="#kimlik-anahtarlar%C4%B1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Kimlik anahtarları</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Anahtar</th>    
+            <th>Açıklama</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>__isAuthenticated</td>
+            <td>Eğer kullanıcı yetkilendirilmiş ise bu anahtar <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerini içerir.</td>
+        </tr>
+        <tr>
+            <td>__isTemporary</td>
+            <td>Yetki doğrulama onay özelliği için kullanılır.</td>
+        </tr>
+        <tr>
+            <td>__rememberMe</td>
+            <td>Kullanıcı giriş yaparken beni hatırla özelliğini kullandıysa bu değer <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerini alır.</td>
+        </tr>
+        <tr>
+            <td>__time</td>
+            <td>Kimliğin ilk oluşturulma zamanıdır. Unix time() formatında kaydedilir.</td>
+        </tr>
+        <tr>
+            <td>__ip</td>
+            <td>Kullanıcının en son giriş yaptığı ip adresi.</td>
+        </tr>
+        <tr>
+            <td>__agent</td>
+            <td>Kullanıcının kullandığı tarayıcı ve işletim sistemi bilgisi.</td>
+        </tr>
+        <tr>
+            <td>__lastActivity</td>
+            <td>Kullanıcının en son aktivite zamanı.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>
+<a id="Şifre-yenileme" class="anchor" href="#%C5%9Eifre-yenileme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Şifre Yenileme</h3>
+
+<p>Eğer login aşamasından sonra giriş başarısız ise <kbd>$authAdapter-&gt;passwordNeedsRehash()</kbd> metodu ile kullanıcının şifresinin yenilenip yenilenmeyeceğine karar verilir.Bu metot php <kbd>password_needs_rehash()</kbd> ve <kbd>password_hash()</kbd> metotlarını kullanarak yenilenen şifrenin hash değerine döner.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$hash</span> <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>passwordNeedsRehash()) {</span>
+<span class="pl-s1">    <span class="pl-c">// UPDATE `users` WHERE email = `$email` SET password = "$hash";</span></span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash değeri ile yenilenmelidir.</p>
+
+<p><a name="identity-method-reference"></a></p>
+
+<h3>
+<a id="identity" class="anchor" href="#identity" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Identity</h3>
+
+<hr>
+
+<h4>
+<a id="identity-check" class="anchor" href="#identity-check" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;check();</h4>
+
+<p>Kullanıcı yetki doğrulamadan geçmiş ise <kbd>true</kbd> aksi durumda <kbd>false</kbd> değerine döner.</p>
+
+<h4>
+<a id="identity-guest" class="anchor" href="#identity-guest" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;guest();</h4>
+
+<p>Kullanıcının yetkisi doğrulanmamış kullanıcı, yani bir ziyaretçi olup olmadığını kontrol eder. Ziyaretçi ise <kbd>true</kbd> değilse <kbd>false</kbd> değerine döner.</p>
+
+<h4>
+<a id="identity-setkey-value" class="anchor" href="#identity-setkey-value" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;set($key, $value);</h4>
+
+<p>Kimlik dizisine girilen anahtara bir değer atar.</p>
+
+<h4>
+<a id="identity-getkey" class="anchor" href="#identity-getkey" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;get($key);</h4>
+
+<p>Kimlik dizisinden girilen anahtara ait değere geri döner. Anahtar yoksa false değerine döner.</p>
+
+<h4>
+<a id="identity-removekey" class="anchor" href="#identity-removekey" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;remove($key);</h4>
+
+<p>Kimlik dizisinden varolan anahtarı siler.</p>
+
+<h4>
+<a id="identity-expirettl" class="anchor" href="#identity-expirettl" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;expire($ttl);</h4>
+
+<p>Kullanıcı kimliğinin girilen süre göre geçtikten sonra yok olması için __expire anahtarı içerisine sona erme süresini kaydeder.</p>
+
+<h4>
+<a id="identity-isexpired" class="anchor" href="#identity-isexpired" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;isExpired();</h4>
+
+<p>Kimliğe expire() metodu ile kaydedilmiş süre sona erdiyse <kbd>true</kbd> aksi durumda <kbd>false</kbd> değerine döner. Bu method Http Auth katmanında aşağıdaki gibi kullanılabilir.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>isExpired()) {</span>
+<span class="pl-s1">    <span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>destroy();    </span>
+<span class="pl-s1">}</span></pre></div>
+
+<h4>
+<a id="identity-maketemporary" class="anchor" href="#identity-maketemporary" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;makeTemporary();</h4>
+
+<p>Başarılı giriş yapmış bir kullanıcıya ait kalıcı kimliği konfigurasyon dosyasından belirlenmiş sona erme süresine göre geçici hale getirir. Süre sona erdiğinde kimlik hafıza deposundan silinir.</p>
+
+<h4>
+<a id="identity-makepermanent" class="anchor" href="#identity-makepermanent" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;makePermanent();</h4>
+
+<p>Başarılı giriş yapmış kullanıcıya ait geçici kimliği konfigurasyon dosyasından belirlenmiş kalıcı süreye göre kalıcı hale getirir. Süre sona erdiğinde veritabanına tekrar sql sorgusu yapılarak kimlik tekrar hafızaya yazılır.</p>
+
+<h4>
+<a id="identity-istemporary" class="anchor" href="#identity-istemporary" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;isTemporary();</h4>
+
+<p>Kullanıcı kimliğinin geçici olup olmadığını gösterir, geçici ise <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerine döner.</p>
+
+<h4>
+<a id="identity-updatetemporarystring-key-mixed-val" class="anchor" href="#identity-updatetemporarystring-key-mixed-val" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;updateTemporary(string $key, mixed $val);</h4>
+
+<p>Geçici olarak oluşturulmuş kimlik bilgilerini güncellemenize olanak tanır.</p>
+
+<h4>
+<a id="identity-logout" class="anchor" href="#identity-logout" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;logout();</h4>
+
+<p>Önbellekteki <kbd>isAuthenticated</kbd> anahtarını <kbd>0</kbd> değeri ile güncelleyerek oturumu kapatır. Bu method önbellekteki kullanıcı kimliğini bütünü ile silmez sadece kullanıcıyı oturumu kapattı olarak kaydeder. Önbellekleme sayesinde <kbd>3600</kbd> saniye içerisinde kullanıcı bir daha sisteme giriş yaptığında <kbd>isAuthenticated</kbd> değeri <kbd>1</kbd> olarak güncellenir ve veritabanı sorgusunun önüne geçilmiş olur.</p>
+
+<h4>
+<a id="identity-destroy" class="anchor" href="#identity-destroy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;destroy();</h4>
+
+<p>Önbellekteki kimliği bütünüyle yok eder.</p>
+
+<h4>
+<a id="identity-forgetme" class="anchor" href="#identity-forgetme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;forgetMe();</h4>
+
+<p>Beni hatırla çerezini kullanıcı tarayıcısından siler.</p>
+
+<h4>
+<a id="identity-refreshremembertoken" class="anchor" href="#identity-refreshremembertoken" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;refreshRememberToken();</h4>
+
+<p>Beni hatırla çerezini yenileyerek veritabanı ve çereze kaydeder.</p>
+
+<h4>
+<a id="identity-getidentifier" class="anchor" href="#identity-getidentifier" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getIdentifier();</h4>
+
+<p>Kullanıcın kimlik tanımlayıcısına geri döner. Tanımlayıcı genellikle <kbd>username</kbd> yada <kbd>email</kbd> değeridir.</p>
+
+<h4>
+<a id="identity-getpassword" class="anchor" href="#identity-getpassword" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getPassword();</h4>
+
+<p>Kullanıcının hash edilmiş şifresine geri döner.</p>
+
+<h4>
+<a id="identity-getrememberme" class="anchor" href="#identity-getrememberme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getRememberMe();</h4>
+
+<p>Eğer kullanıcı beni hatırla özelliğini kullanıyorsa <kbd>1</kbd> değerine aksi durumda <kbd>0</kbd> değerine döner.</p>
+
+<h4>
+<a id="identity-gettime" class="anchor" href="#identity-gettime" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getTime();</h4>
+
+<p>Kimliğin ilk yaratılma zamanını verir. ( Unix microtime ).</p>
+
+<h4>
+<a id="identity-getrememberme-1" class="anchor" href="#identity-getrememberme-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getRememberMe();</h4>
+
+<p>Kullanıcı beni hatırla özelliğini kullandı ise <kbd>1</kbd> değerine, kullanmadı ise <kbd>0</kbd> değerine döner.</p>
+
+<h4>
+<a id="identity-getremembertoken" class="anchor" href="#identity-getremembertoken" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getRememberToken();</h4>
+
+<p>Beni hatırla çerezi değerine döner.</p>
+
+<h4>
+<a id="identity-getloginid" class="anchor" href="#identity-getloginid" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getLoginId();</h4>
+
+<p>Bir veya birden fazla oturumlar numaralandırılır. Giriş yapmış kullanıcıya ait oturum numarasına aksi durumda false değerine döner.</p>
+
+<h4>
+<a id="identity-getarray" class="anchor" href="#identity-getarray" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getArray()</h4>
+
+<p>Kullanıcının tüm kimlik değerlerine bir dizi içerisinde geri döner.</p>
+
+<h3>
+<a id="storage" class="anchor" href="#storage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Storage</h3>
+
+<hr>
+
+<h4>
+<a id="storage-getusersessions" class="anchor" href="#storage-getusersessions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$storage-&gt;getUserSessions();</h4>
+
+<p>Kullanıcının bir yada birden fazla oturumu varsa bir dizi içerisinde bu oturumlara geri döner.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$sessions</span> <span class="pl-k">=</span> <span class="pl-smi">$storage</span><span class="pl-k">-&gt;</span>getUserSessions();</span></pre></div>
+
+<p>Bir kullanıcının iki farklı tarayıcıdan oturum açtığını varsayarsak bu metot aşağıdaki gibi bir çıktı verir.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c1">print_r</span>(<span class="pl-smi">$sesssion</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">Array</span></span>
+<span class="pl-s1">(</span>
+<span class="pl-s1">    [048<span class="pl-c1">f7b509a22800088f1cd8c1cc04b96</span>] <span class="pl-k">=&gt;</span> <span class="pl-k">Array</span></span>
+<span class="pl-s1">        (</span>
+<span class="pl-s1">            [<span class="pl-c1">__isAuthenticated</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__time</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470251639</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__id</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__key</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Auth</span>:<span class="pl-c1">__permanent</span>:<span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span>:048<span class="pl-c1">f7b509a22800088f1cd8c1cc04b96</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__agent</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Mozilla</span><span class="pl-k">/</span><span class="pl-c1">5.0</span> (<span class="pl-c1">X11</span>; <span class="pl-c1">Linux</span> <span class="pl-c1">x86_64</span>) <span class="pl-c1">AppleWebKit</span><span class="pl-k">/</span><span class="pl-c1">537.36</span> (<span class="pl-c1">KHTML</span>,<span class="pl-k">..</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__ip</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">212.124</span><span class="pl-k">.</span><span class="pl-c1">16.1</span>,</span>
+<span class="pl-s1">            [<span class="pl-c1">__lastActivity</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470419674</span></span>
+<span class="pl-s1">        )</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    [1<span class="pl-c1">dd468dbea32e8ed6f58cb00b40af76c</span>] <span class="pl-k">=&gt;</span> <span class="pl-k">Array</span></span>
+<span class="pl-s1">        (</span>
+<span class="pl-s1">            [<span class="pl-c1">__isAuthenticated</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__time</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470251614</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__id</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__key</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Auth</span>:<span class="pl-c1">__permanent</span>:<span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span>:1<span class="pl-c1">dd468dbea32e8ed6f58cb00b40af76c</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__agent</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Mozilla</span><span class="pl-k">/</span><span class="pl-c1">5.0</span> (<span class="pl-c1">X11</span>; <span class="pl-c1">Ubuntu</span>; <span class="pl-c1">Linux</span> <span class="pl-c1">x86_64</span>; <span class="pl-c1">rv</span>:<span class="pl-c1">47.0</span>) <span class="pl-c1">Gecko</span><span class="pl-k">/</span><span class="pl-c1">20100101</span> <span class="pl-c1">Firefox</span><span class="pl-k">/</span><span class="pl-c1">47.0</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__ip</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">88.169</span><span class="pl-k">.</span><span class="pl-c1">1.7</span>,</span>
+<span class="pl-s1">            [<span class="pl-c1">__lastActivity</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470419665</span></span>
+<span class="pl-s1">        )</span>
+<span class="pl-s1">);</span></pre></div>
+
+<h4>
+<a id="storage-killsessionloginid" class="anchor" href="#storage-killsessionloginid" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$storage-&gt;killSession($loginID);</h4>
+
+<p>Oturum id değerine göre kullanıcın seçilen oturumunu sonlandırır.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$storage</span><span class="pl-k">-&gt;</span>killSession(<span class="pl-s"><span class="pl-pds">"</span>1dd468dbea32e8ed6f58cb00b40af76c<span class="pl-pds">"</span></span>);</span></pre></div>
+
+<p>Bir önceki örnekte Firefox tarayıcısına ait login ID değerini bu metoda gönderdiğimizde Firefox tarayıcısında açılmış bu oturum sonlandırılır.</p>
+
+<p><a name="authResult-reference"></a></p>
+
+<h3>
+<a id="authresult" class="anchor" href="#authresult" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>AuthResult</h3>
+
+<hr>
+
+<h4>
+<a id="authresult-isvalid" class="anchor" href="#authresult-isvalid" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authResult-&gt;isValid();</h4>
+
+<p>Login attempt methodundan geri dönen hata kodu <kbd>0</kbd> değerinden büyük ise <kbd>true</kbd> küçük ise <kbd>false</kbd> değerine döner. Başarılı oturum açma işlermlerinde hata kodu <kbd>1</kbd> değerine döner diğer durumlarda negatif değerlere döner.</p>
+
+<h4>
+<a id="authresult-getcode" class="anchor" href="#authresult-getcode" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authResult-&gt;getCode();</h4>
+
+<p>Login denemesinden sonra geçerli hata koduna geri döner.</p>
+
+<h4>
+<a id="authresult-getidentifier" class="anchor" href="#authresult-getidentifier" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authResult-&gt;getIdentifier();</h4>
+
+<p>Login denemesinden sonra geçerli kullanıcı kimliğine göre döner. ( id, username, email gibi. )</p>
+
+<h4>
+<a id="authresult-getmessages" class="anchor" href="#authresult-getmessages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authResult-&gt;getMessages();</h4>
+
+<p>Login denemesinden sonra hata mesajlarına geri döner.</p>
+
+<h4>
+<a id="authresult-setcodeint-code" class="anchor" href="#authresult-setcodeint-code" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authResult-&gt;setCode(int $code);</h4>
+
+<p>Login denemesinden varsayılan sonuca hata kodu ekler.</p>
+
+<h4>
+<a id="authresult-setmessagestring-message" class="anchor" href="#authresult-setmessagestring-message" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authResult-&gt;setMessage(string $message);</h4>
+
+<p>Login denemesinden sonra sonuçlara bir hata mesajı ekler.</p>
+
+<h4>
+<a id="authresult-getarray" class="anchor" href="#authresult-getarray" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authResult-&gt;getArray();</h4>
+
+<p>Login denemesinden sonra tüm sonuçları bir dizi içerisinde verir.</p>
+
+<h4>
+<a id="authresult-getresultrow" class="anchor" href="#authresult-getresultrow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authResult-&gt;getResultRow();</h4>
+
+<p>Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada varsa önbellekte oluşturulmuş sorgu sonucuna geri döner.</p>
+
+<h3>
+<a id="yetki-doğrulama-onayı" class="anchor" href="#yetki-do%C4%9Frulama-onay%C4%B1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Yetki Doğrulama Onayı</h3>
+
+<p>Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil uygulama</b> gibi yöntemlerle onay işlemi sağlar.</p>
+
+<p>Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity-&gt;makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur. Belirtilen süreler konfigürasyon dosyasından ayarlanabilir.</p>
+
+<p><a name="temporary-identity"></a></p>
+
+<h3>
+<a id="geçiçi-kimlikler" class="anchor" href="#ge%C3%A7i%C3%A7i-kimlikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Geçiçi Kimlikler</h3>
+
+<p>Kullanıcı sisteme giriş yaptıktan sonra,</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>makeTemporary();</span></pre></div>
+
+<p>metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması sizin ona doğrulama yöntemlerinden herhangi biriyle göndermiş olacağınız onay kodu ile gerçekleşir. Eğer kullanıcı 300 saniye içerisinde kendisine gönderilen onay kodunu onaylayamaz ise geçiçi kimlik kendiliğinden yok olur.</p>
+
+<p>Eğer kullanıcı onay işlemini başarılı bir şekilde gerçekleştirir ise geçici kimliğin <kbd>$identity-&gt;makePermanent()</kbd> metodu ile kalıcı hale getirilmesi gereklidir. Bir kimlik kalıcı yapıldığında kullanıcı sisteme giriş yapmış olur.</p>
+
+<p>Oturum bilgileri doğru ise kimliği geçici hale getirebilirsiniz.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>isValid()) {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>makeTemporary();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>Verification code has been sent.<span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c">// Url redirect ..</span></span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>Sonraki adımda <kbd>$identity-&gt;makePermanent()</kbd> metodunu kullanarak kimliği kalıcı hale getirin. Ve yetkilendirmeden sonra kullanıcıyı <kbd>dashboard</kbd> sayfanıza yönlendirin.</p>
+
+<p><a name="permanent-identity"></a></p>
+
+<h3>
+<a id="kalıcı-kimlikler" class="anchor" href="#kal%C4%B1c%C4%B1-kimlikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Kalıcı Kimlikler</h3>
+
+<p>Bir geçici kimliği kalıcı hale dönüştürmek için,</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>makePermanent();</span></pre></div>
+
+<p>metodu kullanılır.</p>
+
+<p>Kalıcı kimliğe sahip olan kullanıcı artık sisteme giriş yapabilir. Kalıcı olan kimlikler önbelleklenirler. Böylece önbelleklenen kimlik tekrar oturum açıldığında veritabanı sorgusuna gidilmeden elde edilmiş olur. Kalıcı kimliğin önbelleklenme süresi servis konfigürasyonundan ayarlanabilir. Eğer geçici kimlik oluşturma fonksiyonu kullanılmamışsa sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/obullo/authentication">Obullo Authentication</a> is maintained by <a href="https://github.com/obullo">obullo</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
