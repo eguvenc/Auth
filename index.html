@@ -30,7 +30,7 @@
       <section>
         <p>Authentication paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar için size bir API sağlar. Yetki doğrulama sorgu bellekleme özelliği ile birlikte gelir, yetkisi doğrulanmış kullanıcı kimliklerini hafızada bellekler ve yetki doğrulama isteklerinde veritabanı sorgusu sadece 1 kere çalışmış olur.</p>
 
-<p>Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id lerine göre kolayca yönetilebilirler. Orta ve büyük ölçekli uygulamar için gelişmiş bir yetki doğrulama çözümüdür.</p>
+<p>Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id lerine göre kolayca yönetilebilirler.</p>
 
 <h3>
 <a id="yükleme" class="anchor" href="#y%C3%BCkleme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Yükleme</h3>
@@ -42,11 +42,11 @@
 <a id="Özellikler" class="anchor" href="#%C3%96zellikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Özellikler</h3>
 
 <ul>
-<li>Hafıza depoları,</li>
-<li>Adaptörler,</li>
+<li>Hafıza depoları ile kimlik bellekleme,</li>
+<li>Farklı davranışlar için adaptörler,</li>
 <li>Google oturumları gibi çoklu oturumları görebilme ve sonlandırma</li>
-<li>Sona erme süreleri belirleyerek ile sonlandırılabilir kimlikler yaratabilme</li>
-<li>Veritabanı sorgularını özelleştirebilme</li>
+<li>Sona erme süreleri belirleyerek sonlandırılabilir kimlikler yaratabilme</li>
+<li>Farklı veritabanları için tablo sınıfları</li>
 <li>Kimlik Onaylama</li>
 <li>Beni hatırla özelliği</li>
 </ul>
@@ -335,6 +335,26 @@ use test;
 <span class="pl-s1">}</span></pre></div>
 
 <p>Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash değeri ile yenilenmelidir.</p>
+
+<h3>
+<a id="adapter" class="anchor" href="#adapter" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Adapter</h3>
+
+<hr>
+
+<h4>
+<a id="authadapter-regeneratesessionidtrue" class="anchor" href="#authadapter-regeneratesessionidtrue" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;regenerateSessionId(true);</h4>
+
+<p>Kullanıcı giriş yaptıktan sonra oturum id sinin yeniden yaratılıp yaratılmayacağını belirler.</p>
+
+<h4>
+<a id="authadapter-logincredentials-credentials" class="anchor" href="#authadapter-logincredentials-credentials" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;login(Credentials $credentials);</h4>
+
+<p>Kullanıcıyı yetkilendirir.</p>
+
+<h4>
+<a id="authadapter-validatecredentialscredentials-credentials" class="anchor" href="#authadapter-validatecredentialscredentials-credentials" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;validateCredentials(Credentials $credentials);</h4>
+
+<p>Kullanıcıyı yetkilendirmeden kimlik bilgilerinin doğruluğunu kontrol eder. Doğru ise true aksi durumda false değerine geri döner.</p>
 
 <p><a name="identity-method-reference"></a></p>
 
