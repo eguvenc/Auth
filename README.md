@@ -6,7 +6,7 @@ Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id ler
 
 ### Yükleme
 
-```php
+```
 composer require obullo/authentication
 ```
 
