@@ -4,6 +4,12 @@ Authentication paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar
 
 Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id lerine göre kolayca yönetilebilirler. Orta ve büyük ölçekli uygulamar için gelişmiş bir yetki doğrulama çözümüdür.
 
+### Yükleme
+
+```php
+composer require obullo/authentication
+```
+
 ### Özellikler
 
 * Hafıza depoları,
