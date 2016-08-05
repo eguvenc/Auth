@@ -2,7 +2,7 @@
 
 Authentication paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar için size bir API sağlar. Yetki doğrulama sorgu bellekleme özelliği ile birlikte gelir, yetkisi doğrulanmış kullanıcı kimliklerini hafızada bellekler ve yetki doğrulama isteklerinde veritabanı sorgusu sadece 1 kere çalışmış olur.
 
-Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id lerine göre kolayca yönetilebilirler. Orta ve büyük ölçekli uygulamar için gelişmiş bir yetki doğrulama çözümüdür.
+Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id lerine göre kolayca yönetilebilirler.
 
 ### Yükleme
 
@@ -12,11 +12,11 @@ composer require obullo/authentication
 
 ### Özellikler
 
-* Hafıza depoları,
-* Adaptörler,
+* Hafıza depoları ile kimlik bellekleme,
+* Farklı davranışlar için adaptörler,
 * Google oturumları gibi çoklu oturumları görebilme ve sonlandırma
-* Sona erme süreleri belirleyerek ile sonlandırılabilir kimlikler yaratabilme
-* Veritabanı sorgularını özelleştirebilme
+* Sona erme süreleri belirleyerek sonlandırılabilir kimlikler yaratabilme
+* Farklı veritabanları için tablo sınıfları
 * Kimlik Onaylama
 * Beni hatırla özelliği
 
