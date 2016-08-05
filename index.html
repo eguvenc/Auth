@@ -30,10 +30,9 @@
 <a id="Özellikler" class="anchor" href="#%C3%96zellikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Özellikler</h3>
 
 <ul>
-<li>Hafıza depoları, ( Storages ) </li>
+<li>Hafıza depoları,</li>
 <li>Adaptörler,</li>
 <li>Google oturumları gibi çoklu oturumları görebilme ve sonlandırma</li>
-<li>Kimlikleri önbellekleme ve yönetebilme</li>
 <li>Sona erme süreleri belirleyerek ile sonlandırılabilir kimlikler yaratabilme</li>
 <li>Veritabanı sorgularını özelleştirebilme</li>
 <li>Kimlik Onaylama</li>
@@ -76,7 +75,7 @@
 <span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth.PASSWORD_ALGORITHM<span class="pl-pds">'</span></span>, <span class="pl-c1">PASSWORD_BCRYPT</span>);</span>
 <span class="pl-s1"></span>
 <span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Storage\Redis<span class="pl-pds">'</span></span>)</span>
-<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>Redis:Default<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>redis:default<span class="pl-pds">'</span></span>))</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>request<span class="pl-pds">'</span></span>))</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setPermanentBlockLifetime<span class="pl-pds">'</span></span>, [<span class="pl-c1">3600</span>]) <span class="pl-c">// Should be same with app session lifetime.</span></span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setTemporaryBlockLifetime<span class="pl-pds">'</span></span>, [<span class="pl-c1">300</span>]);</span></pre></div>
@@ -107,7 +106,7 @@
 <p>Hafıza deposu servis konfigurasyonundan değiştirilebilir.</p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Storage\Memcached<span class="pl-pds">'</span></span>)</span>
-<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>Memcached:Default<span class="pl-pds">'</span></span>))</span></pre></div>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>memcached:default<span class="pl-pds">'</span></span>))</span></pre></div>
 
 <p>Ayrıca anasayfadan servis sağlayıcınızı çağırmanız gerekir.</p>
 
@@ -145,14 +144,14 @@ use test;
 <p>Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\Authentication\Adapter\Database\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.</p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>My\Database\Table\Db<span class="pl-pds">'</span></span>)</span>
-<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>Database:Default<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>database:default<span class="pl-pds">'</span></span>))</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setColumns<span class="pl-pds">'</span></span>, [<span class="pl-c1">array</span>(<span class="pl-s"><span class="pl-pds">'</span>username<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>remember_token<span class="pl-pds">'</span></span>)])</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setTableName<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>users<span class="pl-pds">'</span></span>])</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setIdentityColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>])</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setPasswordColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span>])</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setRememberTokenColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>remember_token<span class="pl-pds">'</span></span>]);</span></pre></div>
 
-<p>Mongo Db için bir örnek.</p>
+<p>Mongo Db için örnek.</p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Adapter\Database\Table\Mongo<span class="pl-pds">'</span></span>);</span></pre></div>
 
@@ -171,11 +170,9 @@ use test;
 <span class="pl-s1"><span class="pl-smi">$authResult</span> <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>login(<span class="pl-smi">$credentials</span>);</span>
 <span class="pl-s1"></span>
 <span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-k">!</span> <span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>isValid()) {</span>
-<span class="pl-s1">    <span class="pl-smi">$messages</span> <span class="pl-k">=</span> <span class="pl-c1">array</span>();</span>
-<span class="pl-s1">    <span class="pl-k">foreach</span> (<span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>getMessages() <span class="pl-k">as</span> <span class="pl-smi">$msg</span>) {</span>
-<span class="pl-s1">        <span class="pl-smi">$messages</span>[<span class="pl-s"><span class="pl-pds">'</span>error<span class="pl-pds">'</span></span>][] <span class="pl-k">=</span> <span class="pl-smi">$msg</span>;</span>
-<span class="pl-s1">    };</span>
-<span class="pl-s1">    <span class="pl-c1">print_r</span>(<span class="pl-smi">$messages</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c1">print_r</span>(<span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>getMessages());</span>
+<span class="pl-s1"></span>
 <span class="pl-s1">} <span class="pl-k">else</span> {</span>
 <span class="pl-s1">    <span class="pl-c1">header</span>(<span class="pl-s"><span class="pl-pds">"</span>Location: /example/Restricted.php<span class="pl-pds">"</span></span>);</span>
 <span class="pl-s1">}</span></pre></div>
@@ -193,7 +190,7 @@ use test;
 <span class="pl-s1">    <span class="pl-c1">print_r</span>(<span class="pl-smi">$auhtResult</span><span class="pl-k">-&gt;</span>getArray());</span>
 <span class="pl-s1">}</span></pre></div>
 
-<p><kbd>examples</kbd> klasörü içerisinde oluşturulmuş örneğe göz atmayı unutmayın.</p>
+<p><strong>Not:</strong> <kbd>example</kbd> klasörü içerisinde oluşturulmuş örneğe göz atmayı unutmayın.</p>
 
 <p><a name="login-error-results"></a></p>
 
@@ -262,6 +259,9 @@ use test;
 <span class="pl-s1"><span class="pl-c">    [__isTemporary] =&gt; 0</span></span>
 <span class="pl-s1"><span class="pl-c">    [__rememberMe] =&gt; 0</span></span>
 <span class="pl-s1"><span class="pl-c">    [__time] =&gt; 1414244130</span></span>
+<span class="pl-s1"><span class="pl-c">    [__ip] =&gt; 127.0.0.1</span></span>
+<span class="pl-s1"><span class="pl-c">    [__agent] =&gt; Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0</span></span>
+<span class="pl-s1"><span class="pl-c">    [__lastActivity] =&gt; 1470419173</span></span>
 <span class="pl-s1"><span class="pl-c">    [id] =&gt; 1</span></span>
 <span class="pl-s1"><span class="pl-c">    [password] =&gt; $2y$10$0ICQkMUZBEAUMuyRYDlXe.PaOT4LGlbj6lUWXg6w3GCOMbZLzM7bm</span></span>
 <span class="pl-s1"><span class="pl-c">    [remember_token] =&gt; bqhiKfIWETlSRo7wB2UByb1Oyo2fpb86</span></span>
@@ -299,13 +299,30 @@ use test;
             <td>Kimliğin ilk oluşturulma zamanıdır. Unix time() formatında kaydedilir.</td>
         </tr>
         <tr>
-            <td>__expire</td>
-            <td>
-<kbd>$identity-&gt;expire()</kbd> metodu tarafından kimliğin belirli bir süre sonra yok olmasını sağlamak için kullanılır.</td>
+            <td>__ip</td>
+            <td>Kullanıcının en son giriş yaptığı ip adresi.</td>
         </tr>
-
+        <tr>
+            <td>__agent</td>
+            <td>Kullanıcının kullandığı tarayıcı ve işletim sistemi bilgisi.</td>
+        </tr>
+        <tr>
+            <td>__lastActivity</td>
+            <td>Kullanıcının en son aktivite zamanı.</td>
+        </tr>
     </tbody>
 </table>
+
+<h3>
+<a id="Şifre-yenileme" class="anchor" href="#%C5%9Eifre-yenileme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Şifre Yenileme</h3>
+
+<p>Eğer login aşamasından sonra giriş başarısız ise <kbd>$authAdapter-&gt;passwordNeedsRehash()</kbd> metodu ile kullanıcının şifresinin yenilenip yenilenmeyeceğine karar verilir.Bu metot php <kbd>password_needs_rehash()</kbd> ve <kbd>password_hash()</kbd> metotlarını kullanarak yenilenen şifrenin hash değerine döner.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$hash</span> <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>passwordNeedsRehash()) {</span>
+<span class="pl-s1">    <span class="pl-c">// UPDATE `users` WHERE email = `$email` SET password = "$hash";</span></span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash değeri ile yenilenmelidir.</p>
 
 <p><a name="identity-method-reference"></a></p>
 
@@ -419,20 +436,6 @@ use test;
 <p>Kullanıcı beni hatırla özelliğini kullandı ise <kbd>1</kbd> değerine, kullanmadı ise <kbd>0</kbd> değerine döner.</p>
 
 <h4>
-<a id="identity-getpasswordneedsrehash" class="anchor" href="#identity-getpasswordneedsrehash" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getPasswordNeedsReHash();</h4>
-
-<p>Kullanıcı giriş yaptıktan sonra eğer şifresi yenilenmesi gerekiyorsa <kbd>true</kbd> gerekmiyorsa <kbd>false</kbd> değerine döner.</p>
-
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$hash</span> <span class="pl-k">=</span> <span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>getPasswordNeedsReHash()) {</span>
-<span class="pl-s1"></span>
-<span class="pl-s1">    <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span><span class="pl-smi">db</span><span class="pl-k">-&gt;</span>update(     <span class="pl-c">// Yeni hash değerini veritabanına kaydedin.</span></span>
-<span class="pl-s1">        <span class="pl-s"><span class="pl-pds">'</span>users<span class="pl-pds">'</span></span>, </span>
-<span class="pl-s1">        [<span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-smi">$hash</span>],</span>
-<span class="pl-s1">        [<span class="pl-s"><span class="pl-pds">'</span>id<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-c1">55</span>]</span>
-<span class="pl-s1">    );</span>
-<span class="pl-s1">}</span></pre></div>
-
-<h4>
 <a id="identity-getremembertoken" class="anchor" href="#identity-getremembertoken" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getRememberToken();</h4>
 
 <p>Beni hatırla çerezi değerine döner.</p>
@@ -472,7 +475,8 @@ use test;
 <span class="pl-s1">            [<span class="pl-c1">__id</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__key</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Auth</span>:<span class="pl-c1">__permanent</span>:<span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span>:048<span class="pl-c1">f7b509a22800088f1cd8c1cc04b96</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__agent</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Mozilla</span><span class="pl-k">/</span><span class="pl-c1">5.0</span> (<span class="pl-c1">X11</span>; <span class="pl-c1">Linux</span> <span class="pl-c1">x86_64</span>) <span class="pl-c1">AppleWebKit</span><span class="pl-k">/</span><span class="pl-c1">537.36</span> (<span class="pl-c1">KHTML</span>,<span class="pl-k">..</span></span>
-<span class="pl-s1">            [<span class="pl-c1">__ip</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">212.124</span><span class="pl-k">.</span><span class="pl-c1">16.1</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__ip</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">212.124</span><span class="pl-k">.</span><span class="pl-c1">16.1</span>,</span>
+<span class="pl-s1">            [<span class="pl-c1">__lastActivity</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470419674</span></span>
 <span class="pl-s1">        )</span>
 <span class="pl-s1"></span>
 <span class="pl-s1">    [1<span class="pl-c1">dd468dbea32e8ed6f58cb00b40af76c</span>] <span class="pl-k">=&gt;</span> <span class="pl-k">Array</span></span>
@@ -482,7 +486,8 @@ use test;
 <span class="pl-s1">            [<span class="pl-c1">__id</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__key</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Auth</span>:<span class="pl-c1">__permanent</span>:<span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span>:1<span class="pl-c1">dd468dbea32e8ed6f58cb00b40af76c</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__agent</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Mozilla</span><span class="pl-k">/</span><span class="pl-c1">5.0</span> (<span class="pl-c1">X11</span>; <span class="pl-c1">Ubuntu</span>; <span class="pl-c1">Linux</span> <span class="pl-c1">x86_64</span>; <span class="pl-c1">rv</span>:<span class="pl-c1">47.0</span>) <span class="pl-c1">Gecko</span><span class="pl-k">/</span><span class="pl-c1">20100101</span> <span class="pl-c1">Firefox</span><span class="pl-k">/</span><span class="pl-c1">47.0</span></span>
-<span class="pl-s1">            [<span class="pl-c1">__ip</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">88.169</span><span class="pl-k">.</span><span class="pl-c1">1.7</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__ip</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">88.169</span><span class="pl-k">.</span><span class="pl-c1">1.7</span>,</span>
+<span class="pl-s1">            [<span class="pl-c1">__lastActivity</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470419665</span></span>
 <span class="pl-s1">        )</span>
 <span class="pl-s1">);</span></pre></div>
 
@@ -545,7 +550,7 @@ use test;
 <h3>
 <a id="yetki-doğrulama-onayı" class="anchor" href="#yetki-do%C4%9Frulama-onay%C4%B1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Yetki Doğrulama Onayı</h3>
 
-<p>Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil application</b> gibi yöntemlerle onay işlemi sağlar.</p>
+<p>Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil uygulama</b> gibi yöntemlerle onay işlemi sağlar.</p>
 
 <p>Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity-&gt;makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur. Belirtilen süreler konfigürasyon dosyasından ayarlanabilir.</p>
 
@@ -586,7 +591,7 @@ use test;
 
 <p>metodu kullanılır.</p>
 
-<p>Kalıcı kimliğe sahip olan kullanıcı artık sisteme giriş yapabilir. Kalıcı olan kimlikler önbelleklenirler. Böylece önbelleklenen kimlik tekrar oturum açıldığında veritabanı sorgusuna gidilmeden elde edilmiş olur. Kalıcı kimliğin önbelleklenme süresi konfigürasyon dosyasından ayarlanabilir. Eğer geçici kimlik oluşturma fonksiyonu kullanılmamışsa sistem her kimliği varsayılan olarak <kbd>kalıcı</kbd> olarak kaydeder.</p>
+<p>Kalıcı kimliğe sahip olan kullanıcı artık sisteme giriş yapabilir. Kalıcı olan kimlikler önbelleklenirler. Böylece önbelleklenen kimlik tekrar oturum açıldığında veritabanı sorgusuna gidilmeden elde edilmiş olur. Kalıcı kimliğin önbelleklenme süresi servis konfigürasyonundan ayarlanabilir. Eğer geçici kimlik oluşturma fonksiyonu kullanılmamışsa sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/obullo/authentication">Obullo Authentication</a> is maintained by <a href="https://github.com/obullo">obullo</a>.</span>
