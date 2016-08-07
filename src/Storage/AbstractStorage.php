@@ -64,6 +64,26 @@ abstract class AbstractStorage implements StorageInterface
     /**
      * Returns to permanent block lifetime
      *
+     * @param int $value value
+     */
+    public function getPermanentBlockLifetime()
+    {
+        return $this->permanentBlockLifetime;
+    }
+
+    /**
+     * Returns to temporary block lifetime
+     *
+     * @param int $value value
+     */
+    public function getTemporaryBlockLifetime()
+    {
+        return $this->temporaryBlockLifetime;
+    }
+
+    /**
+     * Returns to permanent block lifetime
+     *
      * @return int
      */
     public function getMemoryBlockLifetime($block = '__permanent')
@@ -230,12 +250,22 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function setLoginId()
     {
-        $client = $this->request->getAttribute('Auth_Client');
+        $client    = $this->request->getAttribute('Auth_Client');
         $userAgent = substr($client['HTTP_USER_AGENT'], 0, 50); // First 50 characters of the user agent
         $loginId   = md5(trim($userAgent).time());
 
         $_SESSION[$this->getCacheKey().'_LoginId'] = $loginId;
         return $loginId;
+    }
+
+    /**
+     * Unset login id of user
+     *
+     * @return void
+     */
+    public function unsetLoginId()
+    {
+        unset($_SESSION[$this->getCacheKey().'_LoginId']);
     }
 
     /**
