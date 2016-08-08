@@ -299,6 +299,10 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function getMemoryBlockKey($block = '__temporary')
     {
+        /**
+         * In here memcached like storages use $this->storage->getUserId()
+         * but redis like storages use $this->storage->getIdentifier();
+         */
         return $this->getCacheKey(). ':' .$block. ':' .$this->getIdentifier();  // Create unique key
     }
 

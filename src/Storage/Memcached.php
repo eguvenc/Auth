@@ -104,6 +104,7 @@ class Memcached extends AbstractStorage
             array_merge($allData, $this->data[$block]),
             $lifetime
         );
+        return true;
     }
 
     /**
@@ -204,6 +205,10 @@ class Memcached extends AbstractStorage
      */
     public function getMemoryBlockKey($block = '__temporary')
     {
+        /**
+         * In here memcached like storages use $this->storage->getUserId()
+         * but redis like storages use $this->storage->getIdentifier();
+         */
         return $this->getCacheKey(). ':' .$block. ':' .$this->getUserId();  // Create unique key
     }
     

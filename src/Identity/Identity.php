@@ -52,11 +52,17 @@ class Identity extends AbstractIdentity
         $this->table     = $container->get('Auth:Table');
         $this->storage   = $container->get('Auth:Storage');
         $this->initialize();
-        
-        if ($tokenValue = $this->recallerExists()) {   // Remember the user if recaller cookie exists
-            $recaller = new Recaller($container);
-            $recaller->recallUser($tokenValue);
-            $this->initialize();  // We need initialize again otherwise ignoreRecaller() does not work.
+
+        if (! empty($_SESSION['Auth_IgnoreRecaller']) && $_SESSION['Auth_IgnoreRecaller'] == 1) {
+            unset($_SESSION['Auth_IgnoreRecaller']);
+        } else {
+            $token = $this->container->get('Auth:RememberMe')->readToken();
+            if ($this->validateRecaller($token)) { // Remember the user if cookie exists
+                $recaller = new Recaller($container);
+                $recaller->recallUser($token);
+                $this->initialize();  // We need initialize again otherwise
+                                      // ignoreRecaller() does not work.
+            }
         }
     }
 
@@ -109,24 +115,15 @@ class Identity extends AbstractIdentity
     }
 
     /**
-     * Check recaller cookie exists
+     * Validate recaller cookie value
      *
-     * WARNING : To test this function remove "Auth/Identifier" value from session
-     * or use "$this->user->identity->destroy()" method.
+     * @param string $token value
      *
      * @return string|boolean false
      */
-    public function recallerExists()
+    public function validateRecaller($token)
     {
-        if (! empty($_SESSION['Auth_IgnoreRecaller']) && $_SESSION['Auth_IgnoreRecaller'] == 1) {
-            unset($_SESSION['Auth_IgnoreRecaller']);
-            return false;
-        }
-        $token = $this->container->get('Auth:RememberMe')->readToken();
-
-        // Check recaller cookie value is alfanumeric
-
-        if ($this->guest() && ctype_alnum($token) && strlen($token) == 32) {
+        if ($this->guest() && ! empty($token) && ctype_alnum($token) && strlen($token) == 32) {
             return $token;
         }
         return false;

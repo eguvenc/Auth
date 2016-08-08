@@ -21,7 +21,7 @@ $container->addServiceProvider('ServiceProvider\Authentication');
 $parsedBody  = $request->getParsedBody();
 $queryParams = $request->getQueryParams();
 
-if (isset($parsedBody['email']) && isset($parsedBody['password'])) {  // Perform the authentication query
+if (isset($parsedBody['email']) && isset($parsedBody['password'])) { // Perform the authentication query
 
     $rememberMe = isset($parsedBody['remember_me']) ? 1 : 0;
 

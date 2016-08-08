@@ -243,6 +243,10 @@ class RedisTest extends WebTestCase
      */
     public function testGetBlock()
     {
+        /**
+         * In here memcached like storages use $this->storage->getUserId()
+         * but redis like storages use $this->storage->getIdentifier();
+         */
         $block = $this->storage->getCacheKey(). ':__permanent:' .$this->storage->getIdentifier();
         $this->assertEquals($block, $this->storage->getBlock('__permanent'), "I expect the block key equals to key '$block'.");
 

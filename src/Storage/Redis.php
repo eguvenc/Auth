@@ -101,6 +101,7 @@ class Redis extends AbstractStorage
         if ($lifetime > 0) {
             $this->redis->setTimeout($key, $lifetime);
         }
+        return true;
     }
 
     /**
@@ -198,7 +199,6 @@ class Redis extends AbstractStorage
         foreach ($dbSessions as $val) {
             $exp = explode(':', $val);
             $loginID = end($exp);
-
             $value = $this->redis->hGet($key.$identifier.':'.$loginID, '__isAuthenticated');
             if ($value !== false) {
                 $sessions[$loginID]['__isAuthenticated'] = $value;

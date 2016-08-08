@@ -67,9 +67,9 @@ abstract class AbstractIdentity
     {
         $attributes = $this->getArray();
 
-        if (! isset($attributes['__isAuthenticated']) || $attributes['__isAuthenticated'] < 1) {
-            return false;
-        }
+        // if (! isset($attributes['__isAuthenticated']) || $attributes['__isAuthenticated'] < 1) {
+        //     return false;
+        // }
         return isset($attributes[$key]) ? $attributes[$key] : false;
     }
 
