@@ -25,7 +25,7 @@ composer require obullo/authentication
 
 Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarından nasıl geçtiği ve servisin nasıl çalıştığı hakkında size bir ön bilgi verecektir:
 
-![Authentication](https://github.com/obullo/authentication/blob/master/auth_flowchart.png?raw=true "Authentication")
+![Authentication](https://github.com/obullo/authentication/blob/master/flowchart.png?raw=true "Authentication")
 
 Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.
 
