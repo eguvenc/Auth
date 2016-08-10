@@ -286,7 +286,7 @@ Array
         </tr>
         <tr>
             <td>__time</td>
-            <td>Kimliğin ilk oluşturulma zamanıdır. Unix time() formatında kaydedilir.</td>
+            <td>Kimliğin ilk oluşturulma zamanıdır. Unix microtime() formatında kaydedilir.</td>
         </tr>
         <tr>
             <td>__ip</td>
