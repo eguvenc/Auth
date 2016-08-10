@@ -45,13 +45,11 @@ class Redis extends AbstractStorage
     /**
      * Returns true if credentials does "not" exists
      *
-     * @param string $block __temporary or __permanent | full key
-     *
      * @return bool
      */
-    public function isEmpty($block = '__permanent')
+    public function isEmpty()
     {
-        $exists = $this->redis->exists($this->getBlock($block));
+        $exists = $this->redis->exists($this->getMemoryBlockKey());
         return ($exists) ? false : true;
     }
 
@@ -62,9 +60,9 @@ class Redis extends AbstractStorage
      */
     public function query()
     {
-        if (! $this->isEmpty('__permanent')) {  // If user has cached auth return to data otherwise false
+        if (! $this->isEmpty()) {  // If user has cached auth return to data otherwise false
 
-            $data = $this->getCredentials('__permanent');
+            $data = $this->getCredentials();
 
             if ($data == false || count($data) == 0 || ! isset($data['__isAuthenticated'])) {
                 return false;
@@ -79,12 +77,11 @@ class Redis extends AbstractStorage
      *
      * @param array  $credentials user identity old data
      * @param mixed  $pushData    push to identity data
-     * @param string $block       storage persistence type permanent / temporary
      * @param string $ttl         storage lifetime
      *
      * @return boolean
      */
-    public function setCredentials(array $credentials, $pushData = null, $block = '__temporary', $ttl = null)
+    public function setCredentials(array $credentials, $pushData = null, $ttl = null)
     {
         if ($this->getIdentifier() == null) {
             return false;
@@ -93,9 +90,11 @@ class Redis extends AbstractStorage
         if (! empty($pushData) && is_array($pushData)) {
             $data = array_merge($credentials, $pushData);
         }
-        $lifetime = ($ttl == null) ? $this->getMemoryBlockLifetime($block) : (int)$ttl;
-
-        $key = $this->getMemoryBlockKey($block);
+        $lifetime = (int)$ttl;
+        if ($ttl == null) {
+            $lifetime = ($credentials['__isTemporary'] == 1) ?  $this->getTemporaryBlockLifetime() : $this->getPermanentBlockLifetime();
+        }
+        $key = $this->getMemoryBlockKey();
 
         $this->redis->hMSet($key, $data);
         if ($lifetime > 0) {
@@ -107,16 +106,14 @@ class Redis extends AbstractStorage
     /**
      * Get user credentials data
      *
-     * @param string $block name
-     *
      * @return void
      */
-    public function getCredentials($block = '__permanent')
+    public function getCredentials()
     {
         if ($this->getIdentifier() == null) {
             return false;
         }
-        return $this->redis->hGetAll($this->getBlock($block));
+        return $this->redis->hGetAll($this->getMemoryBlockKey());
     }
 
     /**
@@ -126,25 +123,24 @@ class Redis extends AbstractStorage
      *
      * @return void
      */
-    public function deleteCredentials($block = '__permanent')
+    public function deleteCredentials()
     {
-        return $this->redis->delete($this->getBlock($block));
+        return $this->redis->delete($this->getMemoryBlockKey());
     }
 
     /**
-     * Update data
+     * Update permanent data
      *
-     * @param string $key   string
-     * @param value  $val   value
-     * @param string $block block key
+     * @param string $key  string
+     * @param value  $val  value
      *
      * @return boolean|integer
      */
-    public function update($key, $val, $block = '__permanent')
+    public function update($key, $val)
     {
-        $lifetime = ($block == '__permanent') ? $this->getMemoryBlockLifetime($block) : 0;  // Refresh permanent expiration time
+        $lifetime = $this->getPermanentBlockLifetime(); // Refresh permanent expiration time
 
-        $this->redis->hSet($this->getMemoryBlockKey($block), $key, $val);
+        $this->redis->hSet($this->getMemoryBlockKey(), $key, $val);
 
         if ($lifetime > 0) {
             $this->redis->setTimeout($key, $lifetime);
@@ -152,28 +148,38 @@ class Redis extends AbstractStorage
     }
 
     /**
+     * Update temporay data
+     *
+     * @param string $key key
+     * @param mixed  $val val
+     *
+     * @return void
+     */
+    public function updateTemporary($key, $val)
+    {
+        $this->redis->hSet($this->getMemoryBlockKey(), $key, $val);
+    }
+
+    /**
      * Remove data
      *
-     * @param string $key   string
-     * @param string $block block key
+     * @param string $key string
      *
      * @return boolean|integer
      */
-    public function remove($key, $block = '__permanent')
+    public function remove($key)
     {
-        return $this->redis->hDel($this->getMemoryBlockKey($block), $key);
+        return $this->redis->hDel($this->getMemoryBlockKey(), $key);
     }
 
     /**
      * Get all keys
      *
-     * @param string $block __temporary or __permanent
-     *
      * @return array keys if succes otherwise false
      */
-    public function getAllKeys($block = '__permanent')
+    public function getAllKeys()
     {
-        $data = $this->redis->keys($this->getUserKey($block).':*');
+        $data = $this->redis->keys($this->getUserKey().':*');
 
         if (isset($data[0])) {
             return $data;
@@ -190,7 +196,7 @@ class Redis extends AbstractStorage
     {
         $sessions   = array();
         $identifier = $this->getUserId();
-        $key        = $this->cacheKey.':__permanent:';
+        $key        = $this->getCacheKey().':';
         $dbSessions = $this->redis->keys($key.$identifier.':*');
 
         if ($dbSessions == false) {
@@ -208,7 +214,6 @@ class Redis extends AbstractStorage
                 $sessions[$loginID]['__agent'] = $this->redis->hGet($key.$identifier.':'.$loginID, '__agent');
                 $sessions[$loginID]['__ip']  = $this->redis->hGet($key.$identifier.':'.$loginID, '__ip');
                 $sessions[$loginID]['__lastActivity']  = $this->redis->hGet($key.$identifier.':'.$loginID, '__lastActivity');
-
             }
         }
         return $sessions;
@@ -223,6 +228,6 @@ class Redis extends AbstractStorage
      */
     public function killSession($loginID)
     {
-        $this->deleteCredentials($this->cacheKey.':__permanent:'.$this->getUserId().':'.$loginID);
+        $this->deleteCredentials($this->getCacheKey().':'.$this->getUserId().':'.$loginID);
     }
 }

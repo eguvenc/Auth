@@ -27,13 +27,6 @@ interface IdentityInterface
     public function guest();
 
     /**
-     * Check recaller cookie exists
-     *
-     * @return string|boolean false
-     */
-    public function recallerExists();
-
-    /**
      * Set expire time
      *
      * @param int $ttl expire

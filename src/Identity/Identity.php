@@ -14,13 +14,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class Identity extends AbstractIdentity
 {
     /**
-     * Memory block
-     *
-     * @var string
-     */
-    protected $block;
-
-    /**
      * Table
      *
      * @var object
@@ -73,8 +66,7 @@ class Identity extends AbstractIdentity
      */
     public function initialize()
     {
-        if ($this->storage->getCredentials('__permanent')) {
-            $this->block = '__permanent';
+        if ($this->storage->getCredentials()) {
             /**
              * We need extend the cache TTL of current user,
              * thats why we need update last activity for each page request.
@@ -83,7 +75,6 @@ class Identity extends AbstractIdentity
             $this->storage->update('__lastActivity', time());
             return;
         }
-        $this->block = '__temporary';
     }
 
     /**
@@ -174,7 +165,6 @@ class Identity extends AbstractIdentity
     public function makeTemporary()
     {
         $this->storage->makeTemporary();
-        $this->block = '__temporary';
     }
 
     /**
@@ -185,7 +175,6 @@ class Identity extends AbstractIdentity
     public function makePermanent()
     {
         $this->storage->makePermanent();
-        $this->block = '__permanent';
     }
 
     /**
@@ -261,7 +250,7 @@ class Identity extends AbstractIdentity
             return;
         }
         $this->updateRememberToken();
-        $this->storage->deleteCredentials('__permanent');
+        $this->storage->deleteCredentials();
         $this->removeSessionIdentifiers();
     }
 
@@ -289,7 +278,7 @@ class Identity extends AbstractIdentity
         if ($this->check()) {
             return;
         }
-        $this->storage->update($key, $val, '__temporary');
+        $this->storage->updateTemporary($key, $val);
     }
 
     /**
@@ -303,7 +292,7 @@ class Identity extends AbstractIdentity
             return;
         }
         $this->updateRememberToken();
-        $this->storage->deleteCredentials('__temporary');
+        $this->storage->deleteCredentials();
         $this->removeSessionIdentifiers();
     }
 

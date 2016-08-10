@@ -17,6 +17,7 @@ $container->share('request', $request);
 $container->addServiceProvider('ServiceProvider\Redis');
 $container->addServiceProvider('ServiceProvider\Database');
 $container->addServiceProvider('ServiceProvider\Authentication');
+// $container->addServiceProvider('ServiceProvider\LDAPAuthentication');
 
 $parsedBody  = $request->getParsedBody();
 $queryParams = $request->getQueryParams();
@@ -45,6 +46,8 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) { // Perform 
         if ($hash = $authAdapter->passwordNeedsRehash()) {
             // Set new user password to db
         }
+        // $container->get('Auth:Identity')->makeTemporary();
+
         header("Location: /example/Restricted.php");
     }
 } else {

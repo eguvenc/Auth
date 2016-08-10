@@ -38,7 +38,7 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function __construct($options = array())
     {
-        $this->cacheKey  = isset($options['cacheKey']) ? $options['cacheKey'] : 'Auth';
+        $this->cacheKey = isset($options['cacheKey']) ? $options['cacheKey'] : 'Auth';
     }
 
     /**
@@ -79,18 +79,6 @@ abstract class AbstractStorage implements StorageInterface
     public function getTemporaryBlockLifetime()
     {
         return $this->temporaryBlockLifetime;
-    }
-
-    /**
-     * Returns to permanent block lifetime
-     *
-     * @return int
-     */
-    public function getMemoryBlockLifetime($block = '__permanent')
-    {
-        $var = substr($block, 2).'BlockLifetime';
-
-        return $this->{$var};
     }
 
     /**
@@ -148,7 +136,7 @@ abstract class AbstractStorage implements StorageInterface
     {
         $credentials['__isAuthenticated'] = 0;
         $credentials['__isTemporary'] = 1;
-        $this->setCredentials($credentials, null, '__temporary', $this->getMemoryBlockLifetime('__temporary'));
+        $this->setCredentials($credentials, null, $this->getTemporaryBlockLifetime());
     }
 
     /**
@@ -162,7 +150,7 @@ abstract class AbstractStorage implements StorageInterface
     {
         $credentials['__isAuthenticated'] = 1;
         $credentials['__isTemporary'] = 0;
-        $this->setCredentials($credentials, null, '__permanent', $this->getMemoryBlockLifetime('__permanent'));
+        $this->setCredentials($credentials, null, $this->getPermanentBlockLifetime());
     }
 
     /**
@@ -172,18 +160,17 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function makePermanent()
     {
-        if ($this->isEmpty('__temporary')) {
+        if ($this->isEmpty()) {
             return false;
         }
-        $credentials = $this->getCredentials('__temporary');
+        $credentials = $this->getCredentials();
         if ($credentials == false) {  // If already permanent
             return;
         }
         $credentials['__isAuthenticated'] = 1;
         $credentials['__isTemporary'] = 0;
 
-        if ($this->setCredentials($credentials, null, '__permanent')) {
-            $this->deleteCredentials('__temporary');
+        if ($this->setCredentials($credentials, null)) {
             return $credentials;
         }
         return false;
@@ -196,18 +183,17 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function makeTemporary()
     {
-        if ($this->isEmpty('__permanent')) {
+        if ($this->isEmpty()) {
             return false;
         }
-        $credentials = $this->getCredentials('__permanent');
+        $credentials = $this->getCredentials();
         if ($credentials == false) {  // If already permanent
             return;
         }
         $credentials['__isAuthenticated'] = 0;
         $credentials['__isTemporary'] = 1;
 
-        if ($this->setCredentials($credentials, null, '__temporary')) {
-            $this->deleteCredentials('__permanent');
+        if ($this->setCredentials($credentials, null)) {
             return $credentials;
         }
         return false;
@@ -279,42 +265,26 @@ abstract class AbstractStorage implements StorageInterface
     }
 
     /**
-     * Get valid memory segment key
-     *
-     * @param string $block name
-     *
-     * @return string
-     */
-    public function getBlock($block)
-    {
-        return ($block == '__temporary' || $block == '__permanent') ? $this->getMemoryBlockKey($block) : $block;
-    }
-
-    /**
      * Returns to storage full key of identity data
      *
-     * @param string $block name
-     *
      * @return string
      */
-    public function getMemoryBlockKey($block = '__temporary')
+    public function getMemoryBlockKey()
     {
         /**
          * In here memcached like storages use $this->storage->getUserId()
          * but redis like storages use $this->storage->getIdentifier();
          */
-        return $this->getCacheKey(). ':' .$block. ':' .$this->getIdentifier();  // Create unique key
+        return $this->getCacheKey(). ':' .$this->getIdentifier();  // Create unique key
     }
 
     /**
      * Returns to storage prefix key of identity data
      *
-     * @param string $block memory block
-     *
      * @return string
      */
-    public function getUserKey($block = '__temporary')
+    public function getUserKey()
     {
-        return $this->getCacheKey(). ':' .$block. ':'.$this->getUserId();
+        return $this->getCacheKey(). ':' .$this->getUserId();
     }
 }

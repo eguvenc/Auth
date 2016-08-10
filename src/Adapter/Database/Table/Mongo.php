@@ -75,6 +75,7 @@ class Mongo extends AbstractTable
         $row['_id'] = (string)$row['_id'];
         return $row;
     }
+    
     /**
      * Update remember me token upon every login & logout
      *

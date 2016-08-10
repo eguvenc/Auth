@@ -85,7 +85,7 @@ class Recaller
             '__rememberMe' => 1,
             '__rememberToken' => $resultRowArray[$rememberTokenColumn]
         ];
-        $this->storage->setCredentials($data, null, '__permanent');
+        $this->storage->setCredentials($data, null);
 
         /**
          * Generate authenticated user

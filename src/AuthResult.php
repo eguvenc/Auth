@@ -4,7 +4,7 @@ namespace Obullo\Authentication;
 
 /**
  * Auth Result Controller
- * 
+ *
  * @copyright 2009-2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
@@ -24,11 +24,6 @@ class AuthResult
      * Failure due to invalid credential being supplied.
      */
     const FAILURE_CREDENTIAL_INVALID = -2;
-
-    /**
-     * Temporary auth has been created
-     */
-    const TEMPORARY_AUTH = -3;
 
     /**
      * Authentication success.
@@ -116,7 +111,7 @@ class AuthResult
 
     /**
      * Set custom error code
-     * 
+     *
      * @param int $code error code
      *
      * @return void
@@ -128,7 +123,7 @@ class AuthResult
 
     /**
      * Set custom error messages
-     * 
+     *
      * @param string $message message
      *
      * @return void
@@ -140,7 +135,7 @@ class AuthResult
 
     /**
      * Gets all messages
-     * 
+     *
      * @return array
      */
     public function getArray()
@@ -154,7 +149,7 @@ class AuthResult
 
     /**
      * Sets successful login database result row
-     * 
+     *
      * @param mixed $resultRow results
      *
      * @return void
@@ -166,12 +161,11 @@ class AuthResult
 
     /**
      * Returns to successful login database result row
-     * 
+     *
      * @return mixed
      */
     public function getResultRow()
     {
         return $this->resultRow;
     }
-
 }

@@ -17,10 +17,10 @@ class Authentication extends AbstractServiceProvider
      */
     protected $provides = [
         'Auth:Table',
-        'Auth:Adapter',
         'Auth:Storage',
         'Auth:Identity',
         'Auth:RememberMe',
+        'Auth:Adapter',
     ];
 
     /**
@@ -35,7 +35,7 @@ class Authentication extends AbstractServiceProvider
     {
         $container = $this->getContainer();
 
-        // Password Config
+        // Servie Config
         //
         $container->share('Auth.PASSWORD_COST', 6);
         $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
@@ -50,7 +50,7 @@ class Authentication extends AbstractServiceProvider
                 'HTTP_USER_AGENT' => $server['HTTP_USER_AGENT']
             ]
         );
-        // Service Config
+        // Services
         //
         $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
             ->withArgument($container->get('redis:default'))

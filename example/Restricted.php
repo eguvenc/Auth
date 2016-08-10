@@ -22,10 +22,18 @@ $identity = $container->get('Auth:Identity');
 $storage  = $container->get('Auth:Storage');
 
 /**
- * Don't forget check to user in your restricted pages !
+ * Temporary identity feature
+ */
+if ($identity->isTemporary()) {
+    header("Location: /example/index.php?error[]=Your identity freezed for 300 seconds.After that the verification you can continue.");
+    return;
+}
+/**
+ * Don't forget check to guest users in your all pages !
  */
 if ($identity->guest()) {
     header("Location: /example/index.php?error[]=Your session has expired.");
+    return;
 }
 ?>
 <h2>User Identity</h2>

@@ -45,13 +45,11 @@ class Memcached extends AbstractStorage
     /**
      * Returns true if temporary credentials does "not" exists
      *
-     * @param string $block __temporary or __permanent | full key
-     *
      * @return bool
      */
-    public function isEmpty($block = '__permanent')
+    public function isEmpty()
     {
-        $exists = $this->getCredentials($block);
+        $exists = $this->getCredentials();
         return ($exists) ? false : true;
     }
 
@@ -62,7 +60,7 @@ class Memcached extends AbstractStorage
      */
     public function query()
     {
-        if (! $this->isEmpty('__permanent')) {  // If user has cached auth return to data otherwise false
+        if (! $this->isEmpty()) {  // If user has cached auth return to data otherwise false
 
             $data = $this->getCredentials();
 
@@ -79,47 +77,47 @@ class Memcached extends AbstractStorage
      *
      * @param array  $credentials user identity old data
      * @param mixed  $pushData    push to identity data
-     * @param string $block       storage persistence type permanent / temporary
      * @param string $ttl         storage lifetime
      *
      * @return boolean
      */
-    public function setCredentials(array $credentials, $pushData = null, $block = '__temporary', $ttl = null)
+    public function setCredentials(array $credentials, $pushData = null, $ttl = null)
     {
         if ($this->getIdentifier() == null) {
             return false;
         }
-        $this->data[$block] = array($this->getLoginId() => $credentials);
+        $this->data = array($this->getLoginId() => $credentials);
         if (! empty($pushData) && is_array($pushData)) {
-            $this->data[$block] = array($this->getLoginId() => array_merge($credentials, $pushData));
+            $this->data = array($this->getLoginId() => array_merge($credentials, $pushData));
         }
-        $allData  = $this->memcached->get($this->getMemoryBlockKey($block));  // Get all data
-        $lifetime = ($ttl == null) ? $this->getMemoryBlockLifetime($block) : (int)$ttl;
+        $allData = $this->memcached->get($this->getMemoryBlockKey());  // Get all data
 
+        $lifetime = (int)$ttl;
+        if ($ttl == null) {
+            $lifetime = ($credentials['__isTemporary'] == 1) ?  $this->getTemporaryBlockLifetime() : $this->getPermanentBlockLifetime();
+        }
         if ($allData == false) {
             $allData = array();
         }
         $this->memcached->set(
-            $this->getMemoryBlockKey($block),
-            array_merge($allData, $this->data[$block]),
+            $this->getMemoryBlockKey(),
+            array_merge($allData, $this->data),
             $lifetime
         );
         return true;
     }
 
     /**
-     * Get Temporary Credentials Data
-     *
-     * @param string $block name
+     * Get credentials data
      *
      * @return void
      */
-    public function getCredentials($block = '__permanent')
+    public function getCredentials()
     {
         if ($this->getIdentifier() == null) {
             return false;
         }
-        $data = $this->memcached->get($this->getBlock($block));
+        $data = $this->memcached->get($this->getMemoryBlockKey());
         if (isset($data[$this->getLoginId()])) {
             return $data[$this->getLoginId()];
         }
@@ -129,27 +127,25 @@ class Memcached extends AbstractStorage
     /**
      * Deletes memory block
      *
-     * @param string $block name or key
-     *
      * @return void
      */
-    public function deleteCredentials($block = '__permanent')
+    public function deleteCredentials()
     {
         $loginID = $this->getLoginId();
-        $credentials = $this->memcached->get($this->getBlock($block));  // Don't do container cache
+        $credentials = $this->memcached->get($this->getMemoryBlockKey());  // Don't do container cache
 
         if (! isset($credentials[$loginID])) {  // already removed
             return;
         }
         unset($credentials[$loginID]);
         $this->memcached->set(
-            $this->getMemoryBlockKey($block),
+            $this->getMemoryBlockKey(),
             $credentials,
-            $this->getMemoryBlockLifetime($block)
+            $this->getPermanentBlockLifetime()
         );
-        $credentials = $this->memcached->get($this->getBlock($block)); // Destroy auth block if its empty
+        $credentials = $this->memcached->get($this->getMemoryBlockKey()); // Destroy auth block if empty
         if (empty($credentials)) {
-            $this->memcached->delete($this->getBlock($block));
+            $this->memcached->delete($this->getMemoryBlockKey());
         }
     }
 
@@ -162,66 +158,72 @@ class Memcached extends AbstractStorage
      *
      * @return boolean|integer
      */
-    public function update($key, $val, $block = '__permanent')
+    public function update($key, $val)
     {
-        $data = $this->getCredentials($block);
+        $data = $this->getCredentials();
         $data[$key] = $val;
-        $this->setCredentials($data, null, $block);
+        $this->setCredentials($data, null);
+    }
+
+    /**
+     * Update temporay data
+     *
+     * @param string $key key
+     * @param mixed  $val val
+     *
+     * @return void
+     */
+    public function updateTemporary($key, $val)
+    {
+        $this->update($key, $val);
     }
 
     /**
      * Unset identity item
      *
-     * @param string $key   string
-     * @param string $block block key
+     * @param string $key string
      *
      * @return boolean|integer
      */
-    public function remove($key, $block = '__permanent')
+    public function remove($key)
     {
-        $data = $this->getCredentials($block);
+        $data = $this->getCredentials();
         unset($data[$key]);
-        $this->setCredentials($data, null, $block);
+        $this->setCredentials($data, null);
     }
 
     /**
      * Get all keys
      *
-     * @param string $block __temporary or __permanent
-     *
      * @return array keys if succes otherwise false
      */
-    public function getAllKeys($block = '__permanent')
+    public function getAllKeys()
     {
-        return $this->memcached->get($this->getBlock($block));
+        return $this->memcached->get($this->getMemoryBlockKey());
     }
 
     /**
      * Returns to full identity block name
      *
-     * @param string $block name
-     *
      * @return string
      */
-    public function getMemoryBlockKey($block = '__temporary')
+    public function getMemoryBlockKey()
     {
         /**
          * In here memcached like storages use $this->storage->getUserId()
          * but redis like storages use $this->storage->getIdentifier();
          */
-        return $this->getCacheKey(). ':' .$block. ':' .$this->getUserId();  // Create unique key
+        return $this->getCacheKey(). ':' .$this->getUserId();  // Create unique key
     }
     
     /**
      * Returns to storage prefix key of identity data
      *
-     * @param string $block memory block
-     *
      * @return string
      */
-    public function getUserKey($block = '__temporary')
+    public function getUserKey()
     {
-        return $this->getCacheKey(). ':' .$block. ':'.$this->getUserId();
+        return $this->getCacheKey(). ':' .$this->getUserId();
     }
 
     /**
@@ -232,7 +234,7 @@ class Memcached extends AbstractStorage
     public function getUserSessions()
     {
         $sessions = array();
-        $dbSessions = $this->memcached->get($this->getMemoryBlockKey('__permanent'));
+        $dbSessions = $this->memcached->get($this->getMemoryBlockKey());
 
         if ($dbSessions == false) {
             return $sessions;
@@ -242,7 +244,7 @@ class Memcached extends AbstractStorage
                 $sessions[$loginID]['__isAuthenticated'] = $val['__isAuthenticated'];
                 $sessions[$loginID]['__time'] = $val['__time'];
                 $sessions[$loginID]['__id']  = $this->getUserId();
-                $sessions[$loginID]['__key'] = $this->getMemoryBlockKey('__permanent');
+                $sessions[$loginID]['__key'] = $this->getMemoryBlockKey();
                 $sessions[$loginID]['__agent'] = $val['__agent'];
                 $sessions[$loginID]['__ip']  = $val['__ip'];
                 $sessions[$loginID]['__lastActivity']  = $val['__lastActivity'];
@@ -260,13 +262,13 @@ class Memcached extends AbstractStorage
      */
     public function killSession($loginID)
     {
-        $data = $this->memcached->get($this->getMemoryBlockKey('__permanent'));
+        $data = $this->memcached->get($this->getMemoryBlockKey());
 
         unset($data[$loginID]);
         $this->memcached->set(
-            $this->getMemoryBlockKey('__permanent'),
+            $this->getMemoryBlockKey(),
             $data,
-            $this->getMemoryBlockLifetime('__permanent')
+            $this->getPermanentBlockLifetime()
         );
     }
 }

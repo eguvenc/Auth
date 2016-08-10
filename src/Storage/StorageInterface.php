@@ -13,11 +13,9 @@ interface StorageInterface
     /**
      * Returns true if temporary credentials "not" exists
      *
-     * @param string $block __temporary or __permanent | full key
-     *
      * @return bool
      */
-    public function isEmpty($block = '__permanent');
+    public function isEmpty();
 
     /**
      * Get credentials and check authority
@@ -31,12 +29,11 @@ interface StorageInterface
      *
      * @param array  $credentials identity data
      * @param mixed  $pushData    push to identity data
-     * @param string $block       storage persistence type permanent / temporary
      * @param string $ttl         storage lifetime
      *
      * @return boolean
      */
-    public function setCredentials(array $credentials, $pushData = null, $block = '__temporary', $ttl = null);
+    public function setCredentials(array $credentials, $pushData = null, $ttl = null);
 
     /**
      * Get temporary|permanent credentials Data
@@ -45,7 +42,7 @@ interface StorageInterface
      *
      * @return void
      */
-    public function getCredentials($storage = '__permanent');
+    public function getCredentials();
 
     /**
      * Delete temporary|permanent credentials Data
@@ -54,37 +51,33 @@ interface StorageInterface
      *
      * @return void
      */
-    public function deleteCredentials($storage = '__temporary');
+    public function deleteCredentials();
 
     /**
      * Update identity item value
      *
-     * @param string $key   string
-     * @param value  $val   value
-     * @param string $block block key
+     * @param string $key  string
+     * @param value  $val  value
      *
      * @return boolean|integer
      */
-    public function update($key, $val, $block = '__permanent');
+    public function update($key, $val);
 
     /**
      * Unset identity item
      *
-     * @param string $key   string
-     * @param string $block block key
+     * @param string $key string
      *
      * @return boolean|integer
      */
-    public function remove($key, $block = '__permanent');
+    public function remove($key);
 
     /**
      * Check whether to identify exists
      *
-     * @param string $block __temporary or __permanent
-     *
      * @return array keys if succes otherwise false
      */
-    public function getAllKeys($block = '__permanent');
+    public function getAllKeys();
 
     /**
      * Returns to database sessions

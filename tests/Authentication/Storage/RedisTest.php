@@ -122,7 +122,7 @@ class RedisTest extends WebTestCase
     public function testCreatePermanent()
     {
         $this->storage->createPermanent($this->credentials);
-        $result = $this->storage->getCredentials('__permanent');
+        $result = $this->storage->getCredentials();
 
         if ($this->assertArrayHasKey('__isAuthenticated', $result, "I create permanent credentials and i expect array has '__isAuthenticated' key.")) {
             $this->assertEquals($result['__isAuthenticated'], 1, "I expect that the value is 1.");
@@ -144,7 +144,7 @@ class RedisTest extends WebTestCase
     {
         $this->storage->createTemporary($this->credentials);
         $this->storage->makePermanent();
-        $result = $this->storage->getCredentials('__permanent');
+        $result = $this->storage->getCredentials();
 
         if ($this->assertArrayHasKey('__isAuthenticated', $result, "I create temporary credentials then make them as permanent and i expect array has '__isAuthenticated' key.")) {
             $this->assertEquals($result['__isAuthenticated'], 1, "I expect that the value is 1.");
@@ -241,28 +241,10 @@ class RedisTest extends WebTestCase
      *
      * @return void
      */
-    public function testGetBlock()
-    {
-        /**
-         * In here memcached like storages use $this->storage->getUserId()
-         * but redis like storages use $this->storage->getIdentifier();
-         */
-        $block = $this->storage->getCacheKey(). ':__permanent:' .$this->storage->getIdentifier();
-        $this->assertEquals($block, $this->storage->getBlock('__permanent'), "I expect the block key equals to key '$block'.");
-
-        $this->storage->unsetIdentifier();
-        $this->storage->unsetLoginId();
-    }
-
-    /**
-     * Get valid memory segment key
-     *
-     * @return void
-     */
     public function testGetMemoryBlockKey()
     {
-        $block = $this->storage->getCacheKey(). ':__temporary:' .$this->storage->getIdentifier();
-        $this->assertEquals($block, $this->storage->getBlock('__temporary'), "I expect the block key equals to key '$block'.");
+        $block = $this->storage->getCacheKey(). ':' .$this->storage->getIdentifier();
+        $this->assertEquals($block, $this->storage->getMemoryBlockKey(), "I expect the block key equals to key '$block'.");
 
         $this->storage->unsetIdentifier();
         $this->storage->unsetLoginId();
@@ -275,8 +257,8 @@ class RedisTest extends WebTestCase
      */
     public function testGetUserKey()
     {
-        $block = $this->storage->getCacheKey(). ':__permanent:' .$this->storage->getUserId();
-        $this->assertEquals($block, $this->storage->getUserKey('__permanent'), "I expect the block key equals to key '$block'.");
+        $block = $this->storage->getCacheKey(). ':' .$this->storage->getUserId();
+        $this->assertEquals($block, $this->storage->getUserKey(), "I expect the block key equals to key '$block'.");
 
         $this->storage->unsetIdentifier();
         $this->storage->unsetLoginId();
@@ -289,14 +271,17 @@ class RedisTest extends WebTestCase
      */
     public function testGetMemoryBlockLifetime()
     {
-        $this->assertEquals(
-            $this->storage->getPermanentBlockLifetime(),
-            $this->storage->getMemoryBlockLifetime('__permanent'),
-            "I expect the permanent block lifetime equals to service configuration lifetime value."
-        );
+        $this->storage->setTemporaryBlockLifetime(400);
+        $this->storage->setPermanentBlockLifetime(1500);
+
+         $this->assertEquals(
+             $this->storage->getPermanentBlockLifetime(),
+             1500,
+             "I expect the permanent block lifetime equals to service configuration lifetime value."
+         );
         $this->assertEquals(
             $this->storage->getTemporaryBlockLifetime(),
-            $this->storage->getMemoryBlockLifetime('__temporary'),
+            400,
             "I expect the temporary block lifetime equals to service configuration lifetime value."
         );
         $this->storage->unsetIdentifier();
@@ -361,7 +346,7 @@ class RedisTest extends WebTestCase
             '__isAuthenticated' => 1,
             '__isTemporary' => 0,
         ];
-        $this->storage->setCredentials($this->credentials, $data, '__permanent', 60);
+        $this->storage->setCredentials($this->credentials, $data, 60);
         $result = $this->storage->getCredentials();
 
         $identifier = $this->table->getIdentityColumn();
@@ -391,7 +376,7 @@ class RedisTest extends WebTestCase
      */
     public function testDeleteCredentials()
     {
-        $this->storage->setCredentials($this->credentials, array(), '__permanent', 60);
+        $this->storage->setCredentials($this->credentials, array(), 60);
         $this->storage->deleteCredentials();
         $result = $this->storage->getCredentials();
 
@@ -410,7 +395,7 @@ class RedisTest extends WebTestCase
     {
         $identifier = $this->table->getIdentityColumn();
 
-        $this->storage->setCredentials($this->credentials, array(), '__permanent', 60);
+        $this->storage->setCredentials($this->credentials, array(), 60);
         $this->storage->update($identifier, 'test@example.com');
         $result = $this->storage->getCredentials();
 
@@ -431,7 +416,7 @@ class RedisTest extends WebTestCase
     {
         $identifier = $this->table->getIdentityColumn();
 
-        $this->storage->setCredentials($this->credentials, array(), '__permanent', 60);
+        $this->storage->setCredentials($this->credentials, array(), 60);
         $this->storage->remove($identifier);
 
         $result = $this->storage->getCredentials();
@@ -454,7 +439,7 @@ class RedisTest extends WebTestCase
             '__isAuthenticated' => 1,
             '__isTemporary' => 0,
         ];
-        $this->storage->setCredentials($this->credentials, $data, '__permanent', 60);
+        $this->storage->setCredentials($this->credentials, $data, 60);
 
         $data = $this->storage->getAllKeys();
 
@@ -473,7 +458,9 @@ class RedisTest extends WebTestCase
      */
     public function testGetUserSessions()
     {
-        $this->credentials['__time'] = time();
+        list($usec, $sec) = explode(" ", microtime());
+        $microtime = ((float)$usec + (float)$sec);
+        $this->credentials['__time'] = $microtime;
 
         $this->storage->createPermanent($this->credentials);
         $result  = $this->storage->getUserSessions();
@@ -481,7 +468,7 @@ class RedisTest extends WebTestCase
 
         if ($this->assertArrayHasKey($loginId, $result, "I create fake credentials then i expect array has '$loginId' key.")) {
             $cacheIdentifier = $result[$loginId]['key'];
-            $this->assertEquals($cacheIdentifier, $this->storage->getMemoryBlockKey('__permanent'), "I expect that the value of cache identifier is equal to $cacheIdentifier.");
+            $this->assertEquals($cacheIdentifier, $this->storage->getMemoryBlockKey(), "I expect that the value of cache identifier is equal to $cacheIdentifier.");
             $this->assertArrayHasKey('__time', $result[$loginId], "I expect array has '__time' key.");
         }
         $this->storage->deleteCredentials();

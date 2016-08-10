@@ -212,11 +212,6 @@ if ($auhtResult->isValid()) {
             <td>Geçersiz kimlik bilgileri girildiğini gösterir.</td>
         </tr>
         <tr>
-            <td>-3</td>
-            <td>AuthResult::TEMPORARY_AUTH</td>
-            <td>Geçici kimlik bilgilerinin oluşturulduğuna dair bir bilgidir.</td>
-        </tr>
-        <tr>
             <td>1</td>
             <td>AuthResult::SUCCESS</td>
             <td>Yetki doğrulama başarılıdır.</td>
@@ -253,7 +248,7 @@ Array
     [__isAuthenticated] => 1
     [__isTemporary] => 0
     [__rememberMe] => 0
-    [__time] => 1414244130
+    [__time] => 1470858670.5284
     [__ip] => 127.0.0.1
     [__agent] => Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0
     [__lastActivity] => 1470419173
@@ -465,9 +460,9 @@ Array
     [048f7b509a22800088f1cd8c1cc04b96] => Array
         (
             [__isAuthenticated] => 1
-            [__time] => 1470251639
+            [__time] => 1470858670.5284
             [__id] => user@example.com
-            [__key] => Auth:__permanent:user@example.com:048f7b509a22800088f1cd8c1cc04b96
+            [__key] => Auth:user@example.com:048f7b509a22800088f1cd8c1cc04b96
             [__agent] => Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,..
             [__ip] => 212.124.16.1,
             [__lastActivity] => 1470419674
@@ -476,9 +471,9 @@ Array
     [1dd468dbea32e8ed6f58cb00b40af76c] => Array
         (
             [__isAuthenticated] => 1
-            [__time] => 1470251614
+            [__time] => 1470858670.6000
             [__id] => user@example.com
-            [__key] => Auth:__permanent:user@example.com:1dd468dbea32e8ed6f58cb00b40af76c
+            [__key] => Auth:user@example.com:1dd468dbea32e8ed6f58cb00b40af76c
             [__agent] => Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0
             [__ip] => 88.169.1.7,
             [__lastActivity] => 1470419665

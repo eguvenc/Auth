@@ -162,12 +162,8 @@ class Database extends AbstractAdapter
         }
         $this->initialize($credentials);
         $this->authenticate($credentials);  // Perform Query
-        
-        if (($authResult = $this->validateResultSet()) instanceof AuthResult) {
-            return $authResult;  // If we have errors return to auth results.
-        }
-        $authResult = $this->validateResult();
-        return $authResult;
+
+        return $this->validateResult();
     }
 
     /**
@@ -242,7 +238,7 @@ class Database extends AbstractAdapter
             $this->table->getIdentityColumn() => $credentials->getIdentityValue(),
             $this->table->getPasswordColumn() => $resultRowArray[$this->table->getPasswordColumn()],
             '__rememberMe' => $credentials->getRememberMeValue(),
-            '__time' => time(),
+            '__time' => $this->getMicrotime(),
             '__agent' => $client['HTTP_USER_AGENT'],
             '__ip' => $client['REMOTE_ADDR'],
         );
@@ -252,33 +248,17 @@ class Database extends AbstractAdapter
         $attributes = array_merge($resultRowArray, $attributes);
 
         if ($this->regenerateSessionId) {
-            $this->regenerateSessionId(true); // Delete old session after regenerate !
+            $this->sessionRegenerateId(true); // Delete old session after regenerate !
         }
         if ($credentials->getRememberMeValue()) {  // If user choosed remember feature
             $token = $this->container->get('Auth:RememberMe')->getToken();
             $this->table->updateRememberToken($token, $credentials->getIdentityValue()); // refresh rememberToken
         }
-        if ($this->storage->isEmpty('__temporary')) {  // If user has NOT got a temporay identity
-            $this->storage->createPermanent($attributes);
-        } else {
+        if ($this->identity->isTemporary()) {
             $this->storage->createTemporary($attributes); // If user has a temporay identity go on as temporary.
+        } else {
+            $this->storage->createPermanent($attributes); // If user has NOT got a temporay identity
         }
-    }
-
-    /**
-     * This method attempts to make
-     * certain that only one record was returned in the resultset
-     *
-     * @return bool|Obullo\Authentication\Result
-     */
-    protected function validateResultSet()
-    {
-        if (! $this->storage->isEmpty('__temporary')) {
-            $this->results['code'] = AuthResult::TEMPORARY_AUTH;
-            $this->results['messages'][] = 'Temporary auth has been created.';
-            return $this->createResult();
-        }
-        return true;
     }
 
     /**

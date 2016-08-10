@@ -53,7 +53,7 @@ abstract class AbstractIdentity
      */
     public function getArray()
     {
-        return $this->storage->getCredentials($this->block);
+        return $this->storage->getCredentials();
     }
 
     /**

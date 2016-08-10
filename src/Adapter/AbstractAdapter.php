@@ -37,7 +37,7 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @return string session_id
      */
-    public function regenerateSessionId($deleteOldSession = true)
+    public function sessionRegenerateId($deleteOldSession = true)
     {
         session_regenerate_id((bool) $deleteOldSession);
 
@@ -45,12 +45,15 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * This method attempts to make
-     * certain that only one record was returned in the resultset
+     * Returns to microtime value
      *
-     * @return bool|Obullo\Authentication\Result
+     * @return int
      */
-    abstract protected function validateResultSet();
+    public function getMicrotime()
+    {
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float)$usec + (float)$sec);
+    }
 
     /**
      * This method attempts to validate that
