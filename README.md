@@ -1,5 +1,5 @@
 
-## Multi Factor Authentication (MFA)
+## Php Multi Factor Authentication (MFA)
 
 MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. 
 
