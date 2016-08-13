@@ -16,7 +16,7 @@ composer require obullo/auth-mfa
 * Önbelleklenebilir kimlikler
 * Çoklu yetkilendirme
 * Farklı davranışlar için adaptörler
-* Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve sonlandırma
+* Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve oturumları sonlandırabilme
 * Farklı veritabanları için tablo sınıfları
 * Beni hatırla özelliği
 
@@ -56,7 +56,7 @@ Tüm auth konfigürasyonu <kbd>classes/ServiceProvider/Authentication</kbd> sın
 $container->share('Auth.PASSWORD_COST', 6);
 $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
 
-$container->share('Auth:Storage', 'Obullo\MultiAuthAuth\Storage\Redis')
+$container->share('Auth:Storage', 'Obullo\Auth\MFA\Storage\Redis')
     ->withArgument($container->get('redis:default'))
     ->withArgument($container->get('request'))
     ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
@@ -85,7 +85,7 @@ Desteklenen sürücüler
 Hafıza deposu servis konfigurasyonundan değiştirilebilir.
 
 ```php
-$container->share('Auth:Storage', 'Obullo\MultiAuthAuth\Storage\Memcached')
+$container->share('Auth:Storage', 'Obullo\Auth\MFA\Storage\Memcached')
     ->withArgument($container->get('memcached:default'))
 ```
 
@@ -139,7 +139,7 @@ $container->share('Auth:Table', 'My\Database\Table\Db')
 Mongo Db için örnek.
 
 ```php
-$container->share('Auth:Table', 'Obullo\MultiAuthAuth\Adapter\Database\Table\Mongo');
+$container->share('Auth:Table', 'Obullo\Auth\MFA\Adapter\Database\Table\Mongo');
 ```
 
 ### Oturum Açma
@@ -149,7 +149,7 @@ Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalışt�
 ```php
 $authAdapter = $container->get('Auth:Adapter');
 
-$credentials = new Obullo\MultiAuthAuth\Credentials;
+$credentials = new Obullo\Auth\MFA\Credentials;
 $credentials->setIdentityValue('user@example.com');
 $credentials->setPasswordValue('123456');
 $credentials->setRememberMeValue(false);
@@ -372,21 +372,22 @@ if ($identity->isExpired()) {
 }
 ```
 
-#### $identity->makeTemporary();
+#### $identity->makeTemporary($expire = 300);
 
-Başarılı giriş yapmış bir kullanıcıya ait kalıcı kimliği konfigurasyon dosyasından belirlenmiş sona erme süresine göre geçici hale getirir. Süre sona erdiğinde kimlik hafıza deposundan silinir.
+Başarılı giriş yapmış bir kullanıcı kimliğini çoklu yetkilendirme için belirlenen sona erme süresine göre geçici hale getirir. Süre sona erdiğinde kimlik hafıza deposundan silinir.
 
 #### $identity->makePermanent();
 
-Başarılı giriş yapmış kullanıcıya ait geçici kimliği konfigurasyon dosyasından belirlenmiş kalıcı süreye göre kalıcı hale getirir. Süre sona erdiğinde veritabanına tekrar sql sorgusu yapılarak kimlik tekrar hafızaya yazılır.
+Çoklu yetkilendirmeyi geçmiş bir kullanıcıya ait geçici kimliği kalıcı hale getirir. Kalıcı kimlik 
+süresi (varsayılan 3600 saniye) sona erdiğinde veritabanına tekrar sorgu yapılarak kimlik tekrar hafızaya kaydedilir.
 
 #### $identity->isTemporary();
 
-Kullanıcı kimliğinin geçici olup olmadığını gösterir, geçici ise <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerine döner.
+Çoklu yetkilendirmede kullanıcı kimliğinin geçici olup olmadığını gösterir, geçici ise <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerine döner.
 
 #### $identity->updateTemporary(string $key, mixed $val);
 
-Geçici olarak oluşturulmuş kimlik bilgilerini güncellemenize olanak tanır.
+Çoklu yetkilendirmede geçici olarak oluşturulmuş kimlik bilgilerini güncellemenize olanak tanır.
 
 #### $identity->logout();
 
@@ -402,7 +403,7 @@ Beni hatırla çerezini kullanıcı tarayıcısından siler.
 
 #### $identity->refreshRememberToken();
 
-Beni hatırla çerezini yenileyerek veritabanı ve çereze kaydeder.
+Beni hatırla çerezini yenileyerek veritabanı ve çereze tekrar kaydeder.
 
 #### $identity->getIdentifier();
 
@@ -530,51 +531,36 @@ Login denemesinden sonra tüm sonuçları bir dizi içerisinde verir.
 
 Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada varsa önbellekte oluşturulmuş sorgu sonucuna geri döner.
 
-### 2 Adımda Yetkilendirme (Verifikasyon)
+### Çoklu Yetkilendirme
 
-Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil uygulama</b> gibi yöntemlerle onay işlemi sağlar.
+Çoklu yetkilendirme kullanıcının kimliğini sisteme giriş yaptıktan hemen sonra <b>mobil uygulama</b>, <b>çağrı</b> veya <b>sms</b> gibi yöntemlerle onaylamasını sağlar.
 
-Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity->makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur. Belirtilen süreler konfigürasyon dosyasından ayarlanabilir.
+Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity->makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilmelidir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur.
 
-<a name="temporary-identity"></a>
-
-### Geçiçi Kimlikler
-
-Kullanıcı sisteme giriş yaptıktan sonra,
+Çoklu yetkilendirmede kullanıcı sisteme giriş yaptıktan sonra,
 
 ```php
-$identity->makeTemporary();
+$identity->makeTemporary(300);
 ```
 
-metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması sizin ona doğrulama yöntemlerinden herhangi biriyle göndermiş olacağınız onay kodu ile gerçekleşir. Eğer kullanıcı 300 saniye içerisinde kendisine gönderilen onay kodunu onaylayamaz ise geçiçi kimlik kendiliğinden yok olur.
-
-Eğer kullanıcı onay işlemini başarılı bir şekilde gerçekleştirir ise geçici kimliğin <kbd>$identity->makePermanent()</kbd> metodu ile kalıcı hale getirilmesi gereklidir. Bir kimlik kalıcı yapıldığında kullanıcı sisteme giriş yapmış olur.
-
-Oturum bilgileri doğru ise kimliği geçici hale getirebilirsiniz.
+metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması için ona bir doğrulama kodu gönderilmelidir.
 
 ```php
 if ($authResult->isValid()) {
     
     $identity->makeTemporary();
     
-    echo "Verification code has been sent.";
+    // Send verification code to user
 
-    // Url redirect ..
+    header("Location: /example/Verify.php");
 }
 ```
 
-Sonraki adımda <kbd>$identity->makePermanent()</kbd> metodunu kullanarak kimliği kalıcı hale getirin. Ve yetkilendirmeden sonra kullanıcıyı <kbd>dashboard</kbd> sayfanıza yönlendirin.
+Eğer kullanıcı verify sayfasında kimliğini onaylarsa geçici kimliğin <kbd>$identity->makePermanent()</kbd> metodu ile kalıcı hale getirilmesi gereklidir. Bir kimlik kalıcı yapıldığında kullanıcı sisteme başarılı bir şekilde giriş yapmış olur.
 
-<a name="permanent-identity"></a>
-
-### Kalıcı Kimlikler
-
-Bir geçici kimliği kalıcı hale dönüştürmek için,
 
 ```php
 $identity->makePermanent();
 ```
 
-metodu kullanılır.
-
-Kalıcı kimliğe sahip olan kullanıcı artık sisteme giriş yapabilir. Kalıcı olan kimlikler önbelleklenirler. Böylece önbelleklenen kimlik tekrar oturum açıldığında veritabanı sorgusuna gidilmeden elde edilmiş olur. Kalıcı kimliğin önbelleklenme süresi servis konfigürasyonundan ayarlanabilir. Eğer geçici kimlik oluşturma fonksiyonu kullanılmamışsa sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.
+Eğer çoklu yetkilendirme yani geçici kimlik oluşturma fonksiyonu kullanılmıyorsa, sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.
