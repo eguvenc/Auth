@@ -2,7 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <title>Obullo Authentication by obullo</title>
+    <title>Php Multi Factor Authentication by obullo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -11,37 +11,36 @@
   </head>
   <body>
     <section class="page-header">
-      <h1 class="project-name">Obullo Authentication</h1>
-      <h2 class="project-tagline">Standalone auth package for php.</h2>
-      <a href="https://github.com/obullo/Authentication" class="btn">View on GitHub</a>
-      <a href="https://github.com/obullo/Authentication/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/obullo/Authentication/tarball/master" class="btn">Download .tar.gz</a>
+      <h1 class="project-name">Php Multi Factor Authentication</h1>
+      <h2 class="project-tagline">Multi Factor authentication (mfa) for php.</h2>
+      <a href="https://github.com/obullo/Auth-MFA" class="btn">View on GitHub</a>
+      <a href="https://github.com/obullo/Auth-MFA/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/obullo/Auth-MFA/tarball/master" class="btn">Download .tar.gz</a>
     </section>
 
     <section class="main-content">
       <h2>
-<a id="authentication" class="anchor" href="#authentication" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authentication</h2>
+<a id="multi-factor-authentication-mfa" class="anchor" href="#multi-factor-authentication-mfa" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Multi Factor Authentication (MFA)</h2>
 
-<p>Authentication paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar için size bir API sağlar. Yetki doğrulama sorgu bellekleme özelliği ile birlikte gelir, yetkisi doğrulanmış kullanıcı kimliklerini hafızada bellekler ve yetki doğrulama isteklerinde veritabanı sorgusu sadece 1 kere çalışmış olur.</p>
+<p>MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. </p>
 
-<p>Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id lerine göre kolayca yönetilebilirler.</p>
+<p>Standart oturum açma işlevi yanında çoklu yetkilendirme özelliği de kullanılırsa 2. aşamada kullanıcıdan <b>mobil uygulama</b>, çağrı veya <b>sms</b> ile kimliğini doğrulanması istenir. Ayrıca MFA, Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.</p>
 
 <h3>
 <a id="yükleme" class="anchor" href="#y%C3%BCkleme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Yükleme</h3>
 
-<pre><code>composer require obullo/authentication
+<pre><code>composer require obullo/auth-mfa
 </code></pre>
 
 <h3>
 <a id="Özellikler" class="anchor" href="#%C3%96zellikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Özellikler</h3>
 
 <ul>
-<li>Hafıza depoları ile kimlik bellekleme,</li>
-<li>Farklı davranışlar için adaptörler,</li>
-<li>Google oturumları gibi çoklu oturumları görebilme ve sonlandırma</li>
-<li>Sona erme süreleri belirleyerek sonlandırılabilir kimlikler yaratabilme</li>
+<li>Önbelleklenebilir kimlikler</li>
+<li>Çoklu yetkilendirme</li>
+<li>Farklı davranışlar için adaptörler</li>
+<li>Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve oturumları sonlandırabilme</li>
 <li>Farklı veritabanları için tablo sınıfları</li>
-<li>Kimlik Onaylama</li>
 <li>Beni hatırla özelliği</li>
 </ul>
 
@@ -50,7 +49,7 @@
 
 <p>Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarından nasıl geçtiği ve servisin nasıl çalıştığı hakkında size bir ön bilgi verecektir:</p>
 
-<p><img src="https://github.com/obullo/authentication/blob/master/flowchart.png?raw=true" alt="Authentication" title="Authentication"></p>
+<p><img src="https://github.com/obullo/Auth-MFA/blob/master/flowchart.png?raw=true" alt="Authentication" title="Authentication"></p>
 
 <p>Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.</p>
 
@@ -80,7 +79,7 @@
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth.PASSWORD_COST<span class="pl-pds">'</span></span>, <span class="pl-c1">6</span>);</span>
 <span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth.PASSWORD_ALGORITHM<span class="pl-pds">'</span></span>, <span class="pl-c1">PASSWORD_BCRYPT</span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Storage\Redis<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\MFA\Storage\Redis<span class="pl-pds">'</span></span>)</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>redis:default<span class="pl-pds">'</span></span>))</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>request<span class="pl-pds">'</span></span>))</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setPermanentBlockLifetime<span class="pl-pds">'</span></span>, [<span class="pl-c1">3600</span>]) <span class="pl-c">// Should be same with app session lifetime.</span></span>
@@ -111,7 +110,7 @@
 
 <p>Hafıza deposu servis konfigurasyonundan değiştirilebilir.</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Storage\Memcached<span class="pl-pds">'</span></span>)</span>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\MFA\Storage\Memcached<span class="pl-pds">'</span></span>)</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>memcached:default<span class="pl-pds">'</span></span>))</span></pre></div>
 
 <p>Ayrıca anasayfadan servis sağlayıcınızı çağırmanız gerekir.</p>
@@ -147,7 +146,7 @@ use test;
 <h3>
 <a id="auth-table" class="anchor" href="#auth-table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Auth Table</h3>
 
-<p>Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\Authentication\Adapter\Database\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.</p>
+<p>Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\MultiAuthAuth\Adapter\Database\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.</p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>My\Database\Table\Db<span class="pl-pds">'</span></span>)</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>database:default<span class="pl-pds">'</span></span>))</span>
@@ -159,7 +158,7 @@ use test;
 
 <p>Mongo Db için örnek.</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Authentication\Adapter\Database\Table\Mongo<span class="pl-pds">'</span></span>);</span></pre></div>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\MFA\Adapter\Database\Table\Mongo<span class="pl-pds">'</span></span>);</span></pre></div>
 
 <h3>
 <a id="oturum-açma" class="anchor" href="#oturum-a%C3%A7ma" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Oturum Açma</h3>
@@ -168,7 +167,7 @@ use test;
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>Auth:Adapter<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1"><span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Authentication\</span><span class="pl-c1">Credentials</span>;</span>
+<span class="pl-s1"><span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\MFA\</span><span class="pl-c1">Credentials</span>;</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setIdentityValue(<span class="pl-s"><span class="pl-pds">'</span>user@example.com<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setPasswordValue(<span class="pl-s"><span class="pl-pds">'</span>123456<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setRememberMeValue(<span class="pl-c1">false</span>);</span>
@@ -228,11 +227,6 @@ use test;
             <td>Geçersiz kimlik bilgileri girildiğini gösterir.</td>
         </tr>
         <tr>
-            <td>-3</td>
-            <td>AuthResult::TEMPORARY_AUTH</td>
-            <td>Geçici kimlik bilgilerinin oluşturulduğuna dair bir bilgidir.</td>
-        </tr>
-        <tr>
             <td>1</td>
             <td>AuthResult::SUCCESS</td>
             <td>Yetki doğrulama başarılıdır.</td>
@@ -264,7 +258,7 @@ use test;
 <span class="pl-s1"><span class="pl-c">    [__isAuthenticated] =&gt; 1</span></span>
 <span class="pl-s1"><span class="pl-c">    [__isTemporary] =&gt; 0</span></span>
 <span class="pl-s1"><span class="pl-c">    [__rememberMe] =&gt; 0</span></span>
-<span class="pl-s1"><span class="pl-c">    [__time] =&gt; 1414244130</span></span>
+<span class="pl-s1"><span class="pl-c">    [__time] =&gt; 1470858670.5284</span></span>
 <span class="pl-s1"><span class="pl-c">    [__ip] =&gt; 127.0.0.1</span></span>
 <span class="pl-s1"><span class="pl-c">    [__agent] =&gt; Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0</span></span>
 <span class="pl-s1"><span class="pl-c">    [__lastActivity] =&gt; 1470419173</span></span>
@@ -302,7 +296,7 @@ use test;
         </tr>
         <tr>
             <td>__time</td>
-            <td>Kimliğin ilk oluşturulma zamanıdır. Unix time() formatında kaydedilir.</td>
+            <td>Kimliğin ilk oluşturulma zamanıdır. Unix microtime() formatında kaydedilir.</td>
         </tr>
         <tr>
             <td>__ip</td>
@@ -397,24 +391,25 @@ use test;
 <span class="pl-s1">}</span></pre></div>
 
 <h4>
-<a id="identity-maketemporary" class="anchor" href="#identity-maketemporary" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;makeTemporary();</h4>
+<a id="identity-maketemporaryexpire--300" class="anchor" href="#identity-maketemporaryexpire--300" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;makeTemporary($expire = 300);</h4>
 
-<p>Başarılı giriş yapmış bir kullanıcıya ait kalıcı kimliği konfigurasyon dosyasından belirlenmiş sona erme süresine göre geçici hale getirir. Süre sona erdiğinde kimlik hafıza deposundan silinir.</p>
+<p>Başarılı giriş yapmış bir kullanıcı kimliğini çoklu yetkilendirme için belirlenen sona erme süresine göre geçici hale getirir. Süre sona erdiğinde kimlik hafıza deposundan silinir.</p>
 
 <h4>
 <a id="identity-makepermanent" class="anchor" href="#identity-makepermanent" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;makePermanent();</h4>
 
-<p>Başarılı giriş yapmış kullanıcıya ait geçici kimliği konfigurasyon dosyasından belirlenmiş kalıcı süreye göre kalıcı hale getirir. Süre sona erdiğinde veritabanına tekrar sql sorgusu yapılarak kimlik tekrar hafızaya yazılır.</p>
+<p>Çoklu yetkilendirmeyi geçmiş bir kullanıcıya ait geçici kimliği kalıcı hale getirir. Kalıcı kimlik 
+süresi (varsayılan 3600 saniye) sona erdiğinde veritabanına tekrar sorgu yapılarak kimlik tekrar hafızaya kaydedilir.</p>
 
 <h4>
 <a id="identity-istemporary" class="anchor" href="#identity-istemporary" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;isTemporary();</h4>
 
-<p>Kullanıcı kimliğinin geçici olup olmadığını gösterir, geçici ise <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerine döner.</p>
+<p>Çoklu yetkilendirmede kullanıcı kimliğinin geçici olup olmadığını gösterir, geçici ise <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerine döner.</p>
 
 <h4>
 <a id="identity-updatetemporarystring-key-mixed-val" class="anchor" href="#identity-updatetemporarystring-key-mixed-val" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;updateTemporary(string $key, mixed $val);</h4>
 
-<p>Geçici olarak oluşturulmuş kimlik bilgilerini güncellemenize olanak tanır.</p>
+<p>Çoklu yetkilendirmede geçici olarak oluşturulmuş kimlik bilgilerini güncellemenize olanak tanır.</p>
 
 <h4>
 <a id="identity-logout" class="anchor" href="#identity-logout" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;logout();</h4>
@@ -434,7 +429,7 @@ use test;
 <h4>
 <a id="identity-refreshremembertoken" class="anchor" href="#identity-refreshremembertoken" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;refreshRememberToken();</h4>
 
-<p>Beni hatırla çerezini yenileyerek veritabanı ve çereze kaydeder.</p>
+<p>Beni hatırla çerezini yenileyerek veritabanı ve çereze tekrar kaydeder.</p>
 
 <h4>
 <a id="identity-getidentifier" class="anchor" href="#identity-getidentifier" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$identity-&gt;getIdentifier();</h4>
@@ -497,9 +492,9 @@ use test;
 <span class="pl-s1">    [048<span class="pl-c1">f7b509a22800088f1cd8c1cc04b96</span>] <span class="pl-k">=&gt;</span> <span class="pl-k">Array</span></span>
 <span class="pl-s1">        (</span>
 <span class="pl-s1">            [<span class="pl-c1">__isAuthenticated</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1</span></span>
-<span class="pl-s1">            [<span class="pl-c1">__time</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470251639</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__time</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470858670.5284</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__id</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span></span>
-<span class="pl-s1">            [<span class="pl-c1">__key</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Auth</span>:<span class="pl-c1">__permanent</span>:<span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span>:048<span class="pl-c1">f7b509a22800088f1cd8c1cc04b96</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__key</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Auth</span>:<span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span>:048<span class="pl-c1">f7b509a22800088f1cd8c1cc04b96</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__agent</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Mozilla</span><span class="pl-k">/</span><span class="pl-c1">5.0</span> (<span class="pl-c1">X11</span>; <span class="pl-c1">Linux</span> <span class="pl-c1">x86_64</span>) <span class="pl-c1">AppleWebKit</span><span class="pl-k">/</span><span class="pl-c1">537.36</span> (<span class="pl-c1">KHTML</span>,<span class="pl-k">..</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__ip</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">212.124</span><span class="pl-k">.</span><span class="pl-c1">16.1</span>,</span>
 <span class="pl-s1">            [<span class="pl-c1">__lastActivity</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470419674</span></span>
@@ -508,9 +503,9 @@ use test;
 <span class="pl-s1">    [1<span class="pl-c1">dd468dbea32e8ed6f58cb00b40af76c</span>] <span class="pl-k">=&gt;</span> <span class="pl-k">Array</span></span>
 <span class="pl-s1">        (</span>
 <span class="pl-s1">            [<span class="pl-c1">__isAuthenticated</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1</span></span>
-<span class="pl-s1">            [<span class="pl-c1">__time</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470251614</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__time</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470858670.6000</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__id</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span></span>
-<span class="pl-s1">            [<span class="pl-c1">__key</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Auth</span>:<span class="pl-c1">__permanent</span>:<span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span>:1<span class="pl-c1">dd468dbea32e8ed6f58cb00b40af76c</span></span>
+<span class="pl-s1">            [<span class="pl-c1">__key</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Auth</span>:<span class="pl-c1">user</span><span class="pl-k">@</span><span class="pl-c1">example</span><span class="pl-k">.</span><span class="pl-c1">com</span>:1<span class="pl-c1">dd468dbea32e8ed6f58cb00b40af76c</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__agent</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">Mozilla</span><span class="pl-k">/</span><span class="pl-c1">5.0</span> (<span class="pl-c1">X11</span>; <span class="pl-c1">Ubuntu</span>; <span class="pl-c1">Linux</span> <span class="pl-c1">x86_64</span>; <span class="pl-c1">rv</span>:<span class="pl-c1">47.0</span>) <span class="pl-c1">Gecko</span><span class="pl-k">/</span><span class="pl-c1">20100101</span> <span class="pl-c1">Firefox</span><span class="pl-k">/</span><span class="pl-c1">47.0</span></span>
 <span class="pl-s1">            [<span class="pl-c1">__ip</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">88.169</span><span class="pl-k">.</span><span class="pl-c1">1.7</span>,</span>
 <span class="pl-s1">            [<span class="pl-c1">__lastActivity</span>] <span class="pl-k">=&gt;</span> <span class="pl-c1">1470419665</span></span>
@@ -574,53 +569,35 @@ use test;
 <p>Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada varsa önbellekte oluşturulmuş sorgu sonucuna geri döner.</p>
 
 <h3>
-<a id="yetki-doğrulama-onayı" class="anchor" href="#yetki-do%C4%9Frulama-onay%C4%B1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Yetki Doğrulama Onayı</h3>
+<a id="Çoklu-yetkilendirme" class="anchor" href="#%C3%87oklu-yetkilendirme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Çoklu Yetkilendirme</h3>
 
-<p>Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil uygulama</b> gibi yöntemlerle onay işlemi sağlar.</p>
+<p>Çoklu yetkilendirme kullanıcının kimliğini sisteme giriş yaptıktan hemen sonra <b>mobil uygulama</b>, <b>çağrı</b> veya <b>sms</b> gibi yöntemlerle onaylamasını sağlar.</p>
 
-<p>Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity-&gt;makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur. Belirtilen süreler konfigürasyon dosyasından ayarlanabilir.</p>
+<p>Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity-&gt;makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilmelidir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur.</p>
 
-<p><a name="temporary-identity"></a></p>
+<p>Çoklu yetkilendirmede kullanıcı sisteme giriş yaptıktan sonra,</p>
 
-<h3>
-<a id="geçiçi-kimlikler" class="anchor" href="#ge%C3%A7i%C3%A7i-kimlikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Geçiçi Kimlikler</h3>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>makeTemporary(<span class="pl-c1">300</span>);</span></pre></div>
 
-<p>Kullanıcı sisteme giriş yaptıktan sonra,</p>
-
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>makeTemporary();</span></pre></div>
-
-<p>metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması sizin ona doğrulama yöntemlerinden herhangi biriyle göndermiş olacağınız onay kodu ile gerçekleşir. Eğer kullanıcı 300 saniye içerisinde kendisine gönderilen onay kodunu onaylayamaz ise geçiçi kimlik kendiliğinden yok olur.</p>
-
-<p>Eğer kullanıcı onay işlemini başarılı bir şekilde gerçekleştirir ise geçici kimliğin <kbd>$identity-&gt;makePermanent()</kbd> metodu ile kalıcı hale getirilmesi gereklidir. Bir kimlik kalıcı yapıldığında kullanıcı sisteme giriş yapmış olur.</p>
-
-<p>Oturum bilgileri doğru ise kimliği geçici hale getirebilirsiniz.</p>
+<p>metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması için ona bir doğrulama kodu gönderilmelidir.</p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>isValid()) {</span>
 <span class="pl-s1"></span>
 <span class="pl-s1">    <span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>makeTemporary();</span>
 <span class="pl-s1"></span>
-<span class="pl-s1">    <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>Verification code has been sent.<span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1">    <span class="pl-c">// Send verification code to user</span></span>
 <span class="pl-s1"></span>
-<span class="pl-s1">    <span class="pl-c">// Url redirect ..</span></span>
+<span class="pl-s1">    <span class="pl-c1">header</span>(<span class="pl-s"><span class="pl-pds">"</span>Location: /example/Verify.php<span class="pl-pds">"</span></span>);</span>
 <span class="pl-s1">}</span></pre></div>
 
-<p>Sonraki adımda <kbd>$identity-&gt;makePermanent()</kbd> metodunu kullanarak kimliği kalıcı hale getirin. Ve yetkilendirmeden sonra kullanıcıyı <kbd>dashboard</kbd> sayfanıza yönlendirin.</p>
-
-<p><a name="permanent-identity"></a></p>
-
-<h3>
-<a id="kalıcı-kimlikler" class="anchor" href="#kal%C4%B1c%C4%B1-kimlikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Kalıcı Kimlikler</h3>
-
-<p>Bir geçici kimliği kalıcı hale dönüştürmek için,</p>
+<p>Eğer kullanıcı verify sayfasında kimliğini onaylarsa geçici kimliğin <kbd>$identity-&gt;makePermanent()</kbd> metodu ile kalıcı hale getirilmesi gereklidir. Bir kimlik kalıcı yapıldığında kullanıcı sisteme başarılı bir şekilde giriş yapmış olur.</p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>makePermanent();</span></pre></div>
 
-<p>metodu kullanılır.</p>
-
-<p>Kalıcı kimliğe sahip olan kullanıcı artık sisteme giriş yapabilir. Kalıcı olan kimlikler önbelleklenirler. Böylece önbelleklenen kimlik tekrar oturum açıldığında veritabanı sorgusuna gidilmeden elde edilmiş olur. Kalıcı kimliğin önbelleklenme süresi servis konfigürasyonundan ayarlanabilir. Eğer geçici kimlik oluşturma fonksiyonu kullanılmamışsa sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.</p>
+<p>Eğer çoklu yetkilendirme yani geçici kimlik oluşturma fonksiyonu kullanılmıyorsa, sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.</p>
 
       <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/obullo/Authentication">Obullo Authentication</a> is maintained by <a href="https://github.com/obullo">obullo</a>.</span>
+        <span class="site-footer-owner"><a href="https://github.com/obullo/Auth-MFA">Php Multi Factor Authentication</a> is maintained by <a href="https://github.com/obullo">obullo</a>.</span>
 
         <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
