@@ -52,13 +52,13 @@ class Authentication extends AbstractServiceProvider
         );
         // Services
         //
-        $container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
+        $container->share('Auth:Storage', 'Obullo\Auth\MFA\Storage\Redis')
             ->withArgument($container->get('redis:default'))
             ->withArgument($request)
             ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
             ->withMethodCall('setTemporaryBlockLifetime', [300]);
 
-        $container->share('Auth:Table', 'Obullo\Authentication\Adapter\Database\Table\Db')
+        $container->share('Auth:Table', 'Obullo\Auth\MFA\Adapter\Database\Table\Db')
             ->withArgument($container->get('database:default'))
             ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
             ->withMethodCall('setTableName', ['users'])
@@ -66,7 +66,7 @@ class Authentication extends AbstractServiceProvider
             ->withMethodCall('setPasswordColumn', ['password'])
             ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 
-        $container->share('Auth:RememberMe', 'Obullo\Authentication\RememberMe')
+        $container->share('Auth:RememberMe', 'Obullo\Auth\MFA\RememberMe')
             ->withArgument($request)
             ->withArgument(
                 [
@@ -78,11 +78,11 @@ class Authentication extends AbstractServiceProvider
                     'expire' => 6 * 30 * 24 * 3600,
                 ]
             );
-        $container->share('Auth:Adapter', 'Obullo\Authentication\Adapter\Database\Database')
+        $container->share('Auth:Adapter', 'Obullo\Auth\MFA\Adapter\Database\Database')
             ->withArgument($container)
             ->withArgument($request);
 
-        $container->share('Auth:Identity', 'Obullo\Authentication\Identity\Identity')
+        $container->share('Auth:Identity', 'Obullo\Auth\MFA\Identity\Identity')
             ->withArgument($container);
     }
 }

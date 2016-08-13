@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Authentication\Storage;
+namespace Obullo\Auth\MFA\Storage;
 
 /**
  * Abstract Adapter
@@ -181,10 +181,13 @@ abstract class AbstractStorage implements StorageInterface
      *
      * @return mixed false|array
      */
-    public function makeTemporary()
+    public function makeTemporary($expire = null)
     {
         if ($this->isEmpty()) {
             return false;
+        }
+        if (is_numeric($expire)) {
+            $this->setTemporaryBlockLifetime($expire);
         }
         $credentials = $this->getCredentials();
         if ($credentials == false) {  // If already permanent
@@ -238,10 +241,11 @@ abstract class AbstractStorage implements StorageInterface
     {
         $client    = $this->request->getAttribute('Auth_Client');
         $userAgent = substr($client['HTTP_USER_AGENT'], 0, 50); // First 50 characters of the user agent
-        $loginId   = md5(trim($userAgent).time());
-
-        $_SESSION[$this->getCacheKey().'_LoginId'] = $loginId;
-        return $loginId;
+        list($usec, $sec) = explode(" ", microtime());
+        $microtime = ((float)$usec + (float)$sec);
+        $id = md5(trim($userAgent).$microtime);
+        $_SESSION[$this->getCacheKey().'_LoginId'] = $id;
+        return $id;
     }
 
     /**

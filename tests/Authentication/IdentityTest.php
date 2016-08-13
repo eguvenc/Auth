@@ -1,6 +1,6 @@
 <?php
 
-use Obullo\Authentication\Credentials;
+use Obullo\Auth\MFA\Credentials;
 
 class IdentityTest extends WebTestCase
 {

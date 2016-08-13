@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Authentication;
+namespace Obullo\Auth\MFA;
 
 /**
  * Credentials Interface

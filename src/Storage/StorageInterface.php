@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Authentication\Storage;
+namespace Obullo\Auth\MFA\Storage;
 
 /**
  * Storage Interface
@@ -73,11 +73,11 @@ interface StorageInterface
     public function remove($key);
 
     /**
-     * Check whether to identify exists
+     * Returns to login keys of user
      *
      * @return array keys if succes otherwise false
      */
-    public function getAllKeys();
+    public function getActiveSessions();
 
     /**
      * Returns to database sessions

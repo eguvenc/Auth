@@ -1,6 +1,6 @@
 <?php
 
-use Obullo\Authentication\Storage\Memcached as MemcachedStorage;
+use Obullo\Auth\MFA\Storage\Memcached as MemcachedStorage;
 
 class MemcachedTest extends WebTestCase
 {

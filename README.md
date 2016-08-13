@@ -1,31 +1,30 @@
 
-## Authentication
+## Multi Factor Authentication (MFA)
 
-Authentication paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar için size bir API sağlar. Yetki doğrulama sorgu bellekleme özelliği ile birlikte gelir, yetkisi doğrulanmış kullanıcı kimliklerini hafızada bellekler ve yetki doğrulama isteklerinde veritabanı sorgusu sadece 1 kere çalışmış olur.
+MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. 
 
-Redis, Memcached gibi sürücüler sayesinde belleklenen kimlikler oturum id lerine göre kolayca yönetilebilirler.
+Standart oturum açma işlevi yanında çoklu yetkilendirme özelliği de kullanılırsa 2. aşamada kullanıcıdan <b>mobil uygulama</b>, çağrı veya <b>sms</b> ile kimliğini doğrulanması istenir. Ayrıca MFA, Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.
 
 ### Yükleme
 
 ```
-composer require obullo/authentication
+composer require obullo/mfa
 ```
 
 ### Özellikler
 
-* Hafıza depoları ile kimlik bellekleme,
-* Farklı davranışlar için adaptörler,
-* Google oturumları gibi çoklu oturumları görebilme ve sonlandırma
-* Sona erme süreleri belirleyerek sonlandırılabilir kimlikler yaratabilme
+* Önbelleklenebilir kimlikler
+* Çoklu yetkilendirme
+* Farklı davranışlar için adaptörler
+* Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve sonlandırma
 * Farklı veritabanları için tablo sınıfları
-* Kimlik Onaylama
 * Beni hatırla özelliği
 
 ### Akış Şeması
 
 Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarından nasıl geçtiği ve servisin nasıl çalıştığı hakkında size bir ön bilgi verecektir:
 
-![Authentication](https://github.com/obullo/authentication/blob/master/flowchart.png?raw=true "Authentication")
+![Authentication](https://github.com/obullo/MultiAuthAuth/blob/master/flowchart.png?raw=true "Authentication")
 
 Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.
 
@@ -57,7 +56,7 @@ Tüm auth konfigürasyonu <kbd>classes/ServiceProvider/Authentication</kbd> sın
 $container->share('Auth.PASSWORD_COST', 6);
 $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
 
-$container->share('Auth:Storage', 'Obullo\Authentication\Storage\Redis')
+$container->share('Auth:Storage', 'Obullo\MultiAuthAuth\Storage\Redis')
     ->withArgument($container->get('redis:default'))
     ->withArgument($container->get('request'))
     ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
@@ -86,7 +85,7 @@ Desteklenen sürücüler
 Hafıza deposu servis konfigurasyonundan değiştirilebilir.
 
 ```php
-$container->share('Auth:Storage', 'Obullo\Authentication\Storage\Memcached')
+$container->share('Auth:Storage', 'Obullo\MultiAuthAuth\Storage\Memcached')
     ->withArgument($container->get('memcached:default'))
 ```
 
@@ -125,7 +124,7 @@ Test kullanıcı adı <kbd>user@example.com</kbd> ve şifre <kbd>123456</kbd> d�
 
 ### Auth Table
 
-Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\Authentication\Adapter\Database\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.
+Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\MultiAuthAuth\Adapter\Database\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.
 
 ```php
 $container->share('Auth:Table', 'My\Database\Table\Db')
@@ -140,7 +139,7 @@ $container->share('Auth:Table', 'My\Database\Table\Db')
 Mongo Db için örnek.
 
 ```php
-$container->share('Auth:Table', 'Obullo\Authentication\Adapter\Database\Table\Mongo');
+$container->share('Auth:Table', 'Obullo\MultiAuthAuth\Adapter\Database\Table\Mongo');
 ```
 
 ### Oturum Açma
@@ -150,7 +149,7 @@ Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalışt�
 ```php
 $authAdapter = $container->get('Auth:Adapter');
 
-$credentials = new Obullo\Authentication\Credentials;
+$credentials = new Obullo\MultiAuthAuth\Credentials;
 $credentials->setIdentityValue('user@example.com');
 $credentials->setPasswordValue('123456');
 $credentials->setRememberMeValue(false);
@@ -531,7 +530,7 @@ Login denemesinden sonra tüm sonuçları bir dizi içerisinde verir.
 
 Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada varsa önbellekte oluşturulmuş sorgu sonucuna geri döner.
 
-### Yetki Doğrulama Onayı
+### 2 Adımda Yetkilendirme (Verifikasyon)
 
 Opsiyonel olarak gümrükten pasaport ile geçiş gibi kimlik onaylama sistemi isteniyorsa yetki doğrulama onayını kullanabilirsiniz. Yetki doğrulama onayı kullanıcının kimliğini sisteme giriş yapmadan önce <b>email</b>, <b>çağrı</b>, <b>sms</b> yada <b>mobil uygulama</b> gibi yöntemlerle onay işlemi sağlar.
 

@@ -2,22 +2,8 @@
 <head><style type="text/css">ul { list-style-type: none; } p { line-height: 2px; }</style></head>
 <body>
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
-chdir(dirname(__DIR__));
-require_once "vendor/autoload.php";
-
-session_start();
-
-$container = new League\Container\Container;
-$request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-$container->share('request', $request);
-
-$container->addServiceProvider('ServiceProvider\Redis');
-$container->addServiceProvider('ServiceProvider\Database');
-$container->addServiceProvider('ServiceProvider\Authentication');
-// $container->addServiceProvider('ServiceProvider\LDAPAuthentication');
+include 'Header.php';
 
 $parsedBody  = $request->getParsedBody();
 $queryParams = $request->getQueryParams();
@@ -29,7 +15,7 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) { // Perform 
     $authAdapter = $container->get('Auth:Adapter');
     $authAdapter->regenerateSessionId(true);
 
-    $credentials = new Obullo\Authentication\Credentials;
+    $credentials = new Obullo\Auth\MFA\Credentials;
     $credentials->setIdentityValue($parsedBody['email']);
     $credentials->setPasswordValue($parsedBody['password']);
     $credentials->setRememberMeValue($rememberMe);
@@ -46,6 +32,7 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) { // Perform 
         if ($hash = $authAdapter->passwordNeedsRehash()) {
             // Set new user password to db
         }
+        
         // $container->get('Auth:Identity')->makeTemporary();
 
         header("Location: /example/Restricted.php");

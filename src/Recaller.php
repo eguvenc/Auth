@@ -1,12 +1,12 @@
 <?php
 
-namespace Obullo\Authentication;
+namespace Obullo\Auth\MFA;
 
 use Interop\Container\ContainerInterface as Container;
 
-use Obullo\Authentication\IdentityInterface as Identity;
-use Obullo\Authentication\Storage\StorageInterface as Storage;
-use Obullo\Authentication\Adapter\Datababase\TableInterface as Table;
+use Obullo\Auth\MFA\IdentityInterface as Identity;
+use Obullo\Auth\MFA\Storage\StorageInterface as Storage;
+use Obullo\Auth\MFA\Adapter\Datababase\TableInterface as Table;
 
 /**
  * Recaller

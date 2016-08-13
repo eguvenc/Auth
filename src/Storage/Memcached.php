@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Authentication\Storage;
+namespace Obullo\Auth\MFA\Storage;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -71,7 +71,7 @@ class Memcached extends AbstractStorage
         }
         return false;
     }
-    
+   
     /**
      * Update credentials
      *
@@ -86,29 +86,23 @@ class Memcached extends AbstractStorage
         if ($this->getIdentifier() == null) {
             return false;
         }
-        $this->data = array($this->getLoginId() => $credentials);
+        $data = $credentials;
         if (! empty($pushData) && is_array($pushData)) {
-            $this->data = array($this->getLoginId() => array_merge($credentials, $pushData));
+            $data = array_merge($credentials, $pushData);
         }
-        $allData = $this->memcached->get($this->getMemoryBlockKey());  // Get all data
-
         $lifetime = (int)$ttl;
         if ($ttl == null) {
             $lifetime = ($credentials['__isTemporary'] == 1) ?  $this->getTemporaryBlockLifetime() : $this->getPermanentBlockLifetime();
         }
-        if ($allData == false) {
-            $allData = array();
-        }
-        $this->memcached->set(
-            $this->getMemoryBlockKey(),
-            array_merge($allData, $this->data),
-            $lifetime
-        );
+        $key = $this->getMemoryBlockKey();
+
+        $this->memcached->set($key, $data, $lifetime);
+        $this->setSessionIndex($data, $lifetime);
         return true;
     }
 
     /**
-     * Get credentials data
+     * Get user credentials data
      *
      * @return void
      */
@@ -117,38 +111,21 @@ class Memcached extends AbstractStorage
         if ($this->getIdentifier() == null) {
             return false;
         }
-        $data = $this->memcached->get($this->getMemoryBlockKey());
-        if (isset($data[$this->getLoginId()])) {
-            return $data[$this->getLoginId()];
-        }
-        return false;
+        return $this->memcached->get($this->getMemoryBlockKey());
     }
-
+   
     /**
-     * Deletes memory block
+     * Deletes memory block completely
+     *
+     * @param string $block name or key
      *
      * @return void
      */
     public function deleteCredentials()
     {
-        $loginID = $this->getLoginId();
-        $credentials = $this->memcached->get($this->getMemoryBlockKey());  // Don't do container cache
-
-        if (! isset($credentials[$loginID])) {  // already removed
-            return;
-        }
-        unset($credentials[$loginID]);
-        $this->memcached->set(
-            $this->getMemoryBlockKey(),
-            $credentials,
-            $this->getPermanentBlockLifetime()
-        );
-        $credentials = $this->memcached->get($this->getMemoryBlockKey()); // Destroy auth block if empty
-        if (empty($credentials)) {
-            $this->memcached->delete($this->getMemoryBlockKey());
-        }
+        return $this->memcached->delete($this->getMemoryBlockKey());
     }
-
+   
     /**
      * Update identity item value
      *
@@ -197,35 +174,22 @@ class Memcached extends AbstractStorage
      *
      * @return array keys if succes otherwise false
      */
-    public function getAllKeys()
+    public function getActiveSessions()
     {
-        return $this->memcached->get($this->getMemoryBlockKey());
-    }
+        $sessions = array();
+        if ($sessionIndex = $this->getSessionIndex()) {
+            foreach ($sessionIndex as $loginID => $val) {
+                $key = $this->getCacheKey().':'.$this->getUserId().':'.$loginID;
 
-    /**
-     * Returns to full identity block name
-     *
-     * @return string
-     */
-    public function getMemoryBlockKey()
-    {
-        /**
-         * In here memcached like storages use $this->storage->getUserId()
-         * but redis like storages use $this->storage->getIdentifier();
-         */
-        return $this->getCacheKey(). ':' .$this->getUserId();  // Create unique key
+                $maxLifetime = $this->getPermanentBlockLifetime() + $this->getTemporaryBlockLifetime();
+                if ($val['lastActivity'] > $maxLifetime) {
+                    $sessions[$loginID] = $this->memcached->get($key);
+                }
+            }
+        }
+        return $sessions;
     }
     
-    /**
-     * Returns to storage prefix key of identity data
-     *
-     * @return string
-     */
-    public function getUserKey()
-    {
-        return $this->getCacheKey(). ':' .$this->getUserId();
-    }
-
     /**
      * Returns to database sessions
      *
@@ -234,7 +198,7 @@ class Memcached extends AbstractStorage
     public function getUserSessions()
     {
         $sessions = array();
-        $dbSessions = $this->memcached->get($this->getMemoryBlockKey());
+        $dbSessions = $this->getActiveSessions();
 
         if ($dbSessions == false) {
             return $sessions;
@@ -262,13 +226,53 @@ class Memcached extends AbstractStorage
      */
     public function killSession($loginID)
     {
-        $data = $this->memcached->get($this->getMemoryBlockKey());
+        $this->memcached->delete($this->getCacheKey().':'.$this->getUserId().':'.$loginID);
+    }
 
-        unset($data[$loginID]);
-        $this->memcached->set(
-            $this->getMemoryBlockKey(),
-            $data,
-            $this->getPermanentBlockLifetime()
-        );
+    /**
+     * Keeps login id index of all users
+     *
+     * We use this method to get active sessions.
+     *
+     * @param array   $data data
+     * @param integer $lifetime lifetime
+     *
+     * @return boolean
+     */
+    protected function setSessionIndex($data, $lifetime)
+    {
+        $key = $this->getUserKey().':session_index';
+        $id  = $this->getUserId();
+
+        $index = $this->memcached->get($key);
+        if ($index == false) {
+            $index = array();
+        }
+        $index[$id][$this->getLoginId()] = [
+            'lastActivity' => $data['__lastActivity'],
+        ];
+        return $this->memcached->set($key, $index, $lifetime);
+    }
+
+    /**
+     * Returns to index of logged users sessions
+     *
+     * @return array
+     */
+    public function getSessionIndex()
+    {
+        $index = $this->memcached->get($this->getUserKey().':session_index');
+
+        return isset($index[$this->getUserId()]) ? $index[$this->getUserId()] : array();
+    }
+
+    /**
+     * Removes session index
+     *
+     * @return boolean
+     */
+    protected function deleteSessionIndex()
+    {
+        return $this->memcached->delete($this->getUserKey().':session_index');
     }
 }

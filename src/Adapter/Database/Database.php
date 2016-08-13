@@ -1,12 +1,12 @@
 <?php
 
-namespace Obullo\Authentication\Adapter\Database;
+namespace Obullo\Auth\MFA\Adapter\Database;
 
-use Obullo\Authentication\AuthResult;
-use Obullo\Authentication\Adapter\AbstractAdapter;
+use Obullo\Auth\MFA\AuthResult;
+use Obullo\Auth\MFA\Adapter\AbstractAdapter;
 use Interop\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Obullo\Authentication\CredentialsInterface as Credentials;
+use Obullo\Auth\MFA\CredentialsInterface as Credentials;
 
 /**
  * Database Adapter
@@ -291,7 +291,7 @@ class Database extends AbstractAdapter
     }
 
     /**
-     * Creates a Obullo\Authentication\AuthResult object from the information that
+     * Creates a Obullo\Auth\MFA\AuthResult object from the information that
      * has been collected during the authenticate() attempt.
      *
      * @return AuthResult

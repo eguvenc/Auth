@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Authentication\Identity;
+namespace Obullo\Auth\MFA\Identity;
 
 use Interop\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -162,9 +162,9 @@ class Identity extends AbstractIdentity
      *
      * @return void
      */
-    public function makeTemporary()
+    public function makeTemporary($expire = 300)
     {
-        $this->storage->makeTemporary();
+        $this->storage->makeTemporary($expire);
     }
 
     /**

@@ -2,30 +2,19 @@
 <head><style type="text/css">ul { list-style-type: none; } p { line-height: 2px; }</style></head>
 <body>
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
-chdir(dirname(__DIR__));
-require_once "vendor/autoload.php";
-
-session_start();
-
-$container = new League\Container\Container;
-$request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-$container->share('request', $request);
-
-$container->addServiceProvider('ServiceProvider\Redis');
-$container->addServiceProvider('ServiceProvider\Database');
-$container->addServiceProvider('ServiceProvider\Authentication');
+include 'Header.php';
 
 $identity = $container->get('Auth:Identity');
 $storage  = $container->get('Auth:Storage');
+
+// $identity->makeTemporary(10);
 
 /**
  * Temporary identity feature
  */
 if ($identity->isTemporary()) {
-    header("Location: /example/index.php?error[]=Your identity freezed for 300 seconds.After that the verification you can continue.");
+    header("Location: /example/Verify.php");
     return;
 }
 /**
@@ -47,6 +36,9 @@ if ($identity->guest()) {
 
 <h2>User Sessions</h2>
 
-<?php $sessions = $storage->getUserSessions(); ?>
+<?php $sessions = $storage->getUserSessions();
+
+// $storage->killSession('52c049faa3ef9f7407027b1a457f7982');
+?>
 
 <pre><?php print_r($sessions) ?></pre>

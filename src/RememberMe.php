@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Authentication;
+namespace Obullo\Auth\MFA;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 

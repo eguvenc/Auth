@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Authentication\Identity;
+namespace Obullo\Auth\MFA\Identity;
 
 /**
  * Abstract Identity

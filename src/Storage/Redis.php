@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Authentication\Storage;
+namespace Obullo\Auth\MFA\Storage;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -92,7 +92,7 @@ class Redis extends AbstractStorage
         }
         $lifetime = (int)$ttl;
         if ($ttl == null) {
-            $lifetime = ($credentials['__isTemporary'] == 1) ?  $this->getTemporaryBlockLifetime() : $this->getPermanentBlockLifetime();
+            $lifetime = ($credentials['__isTemporary'] == 1) ? $this->getTemporaryBlockLifetime() : $this->getPermanentBlockLifetime();
         }
         $key = $this->getMemoryBlockKey();
 
@@ -173,11 +173,11 @@ class Redis extends AbstractStorage
     }
 
     /**
-     * Get all keys
+     * Get session data of current user
      *
      * @return array keys if succes otherwise false
      */
-    public function getAllKeys()
+    public function getActiveSessions()
     {
         $data = $this->redis->keys($this->getUserKey().':*');
 
@@ -197,7 +197,7 @@ class Redis extends AbstractStorage
         $sessions   = array();
         $identifier = $this->getUserId();
         $key        = $this->getCacheKey().':';
-        $dbSessions = $this->redis->keys($key.$identifier.':*');
+        $dbSessions = $this->getActiveSessions();  // $this->redis->keys($key.$identifier.':*');
 
         if ($dbSessions == false) {
             return $sessions;
@@ -228,6 +228,6 @@ class Redis extends AbstractStorage
      */
     public function killSession($loginID)
     {
-        $this->deleteCredentials($this->getCacheKey().':'.$this->getUserId().':'.$loginID);
+        $this->redis->delete($this->getCacheKey().':'.$this->getUserId().':'.$loginID);
     }
 }

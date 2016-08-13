@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Authentication\Adapter;
+namespace Obullo\Auth\MFA\Adapter;
 
-use Obullo\Authentication\CredentialsInterface as Credentials;
+use Obullo\Auth\MFA\CredentialsInterface as Credentials;
 
 /**
  * Abstract Adapater
