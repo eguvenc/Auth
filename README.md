@@ -1,9 +1,9 @@
 
-## Multi Factor Authentication (MFA)
+## Php Multi Factor Authentication (MFA)
 
-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. 
+Auth-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. 
 
-Standart oturum açma işlevi yanında çoklu yetkilendirme özelliği de kullanılırsa 2. aşamada kullanıcıdan <b>mobil uygulama</b>, çağrı veya <b>sms</b> ile kimliğini doğrulanması istenir. Ayrıca MFA, Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.
+Standart oturum açma işlevi yanında çoklu yetkilendirme özelliği de kullanılırsa 2. aşamada kullanıcıdan <b>mobil uygulama</b>, <b>çağrı</b> veya <b>sms</b> ile kimliğini doğrulanması istenir. Ayrıca MFA, Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.
 
 ### Yükleme
 
