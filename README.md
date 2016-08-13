@@ -8,7 +8,7 @@ Standart oturum açma işlevi yanında çoklu yetkilendirme özelliği de kullan
 ### Yükleme
 
 ```
-composer require obullo/mfa
+composer require obullo/auth-mfa
 ```
 
 ### Özellikler
