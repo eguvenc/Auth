@@ -12,7 +12,8 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) { // Perform 
 
     $rememberMe = isset($parsedBody['remember_me']) ? 1 : 0;
 
-    $authAdapter = $container->get('Auth:Adapter');
+    $authAdapter = new Obullo\Auth\MFA\Adapter\Database\Database($container);
+    $authAdapter->setRequest($request);
     $authAdapter->regenerateSessionId(true);
 
     $credentials = new Obullo\Auth\MFA\Credentials;
@@ -20,7 +21,7 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) { // Perform 
     $credentials->setPasswordValue($parsedBody['password']);
     $credentials->setRememberMeValue($rememberMe);
 
-    $authResult = $authAdapter->login($credentials);
+    $authResult = $authAdapter->authenticate($credentials);
 
     if (! $authResult->isValid()) {
         $messages = array();

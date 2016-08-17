@@ -8,7 +8,7 @@ namespace Obullo\Auth\MFA\Identity;
  * @copyright 2009-2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-abstract class AbstractIdentity
+abstract class AbstractIdentity implements IdentityInterface
 {
     /**
      * Get the identifier column value

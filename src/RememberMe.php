@@ -63,7 +63,7 @@ class RememberMe
         setcookie(
             $cookie['name'],
             $token,
-            $cookie['expire'],
+            $cookie['expire'] + time(),
             $cookie['path'],
             $cookie['domain'],
             $cookie['secure'],

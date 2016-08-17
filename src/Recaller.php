@@ -3,9 +3,8 @@
 namespace Obullo\Auth\MFA;
 
 use Interop\Container\ContainerInterface as Container;
-
-use Obullo\Auth\MFA\IdentityInterface as Identity;
 use Obullo\Auth\MFA\Storage\StorageInterface as Storage;
+use Obullo\Auth\MFA\Identity\IdentityInterface as Identity;
 use Obullo\Auth\MFA\Adapter\Datababase\TableInterface as Table;
 
 /**
@@ -31,13 +30,6 @@ class Recaller
     protected $storage;
 
     /**
-     * User identity
-     *
-     * @var object
-     */
-    protected $identity;
-
-    /**
      * Container
      *
      * @var object
@@ -47,16 +39,13 @@ class Recaller
     /**
      * Constructor
      *
-     * @param object $storage   auth storage
-     * @param object $table     auth table
-     * @param array  $identity  auth identity
+     * @param object Container $container
      */
     public function __construct(Container $container)
     {
         $this->container = $container;
         $this->table     = $container->get('Auth:Table');
         $this->storage   = $container->get('Auth:Storage');
-        $this->identity  = $container->get('Auth:Identity');
     }
 
     /**
@@ -71,6 +60,7 @@ class Recaller
         $resultRowArray = $this->table->recall($tokenValue);
 
         $identityColumn      = $this->table->getIdentityColumn();
+        $passwordColumn      = $this->table->getPasswordColumn();
         $rememberTokenColumn = $this->table->getRememberTokenColumn();
 
         if (! is_array($resultRowArray) || empty($resultRowArray[$rememberTokenColumn])) {
@@ -83,16 +73,19 @@ class Recaller
         $data = [
             $identityColumn => $resultRowArray[$identityColumn],
             '__rememberMe' => 1,
-            '__rememberToken' => $resultRowArray[$rememberTokenColumn]
+            '__rememberToken' => $resultRowArray[$rememberTokenColumn],
+            '__isTemporary' => 0
         ];
         $this->storage->setCredentials($data, null);
-
-        /**
-         * Generate authenticated user
-         */
-        $this->container->get('Auth:Adapter')->generateUser($data, $resultRowArray);
         
-        $this->removeInactiveSessions(); // Kill all inactive sessions of current user
+        $credentials = new Credentials;
+        $credentials->setIdentityValue($resultRowArray[$identityColumn]);
+        $credentials->setPasswordValue($resultRowArray[$passwordColumn]);
+        $credentials->setRememberMeValue(true);
+
+        $user = new User($credentials);
+        $user->setResultRow($resultRowArray);
+        return $user;
     }
 
     /**
@@ -100,7 +93,7 @@ class Recaller
      *
      * @return void
      */
-    protected function removeInactiveSessions()
+    public function __destruct()
     {
         $sessions = $this->storage->getUserSessions();
 

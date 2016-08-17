@@ -19,5 +19,5 @@ interface AdapterInterface
      *
      * @return object authResult
      */
-    public function login(Credentials $credentials);
+    public function authenticate(Credentials $credentials);
 }

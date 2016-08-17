@@ -209,7 +209,11 @@ class MemcachedTest extends WebTestCase
 
         $client    = $this->request->getAttribute('Auth_Client');
         $userAgent = substr($client['HTTP_USER_AGENT'], 0, 50); // First 50 characters of the user agent
-        $loginId   = md5(trim($userAgent).time());
+
+        list($usec, $sec) = explode(" ", microtime());
+        $microtime = ((float)$usec + (float)$sec);
+        $loginId = md5(trim($userAgent).$microtime);
+        $_SESSION[$this->storage->getCacheKey().'_LoginId'] = $loginId;
         $expected  = $this->storage->getLoginId();
 
         $this->assertEquals($loginId, $expected, "I expect that the value is $loginId.");
@@ -250,7 +254,7 @@ class MemcachedTest extends WebTestCase
      */
     public function testGetMemoryBlockKey()
     {
-        $block = $this->storage->getCacheKey(). ':' .$this->storage->getUserId();
+        $block = $this->storage->getCacheKey(). ':' .$this->storage->getIdentifier();
         $this->assertEquals($block, $this->storage->getMemoryBlockKey(), "I expect the block key equals to key '$block'.");
 
         $this->storage->unsetIdentifier();
@@ -403,7 +407,11 @@ class MemcachedTest extends WebTestCase
     {
         $identifier = $this->table->getIdentityColumn();
 
-        $this->storage->setCredentials($this->credentials, array(), 60);
+        $data = [
+            '__isAuthenticated' => 1,
+            '__isTemporary' => 0,
+        ];
+        $this->storage->setCredentials($this->credentials, $data, 60);
         $this->storage->update($identifier, 'test@example.com');
         $result = $this->storage->getCredentials();
 
@@ -424,7 +432,11 @@ class MemcachedTest extends WebTestCase
     {
         $identifier = $this->table->getIdentityColumn();
 
-        $this->storage->setCredentials($this->credentials, array(), 60);
+        $data = [
+            '__isAuthenticated' => 1,
+            '__isTemporary' => 0,
+        ];
+        $this->storage->setCredentials($this->credentials, $data, 60);
         $this->storage->remove($identifier);
 
         $result = $this->storage->getCredentials();
@@ -441,7 +453,7 @@ class MemcachedTest extends WebTestCase
      *
      * @return void
      */
-    public function testGetAllKeys()
+    public function testGetActiveSessions()
     {
         $data = [
             '__isAuthenticated' => 1,
@@ -449,7 +461,7 @@ class MemcachedTest extends WebTestCase
         ];
         $this->storage->setCredentials($this->credentials, $data, 60);
 
-        $data = $this->storage->getAllKeys();
+        $data = $this->storage->getActiveSessions();
         $key  = $this->storage->getLoginId();
 
         if ($this->assertArrayHasKey($key, $data, "I create fake credentials then i expect array has 0 key.")) {
@@ -507,6 +519,93 @@ class MemcachedTest extends WebTestCase
         $this->storage->deleteCredentials();
         $this->storage->unsetIdentifier();
         $this->storage->unsetLoginId();
+    }
+
+    /**
+     * Keeps login id index of all users
+     *
+     * @return boolean
+     */
+    public function testSetSessionIndex()
+    {
+        list($usec, $sec) = explode(" ", microtime());
+        $microtime = ((float)$usec + (float)$sec);
+
+        $data = [
+            '__lastActivity' => $microtime,
+        ];
+        $this->storage->setLoginId();
+        $this->storage->setSessionIndex($data, 3600);
+        $data = $this->storage->getSessionIndex();
+
+        $loginID = $this->storage->getLoginId();
+        $this->assertNotEmpty($loginID, "I set login id and i expect that is not empty.");
+
+        if ($this->assertArrayHasKey($loginID, $data, "I set test index and i expect that array has $loginID key.")) {
+            $this->asserType('float', $data['lastActivity']);
+        }
+        if ($this->assertArrayHasKey('lastActivity', $data[$loginID], "I set test index and i expect that array has lastActivity key.")) {
+            $this->asserType('float', $data['lastActivity']);
+        }
+        $this->storage->deleteSessionIndex();
+    }
+
+    /**
+     * Returns to index of logged users sessions
+     *
+     * @return array
+     */
+    public function testGetSessionIndex()
+    {
+        list($usec, $sec) = explode(" ", microtime());
+        $microtime = ((float)$usec + (float)$sec);
+
+        $data = [
+            '__lastActivity' => $microtime,
+        ];
+        $this->storage->setLoginId();
+        $this->storage->setSessionIndex($data, 3600);
+        $data = $this->storage->getSessionIndex();
+
+        $loginID = $this->storage->getLoginId();
+        $this->assertNotEmpty($loginID, "I set login id and i expect that is not empty.");
+
+        if ($this->assertArrayHasKey($loginID, $data, "I set test index and i expect that array has $loginID key.")) {
+            $this->asserType('float', $data['lastActivity']);
+        }
+        if ($this->assertArrayHasKey('lastActivity', $data[$loginID], "I set test index and i expect that array has lastActivity key.")) {
+            $this->asserType('float', $data['lastActivity']);
+        }
+        $this->storage->deleteSessionIndex();
+    }
+
+    /**
+     * Removes session index
+     *
+     * @return boolean
+     */
+    public function testDeleteSessionIndex()
+    {
+        list($usec, $sec) = explode(" ", microtime());
+        $microtime = ((float)$usec + (float)$sec);
+
+        $data = [
+            '__lastActivity' => $microtime,
+        ];
+        $this->storage->setLoginId();
+        $this->storage->setSessionIndex($data, 3600);
+        $data = $this->storage->getSessionIndex();
+
+        $loginID = $this->storage->getLoginId();
+        $this->assertNotEmpty($loginID, "I set login id and i expect that is not empty.");
+
+        if ($this->assertArrayHasKey($loginID, $data, "I set test index and i expect that array has $loginID key.")) {
+            $this->asserType('float', $data['lastActivity']);
+        }
+        if ($this->assertArrayHasKey('lastActivity', $data[$loginID], "I set test index and i expect that array has lastActivity key.")) {
+            $this->asserType('float', $data['lastActivity']);
+        }
+        $this->storage->deleteSessionIndex();
     }
 
 }

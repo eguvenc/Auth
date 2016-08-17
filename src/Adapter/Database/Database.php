@@ -3,9 +3,9 @@
 namespace Obullo\Auth\MFA\Adapter\Database;
 
 use Obullo\Auth\MFA\AuthResult;
+use Obullo\Auth\MFA\UserInterface as User;
 use Obullo\Auth\MFA\Adapter\AbstractAdapter;
 use Interop\Container\ContainerInterface as Container;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Obullo\Auth\MFA\CredentialsInterface as Credentials;
 
 /**
@@ -22,13 +22,6 @@ class Database extends AbstractAdapter
      * @var object
      */
     protected $table;
-
-    /**
-     * Request
-     *
-     * @var object
-     */
-    protected $request;
     
     /**
      * Storage
@@ -97,11 +90,9 @@ class Database extends AbstractAdapter
      * Constructor
      *
      * @param Container $container container
-     * @param Request   $request   http server request
      */
-    public function __construct(Container $container, Request $request)
+    public function __construct(Container $container)
     {
-        $this->request   = $request;
         $this->container = $container;
         $this->table     = $container->get('Auth:Table');
         $this->storage   = $container->get('Auth:Storage');
@@ -148,12 +139,12 @@ class Database extends AbstractAdapter
      *
      * @return object authResult
      */
-    public function login(Credentials $credentials)
+    public function authenticate(Credentials $credentials)
     {
-        $this->ignoreRecaller($credentials);  // Ignore recaller if user has remember cookie
+        $this->ignoreRecaller();  // Ignore recaller if user has remember cookie
 
         if ($this->checkCredentials($credentials) == false) {
-            $message = 'Login attempt requires username and plain password values.';
+            $message = 'Authentication requires username and plain password.';
             return new AuthResult(
                 AuthResult::FAILURE,
                 null,
@@ -161,7 +152,7 @@ class Database extends AbstractAdapter
             );
         }
         $this->initialize($credentials);
-        $this->authenticate($credentials);  // Perform Query
+        $this->authenticationRequest($credentials);  // Perform Query
 
         return $this->validateResult();
     }
@@ -175,9 +166,9 @@ class Database extends AbstractAdapter
      */
     public function validateCredentials(Credentials $credentials)
     {
-        $this->ignoreRecaller($credentials);  // Ignore recaller if user has remember cookie
+        $this->ignoreRecaller();  // Ignore recaller if user has remember cookie
 
-        return $this->authenticate($credentials, false);  // validate credentials
+        return $this->authenticationRequest($credentials, false);  // validate credentials
     }
 
     /**
@@ -192,7 +183,7 @@ class Database extends AbstractAdapter
      *
      * @return object
      */
-    protected function authenticate(Credentials $credentials, $login = true)
+    protected function authenticationRequest(Credentials $credentials, $login = true)
     {
         $storageResult = $this->storage->query();  // if identity exists returns to cached data
 
@@ -210,8 +201,10 @@ class Database extends AbstractAdapter
             // depending to passwordNeedHash "cost" value default is 6
             // for best performance, set 10-12 for max security.
 
-                if ($login) {  // If login process allowed.
-                    $this->generateUser($credentials, $this->resultRowArray);
+                if ($login) {  // If login is allowed.
+                    $user = new User($credentials);
+                    $user->setResultRow($this->resultRowArray);
+                    $this->authorizeUser($user);
                 }
                 return true;
             }
@@ -224,28 +217,28 @@ class Database extends AbstractAdapter
     /**
      * Set identities data to AuthorizedUser object
      *
-     * @param array $credentials         username and plain password
-     * @param array $resultRowArray      success auth query user data
-     * @param array $passwordNeedsRehash marks attribute if password needs rehash
+     * @param object User $user
      *
      * @return object
      */
-    protected function generateUser(Credentials $credentials, $resultRowArray)
+    public function authorizeUser(User $user)
     {
-        $client = $this->request->getAttribute('Auth_Request');
+        $credentials = $user->getCredentials();
+        $resultRow   = $user->getResultRow();
+        $client      = $this->request->getAttribute('Auth_Request');
 
         $attributes = array(
             $this->table->getIdentityColumn() => $credentials->getIdentityValue(),
-            $this->table->getPasswordColumn() => $resultRowArray[$this->table->getPasswordColumn()],
+            $this->table->getPasswordColumn() => $resultRow[$this->table->getPasswordColumn()],
             '__rememberMe' => $credentials->getRememberMeValue(),
             '__time' => $this->getMicrotime(),
             '__agent' => $client['HTTP_USER_AGENT'],
             '__ip' => $client['REMOTE_ADDR'],
         );
         /**
-         * Authenticate the user and fornat auth data
+         * Fornat auth data
          */
-        $attributes = array_merge($resultRowArray, $attributes);
+        $attributes = array_merge($resultRow, $attributes);
 
         if ($this->regenerateSessionId) {
             $this->sessionRegenerateId(true); // Delete old session after regenerate !

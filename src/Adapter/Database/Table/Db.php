@@ -66,7 +66,7 @@ class Db extends AbstractTable
         $stmt = $this->conn->prepare(
             sprintf(
                 'SELECT %s FROM %s WHERE %s = ?',
-                $this->getColumns(),
+                implode(", ", $this->getColumns()),
                 $this->getTablename(),
                 $this->getRememberTokenColumn()
             )

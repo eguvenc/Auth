@@ -2,6 +2,7 @@
 
 namespace Obullo\Auth\MFA\Adapter;
 
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Obullo\Auth\MFA\CredentialsInterface as Credentials;
 
 /**
@@ -12,6 +13,23 @@ use Obullo\Auth\MFA\CredentialsInterface as Credentials;
  */
 abstract class AbstractAdapter implements AdapterInterface
 {
+    /**
+     * Request
+     *
+     * @var object
+     */
+    protected $request;
+
+    /**
+     * Set request
+     *
+     * @param Request $request object
+     */
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
+    }
+
     /**
      * Combine credentials with real column names
      *

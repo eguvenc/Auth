@@ -202,7 +202,11 @@ class RedisTest extends WebTestCase
 
         $client    = $this->request->getAttribute('Auth_Client');
         $userAgent = substr($client['HTTP_USER_AGENT'], 0, 50); // First 50 characters of the user agent
-        $loginId   = md5(trim($userAgent).time());
+
+        list($usec, $sec) = explode(" ", microtime());
+        $microtime = ((float)$usec + (float)$sec);
+        $loginId = md5(trim($userAgent).$microtime);
+        $_SESSION[$this->storage->getCacheKey().'_LoginId'] = $loginId;
         $expected  = $this->storage->getLoginId();
 
         $this->assertEquals($loginId, $expected, "I expect that the value is $loginId.");
@@ -395,7 +399,11 @@ class RedisTest extends WebTestCase
     {
         $identifier = $this->table->getIdentityColumn();
 
-        $this->storage->setCredentials($this->credentials, array(), 60);
+        $data = [
+            '__isAuthenticated' => 1,
+            '__isTemporary' => 0,
+        ];
+        $this->storage->setCredentials($this->credentials, $data, 60);
         $this->storage->update($identifier, 'test@example.com');
         $result = $this->storage->getCredentials();
 
@@ -416,7 +424,11 @@ class RedisTest extends WebTestCase
     {
         $identifier = $this->table->getIdentityColumn();
 
-        $this->storage->setCredentials($this->credentials, array(), 60);
+        $data = [
+            '__isAuthenticated' => 1,
+            '__isTemporary' => 0,
+        ];
+        $this->storage->setCredentials($this->credentials, $data, 60);
         $this->storage->remove($identifier);
 
         $result = $this->storage->getCredentials();
@@ -433,7 +445,7 @@ class RedisTest extends WebTestCase
      *
      * @return void
      */
-    public function testGetAllKeys()
+    public function testActiveSessions()
     {
         $data = [
             '__isAuthenticated' => 1,
@@ -441,10 +453,10 @@ class RedisTest extends WebTestCase
         ];
         $this->storage->setCredentials($this->credentials, $data, 60);
 
-        $data = $this->storage->getAllKeys();
+        $sessions = $this->storage->getActiveSessions();
 
-        if ($this->assertArrayHasKey(0, $data, "I create fake credentials then i expect array has 0 key.")) {
-            $this->assertNotEmpty($data[0], "I expect the key data is not empty.");
+        if ($this->assertArrayHasKey(0, $sessions, "I create fake credentials then i expect array has 0 key.")) {
+            $this->assertNotEmpty($sessions[0], "I expect the key data is not empty.");
         }
         $this->storage->deleteCredentials();
         $this->storage->unsetIdentifier();

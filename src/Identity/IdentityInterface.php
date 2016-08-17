@@ -64,13 +64,6 @@ interface IdentityInterface
     public function getArray();
 
     /**
-     * Get the password needs rehash array.
-     *
-     * @return mixed false|string new password hash
-     */
-    public function getPasswordNeedsReHash();
-
-    /**
      * Returns to "1" user if used remember me
      *
      * @return integer

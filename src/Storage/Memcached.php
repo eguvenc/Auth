@@ -239,7 +239,7 @@ class Memcached extends AbstractStorage
      *
      * @return boolean
      */
-    protected function setSessionIndex($data, $lifetime)
+    public function setSessionIndex($data, $lifetime)
     {
         $key = $this->getUserKey().':session_index';
         $id  = $this->getUserId();
@@ -271,7 +271,7 @@ class Memcached extends AbstractStorage
      *
      * @return boolean
      */
-    protected function deleteSessionIndex()
+    public function deleteSessionIndex()
     {
         return $this->memcached->delete($this->getUserKey().':session_index');
     }

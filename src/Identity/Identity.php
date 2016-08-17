@@ -44,19 +44,8 @@ class Identity extends AbstractIdentity
         $this->container = $container;
         $this->table     = $container->get('Auth:Table');
         $this->storage   = $container->get('Auth:Storage');
-        $this->initialize();
 
-        if (! empty($_SESSION['Auth_IgnoreRecaller']) && $_SESSION['Auth_IgnoreRecaller'] == 1) {
-            unset($_SESSION['Auth_IgnoreRecaller']);
-        } else {
-            $token = $this->container->get('Auth:RememberMe')->readToken();
-            if ($this->validateRecaller($token)) { // Remember the user if cookie exists
-                $recaller = new Recaller($container);
-                $recaller->recallUser($token);
-                $this->initialize();  // We need initialize again otherwise
-                                      // ignoreRecaller() does not work.
-            }
-        }
+        $this->initialize();
     }
 
     /**
@@ -75,6 +64,24 @@ class Identity extends AbstractIdentity
             $this->storage->update('__lastActivity', time());
             return;
         }
+    }
+    
+    /**
+     * Returns true if user has recaller cookie (__rm).
+     *
+     * @return false|string token
+     */
+    public function hasRecallerCookie()
+    {
+        if (! empty($_SESSION['Auth_IgnoreRecaller']) && $_SESSION['Auth_IgnoreRecaller'] == 1) {
+            unset($_SESSION['Auth_IgnoreRecaller']);
+        } else {
+            $token = $this->container->get('Auth:RememberMe')->readToken();
+            if ($this->validateRecaller($token)) { // Remember the user if cookie exists
+                return $token;
+            }
+        }
+        return false;
     }
 
     /**

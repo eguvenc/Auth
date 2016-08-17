@@ -20,7 +20,6 @@ class Authentication extends AbstractServiceProvider
         'Auth:Storage',
         'Auth:Identity',
         'Auth:RememberMe',
-        'Auth:Adapter',
     ];
 
     /**
@@ -71,17 +70,13 @@ class Authentication extends AbstractServiceProvider
             ->withArgument(
                 [
                     'name' => '__rm',
-                    'domain' => null,
+                    'domain' => '',
                     'path' => '/',
                     'secure' => false,
-                    'httpOnly' => true,
+                    'httpOnly' => false,
                     'expire' => 6 * 30 * 24 * 3600,
                 ]
             );
-        $container->share('Auth:Adapter', 'Obullo\Auth\MFA\Adapter\Database\Database')
-            ->withArgument($container)
-            ->withArgument($request);
-
         $container->share('Auth:Identity', 'Obullo\Auth\MFA\Identity\Identity')
             ->withArgument($container);
     }

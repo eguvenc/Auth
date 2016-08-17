@@ -28,7 +28,7 @@ interface TableInterface
      *
      * @return array
      */
-    public function recall($token);
+    public function recall($tokenValue);
     
     /**
      * Update remember token upon every login & logout requests

@@ -1,11 +1,21 @@
 
 ## Php Multi Factor Authentication (MFA)
 
-Auth-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. 
+Oturum açma işlemlerinde kullancıyı yetkilendirme işlemleri birden fazla aşama ile yapılıyorsa bu çoklu yetkilendirme olarak adlandırılır. Multi-Factor Authentication güvenlik yöntemi; katmanlı bir yapıdan oluşur. Birden fazla kimlik doğrulama metoduyla saldırganların geçemeyeceği bir güvenlik kalkanı oluşturur. Bu metotlar aşağıdaki gibi olabilir : 
 
-Standart oturum açma işlevi yanında çoklu yetkilendirme özelliği de kullanılırsa 2. aşamada kullanıcıdan <b>mobil uygulama</b>, <b>çağrı</b> veya <b>sms</b> ile kimliğini doğrulanması istenir. Ayrıca MFA, Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.
+* OTP
+* QR Code
+* Çağrı
+* Sms
 
-### Yükleme
+MFA yani çoklu yetkilendirme yönteminde standart oturum açma işlevinden farklı olarak 2. aşamada kullanıcıdan  ile kimliğini doğrulaması istenir. Bir saldırgan yukarıda saydığımız kimlik doğrulama metotlarından kullanıcı parolasına sahip olsa bile MFA için yetkilendirilmiş güvenilir bir cihaza sahip olmadığından kimlik doğrulamayı geçemeyecektir. 
+
+## Auth-MFA 
+
+Auth-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. Auth-MFA paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.
+
+
+### Composer İle Yükleme
 
 ```
 composer require obullo/auth-mfa
@@ -147,14 +157,16 @@ $container->share('Auth:Table', 'Obullo\Auth\MFA\Adapter\Database\Table\Mongo');
 Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.
 
 ```php
-$authAdapter = $container->get('Auth:Adapter');
+$authAdapter = new Obullo\Auth\MFA\Adapter\Database\Database($container);
+$authAdapter->setRequest($request);
+$authAdapter->regenerateSessionId(true);
 
 $credentials = new Obullo\Auth\MFA\Credentials;
 $credentials->setIdentityValue('user@example.com');
 $credentials->setPasswordValue('123456');
 $credentials->setRememberMeValue(false);
 
-$authResult = $authAdapter->login($credentials);
+$authResult = $authAdapter->authenticate($credentials);
 
 if (! $authResult->isValid()) {
         
@@ -319,18 +331,21 @@ Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash d
 
 ------
 
+#### $authAdapter->authenticate(Credentials $credentials);
+
+Girilen kullanıcı bilgileri ile yetki doğrulaması yaparak AuthResult nesnesine geri döner.
+
 #### $authAdapter->regenerateSessionId(true);
 
 Kullanıcı giriş yaptıktan sonra oturum id sinin yeniden yaratılıp yaratılmayacağını belirler.
-
-#### $authAdapter->login(Credentials $credentials);
-
-Kullanıcıyı yetkilendirir.
 
 #### $authAdapter->validateCredentials(Credentials $credentials);
 
 Kullanıcıyı yetkilendirmeden kimlik bilgilerinin doğruluğunu kontrol eder. Doğru ise true aksi durumda false değerine geri döner.
 
+#### $authAdapter->authorizeUser(User $user);
+
+User nesnesini kullanarak zaten kimlik bilgileri doğrulanmış Guest kullanıcıyı yetkilendirmek için kullanılır.
 
 <a name="identity-method-reference"></a>
 

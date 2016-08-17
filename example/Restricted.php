@@ -8,8 +8,18 @@ include 'Header.php';
 $identity = $container->get('Auth:Identity');
 $storage  = $container->get('Auth:Storage');
 
-// $identity->makeTemporary(10);
+/**
+ * Remember User
+ */
+if ($token = $identity->hasRecallerCookie()) {
+    $recaller = new Obullo\Auth\MFA\Recaller($container);
+    $user = $recaller->recallUser($token);
 
+    $authAdapter = new Obullo\Auth\MFA\Adapter\Database\Database($container);
+    $authAdapter->setRequest($request);
+    $authAdapter->regenerateSessionId(true);
+    $authAdapter->authorizeUser($user);
+}
 /**
  * Temporary identity feature
  */
