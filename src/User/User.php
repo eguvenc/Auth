@@ -1,8 +1,6 @@
 <?php
 
-namespace Obullo\Auth\MFA;
-
-use Obullo\Auth\MFA\CredentialsInterface as Credentials;
+namespace Obullo\Auth\MFA\User;
 
 /**
  * Authenticated User

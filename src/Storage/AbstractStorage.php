@@ -2,6 +2,8 @@
 
 namespace Obullo\Auth\MFA\Storage;
 
+use League\Container\ContainerAwareTrait;
+
 /**
  * Abstract Adapter
  *
@@ -10,6 +12,8 @@ namespace Obullo\Auth\MFA\Storage;
  */
 abstract class AbstractStorage implements StorageInterface
 {
+    use ContainerAwareTrait;
+
     /**
      * Auth key
      *
@@ -239,11 +243,12 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function setLoginId()
     {
-        $client    = $this->request->getAttribute('Auth_Client');
-        $userAgent = substr($client['HTTP_USER_AGENT'], 0, 50); // First 50 characters of the user agent
+        $container = $this->getContainer();
+        $userAgent = substr($container->get('Auth.HTTP_USER_AGENT')->getValue(), 0, 50); // First 50 characters of the user agent
         list($usec, $sec) = explode(" ", microtime());
         $microtime = ((float)$usec + (float)$sec);
         $id = md5(trim($userAgent).$microtime);
+        
         $_SESSION[$this->getCacheKey().'_LoginId'] = $id;
         return $id;
     }

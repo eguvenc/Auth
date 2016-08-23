@@ -2,7 +2,7 @@
 
 namespace Obullo\Auth\MFA\Adapter\Database;
 
-use Obullo\Auth\MFA\CredentialsInterface as Credentials;
+use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
 
 /**
  * Auth Table Interface

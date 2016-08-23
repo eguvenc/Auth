@@ -1,7 +1,8 @@
 <?php
 
-namespace Obullo\Auth\MFA;
+namespace Obullo\Auth\MFA\User;
 
+use Obullo\Auth\MFA\CookieInterface as Cookie;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
@@ -10,44 +11,44 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  * @copyright 2009-2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class RememberMe
+class RememberMe implements RememberMeInterface
 {
     /**
-     * Request
+     * Cookie
      *
      * @var object
      */
-    protected $request;
+    protected $cookie;
 
     /**
      * Cookie params
      *
      * @var array
      */
-    protected $cookieParams = array();
+    protected $params = array();
 
     /**
      * Constructor
      *
-     * @param array $cookieParams parameters
+     * @param Cookie $cookie object
+     * @param array  $params parameters
      */
-    public function __construct(Request $request, array $cookieParams)
+    public function __construct(Cookie $cookie, array $params)
     {
-        $this->request = $request;
-        $this->cookieParams = $cookieParams;
+        $this->cookie = $cookie;
+        $this->params = $params;
+
+        $this->cookie->setDefaults($params);
     }
 
     /**
      * Read recaller token
      *
-     * @return string
+     * @return string|false
      */
     public function readToken()
     {
-        $name    = $this->cookieParams['name'];
-        $cookies = $this->request->getCookieParams();
-
-        return isset($cookies[$name]) ? $cookies[$name] : false;
+        return $this->cookie->get($this->params['name'], false);
     }
 
     /**
@@ -57,18 +58,10 @@ class RememberMe
      */
     public function getToken()
     {
-        $cookie = $this->getCookieParams();
+        $cookie = $this->getParams();
         $token  = $this->generateToken();
 
-        setcookie(
-            $cookie['name'],
-            $token,
-            $cookie['expire'] + time(),
-            $cookie['path'],
-            $cookie['domain'],
-            $cookie['secure'],
-            $cookie['httpOnly']
-        );
+        $this->cookie->set($cookie['name'], $token);
         return $token;
     }
 
@@ -79,17 +72,9 @@ class RememberMe
      */
     public function removeToken()
     {
-        $cookie = $this->getCookieParams();
-
-        setcookie(
-            $cookie['name'],
-            null,
-            -1,
-            $cookie['path'],
-            $cookie['domain'],
-            $cookie['secure'],
-            $cookie['httponly']
-        );
+        $cookie = $this->getParams();
+        
+        $this->cookie->delete($cookie['name']);
     }
 
     /**
@@ -97,9 +82,9 @@ class RememberMe
      *
      * @return array
      */
-    public function getCookieParams()
+    public function getParams()
     {
-        return $this->cookieParams;
+        return $this->params;
     }
 
     /**

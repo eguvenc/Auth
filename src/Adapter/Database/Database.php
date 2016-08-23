@@ -2,11 +2,11 @@
 
 namespace Obullo\Auth\MFA\Adapter\Database;
 
+use Obullo\Auth\MFA\User\User;
 use Obullo\Auth\MFA\AuthResult;
-use Obullo\Auth\MFA\UserInterface as User;
 use Obullo\Auth\MFA\Adapter\AbstractAdapter;
 use Interop\Container\ContainerInterface as Container;
-use Obullo\Auth\MFA\CredentialsInterface as Credentials;
+use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
 
 /**
  * Database Adapter
@@ -225,15 +225,14 @@ class Database extends AbstractAdapter
     {
         $credentials = $user->getCredentials();
         $resultRow   = $user->getResultRow();
-        $client      = $this->request->getAttribute('Auth_Request');
 
         $attributes = array(
             $this->table->getIdentityColumn() => $credentials->getIdentityValue(),
             $this->table->getPasswordColumn() => $resultRow[$this->table->getPasswordColumn()],
             '__rememberMe' => $credentials->getRememberMeValue(),
             '__time' => $this->getMicrotime(),
-            '__agent' => $client['HTTP_USER_AGENT'],
-            '__ip' => $client['REMOTE_ADDR'],
+            '__agent' => $this->container->get('Auth.HTTP_USER_AGENT')->getValue(),
+            '__ip' => $this->container->get('Auth.REMOTE_ADDR')->getValue(),
         );
         /**
          * Fornat auth data

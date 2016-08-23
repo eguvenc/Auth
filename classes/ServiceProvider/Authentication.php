@@ -2,6 +2,7 @@
 
 namespace ServiceProvider;
 
+use League\Container\Argument\RawArgument;
 use League\Container\ServiceProvider\AbstractServiceProvider;
 
 class Authentication extends AbstractServiceProvider
@@ -33,27 +34,21 @@ class Authentication extends AbstractServiceProvider
     public function register()
     {
         $container = $this->getContainer();
+        $request   = $container->get('request');
+        $server    = $request->getServerParams();
 
-        // Servie Config
+        // Config
         //
         $container->share('Auth.PASSWORD_COST', 6);
         $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
-        
-        // Request Config
-        //
-        $server  = $container->get('request')->getServerParams();
-        $request = $container->get('request')->withAttribute(
-            'Auth_Request',
-            [
-                'REMOTE_ADDR'     => $server['REMOTE_ADDR'],
-                'HTTP_USER_AGENT' => $server['HTTP_USER_AGENT']
-            ]
-        );
+        $container->share('Auth.REMOTE_ADDR', new RawArgument($server['REMOTE_ADDR']));
+        $container->share('Auth.HTTP_USER_AGENT', new RawArgument($server['HTTP_USER_AGENT']));
+
         // Services
         //
         $container->share('Auth:Storage', 'Obullo\Auth\MFA\Storage\Redis')
             ->withArgument($container->get('redis:default'))
-            ->withArgument($request)
+            ->withMethodCall('setContainer', [$container])
             ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
             ->withMethodCall('setTemporaryBlockLifetime', [300]);
 
@@ -65,8 +60,8 @@ class Authentication extends AbstractServiceProvider
             ->withMethodCall('setPasswordColumn', ['password'])
             ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 
-        $container->share('Auth:RememberMe', 'Obullo\Auth\MFA\RememberMe')
-            ->withArgument($request)
+        $container->share('Auth:RememberMe', 'Obullo\Auth\MFA\User\RememberMe')
+            ->withArgument($container->get('cookie'))
             ->withArgument(
                 [
                     'name' => '__rm',

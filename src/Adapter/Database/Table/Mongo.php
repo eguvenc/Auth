@@ -3,7 +3,7 @@
 namespace Obullo\Auth\MFA\Adapter\Database\Table;
 
 use Obullo\Auth\MFA\Adapter\Database\AbstractTable;
-use Obullo\Auth\MFA\CredentialsInterface as Credentials;
+use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
 
 /**
  * Mongo AbstractTable

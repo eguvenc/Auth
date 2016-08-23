@@ -13,13 +13,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class Memcached extends AbstractStorage
 {
     /**
-     * Http request
-     *
-     * @var object
-     */
-    protected $request;
-
-    /**
      * Memcached
      *
      * @var object
@@ -34,10 +27,9 @@ class Memcached extends AbstractStorage
      *
      * @return void
      */
-    public function __construct(\Memcached $memcached, Request $request, $options = array())
+    public function __construct(\Memcached $memcached, $options = array())
     {
         $this->memcached = $memcached;
-        $this->request   = $request;
         
         parent::__construct($options);
     }

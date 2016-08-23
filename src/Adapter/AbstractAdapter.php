@@ -3,7 +3,7 @@
 namespace Obullo\Auth\MFA\Adapter;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Obullo\Auth\MFA\CredentialsInterface as Credentials;
+use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
 
 /**
  * Abstract Adapater

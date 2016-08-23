@@ -20,13 +20,6 @@ class Redis extends AbstractStorage
     protected $redis;
 
     /**
-     * Http request
-     *
-     * @var object
-     */
-    protected $request;
-
-    /**
      * Constructor
      *
      * @param \Redis $redis   redis
@@ -34,10 +27,9 @@ class Redis extends AbstractStorage
      *
      * @return void
      */
-    public function __construct(\Redis $redis, Request $request, $options = array())
+    public function __construct(\Redis $redis, $options = array())
     {
-        $this->redis    = $redis;
-        $this->request  = $request;
+        $this->redis = $redis;
         
         parent::__construct($options);
     }

@@ -2,6 +2,8 @@
 
 namespace Obullo\Auth\MFA;
 
+use Obullo\Auth\MFA\User\User;
+use Obullo\Auth\MFA\User\Credentials;
 use Interop\Container\ContainerInterface as Container;
 use Obullo\Auth\MFA\Storage\StorageInterface as Storage;
 use Obullo\Auth\MFA\Identity\IdentityInterface as Identity;

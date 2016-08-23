@@ -4,6 +4,7 @@ namespace Obullo\Auth\MFA\Identity;
 
 use Interop\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Obullo\Auth\MFA\User\RememberMeInterface as RememberMe;
 
 /**
  * User Identity
@@ -69,14 +70,20 @@ class Identity extends AbstractIdentity
     /**
      * Returns true if user has recaller cookie (__rm).
      *
+     * @param object $rememberMe null|object
+     *
      * @return false|string token
      */
-    public function hasRecallerCookie()
+    public function hasRecallerCookie($rememberMe = null)
     {
         if (! empty($_SESSION['Auth_IgnoreRecaller']) && $_SESSION['Auth_IgnoreRecaller'] == 1) {
             unset($_SESSION['Auth_IgnoreRecaller']);
         } else {
-            $token = $this->container->get('Auth:RememberMe')->readToken();
+            if ($rememberMe instanceof RememberMe) {
+                $token = $rememberMe->readToken();
+            } else {
+                $token = $this->container->get('Auth:RememberMe')->readToken();
+            }
             if ($this->validateRecaller($token)) { // Remember the user if cookie exists
                 return $token;
             }
@@ -158,7 +165,10 @@ class Identity extends AbstractIdentity
      */
     public function isExpired()
     {
-        if ($this->has('__expire') && $this->get('__expire') < time()) {
+        if ($this->get('__expire') == false) {
+            return false;
+        }
+        if ($this->get('__expire') < time()) {
             return true;
         }
         return false;

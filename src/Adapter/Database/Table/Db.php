@@ -4,7 +4,7 @@ namespace Obullo\Auth\MFA\Adapter\Database\Table;
 
 use Doctrine\DBAL\Driver\Connection;
 use Obullo\Auth\MFA\Adapter\Database\AbstractTable;
-use Obullo\Auth\MFA\CredentialsInterface as Credentials;
+use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
 
 /**
  * Pdo Adapter
