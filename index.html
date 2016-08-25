@@ -20,14 +20,26 @@
 
     <section class="main-content">
       <h2>
-<a id="php-multi-factor-authentication-mfa" class="anchor" href="#php-multi-factor-authentication-mfa" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Php Multi Factor Authentication (MFA)</h2>
+<a id="php-multi-factor-web-authentication-mfa" class="anchor" href="#php-multi-factor-web-authentication-mfa" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Php Multi Factor Web Authentication (MFA)</h2>
 
-<p>Auth-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. </p>
+<p>Oturum açma işlemlerinde kullancıyı yetkilendirme işlemleri birden fazla aşama ile yapılıyorsa bu çoklu yetkilendirme olarak adlandırılır. Multi-Factor Authentication güvenlik yöntemi; katmanlı bir yapıdan oluşur. Birden fazla kimlik doğrulama metoduyla saldırganların geçemeyeceği bir güvenlik kalkanı oluşturur. Bu metotlar aşağıdaki gibi olabilir : </p>
 
-<p>Standart oturum açma işlevi yanında çoklu yetkilendirme özelliği de kullanılırsa 2. aşamada kullanıcıdan <b>mobil uygulama</b>, <b>çağrı</b> veya <b>sms</b> ile kimliğini doğrulanması istenir. Ayrıca MFA, Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.</p>
+<ul>
+<li>OTP</li>
+<li>QR Code</li>
+<li>Çağrı</li>
+<li>Sms</li>
+</ul>
+
+<p>MFA yani çoklu yetkilendirme yönteminde standart oturum açma işlevinden farklı olarak 2. aşamada kullanıcıdan  ile kimliğini doğrulaması istenir. Bir saldırgan yukarıda saydığımız kimlik doğrulama metotlarından kullanıcı parolasına sahip olsa bile MFA için yetkilendirilmiş güvenilir bir cihaza sahip olmadığından kimlik doğrulamayı geçemeyecektir. </p>
+
+<h2>
+<a id="auth-mfa" class="anchor" href="#auth-mfa" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Auth-MFA</h2>
+
+<p>Auth-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. Auth-MFA paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.</p>
 
 <h3>
-<a id="yükleme" class="anchor" href="#y%C3%BCkleme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Yükleme</h3>
+<a id="composer-İle-yükleme" class="anchor" href="#composer-%C4%B0le-y%C3%BCkleme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Composer İle Yükleme</h3>
 
 <pre><code>composer require obullo/auth-mfa
 </code></pre>
@@ -165,14 +177,16 @@ use test;
 
 <p>Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>Auth:Adapter<span class="pl-pds">'</span></span>);</span>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\MFA\Adapter\Database\</span><span class="pl-c1">Database</span>(<span class="pl-smi">$container</span>);</span>
+<span class="pl-s1"><span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>setRequest(<span class="pl-smi">$request</span>);</span>
+<span class="pl-s1"><span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>regenerateSessionId(<span class="pl-c1">true</span>);</span>
 <span class="pl-s1"></span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\MFA\</span><span class="pl-c1">Credentials</span>;</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setIdentityValue(<span class="pl-s"><span class="pl-pds">'</span>user@example.com<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setPasswordValue(<span class="pl-s"><span class="pl-pds">'</span>123456<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setRememberMeValue(<span class="pl-c1">false</span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1"><span class="pl-smi">$authResult</span> <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>login(<span class="pl-smi">$credentials</span>);</span>
+<span class="pl-s1"><span class="pl-smi">$authResult</span> <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>authenticate(<span class="pl-smi">$credentials</span>);</span>
 <span class="pl-s1"></span>
 <span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-k">!</span> <span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>isValid()) {</span>
 <span class="pl-s1"></span>
@@ -330,19 +344,24 @@ use test;
 <hr>
 
 <h4>
+<a id="authadapter-authenticatecredentials-credentials" class="anchor" href="#authadapter-authenticatecredentials-credentials" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;authenticate(Credentials $credentials);</h4>
+
+<p>Girilen kullanıcı bilgileri ile yetki doğrulaması yaparak AuthResult nesnesine geri döner.</p>
+
+<h4>
 <a id="authadapter-regeneratesessionidtrue" class="anchor" href="#authadapter-regeneratesessionidtrue" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;regenerateSessionId(true);</h4>
 
 <p>Kullanıcı giriş yaptıktan sonra oturum id sinin yeniden yaratılıp yaratılmayacağını belirler.</p>
 
 <h4>
-<a id="authadapter-logincredentials-credentials" class="anchor" href="#authadapter-logincredentials-credentials" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;login(Credentials $credentials);</h4>
-
-<p>Kullanıcıyı yetkilendirir.</p>
-
-<h4>
 <a id="authadapter-validatecredentialscredentials-credentials" class="anchor" href="#authadapter-validatecredentialscredentials-credentials" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;validateCredentials(Credentials $credentials);</h4>
 
 <p>Kullanıcıyı yetkilendirmeden kimlik bilgilerinin doğruluğunu kontrol eder. Doğru ise true aksi durumda false değerine geri döner.</p>
+
+<h4>
+<a id="authadapter-authorizeuseruser-user" class="anchor" href="#authadapter-authorizeuseruser-user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;authorizeUser(User $user);</h4>
+
+<p>User nesnesini kullanarak zaten kimlik bilgileri doğrulanmış Guest kullanıcıyı yetkilendirmek için kullanılır.</p>
 
 <p><a name="identity-method-reference"></a></p>
 
