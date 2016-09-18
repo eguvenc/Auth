@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\MFA\Storage;
+namespace Obullo\Auth\Storage;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -171,7 +171,7 @@ class Memcached extends AbstractStorage
         $sessions = array();
         if ($sessionIndex = $this->getSessionIndex()) {
             foreach ($sessionIndex as $loginID => $val) {
-                $key = $this->getCacheKey().':'.$this->getUserId().':'.$loginID;
+                $key = $this->getStoreKey().':'.$this->getUserId().':'.$loginID;
 
                 $maxLifetime = $this->getPermanentBlockLifetime() + $this->getTemporaryBlockLifetime();
                 if ($val['lastActivity'] > $maxLifetime) {
@@ -218,7 +218,7 @@ class Memcached extends AbstractStorage
      */
     public function killSession($loginID)
     {
-        $this->memcached->delete($this->getCacheKey().':'.$this->getUserId().':'.$loginID);
+        $this->memcached->delete($this->getStoreKey().':'.$this->getUserId().':'.$loginID);
     }
 
     /**

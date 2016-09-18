@@ -1,11 +1,11 @@
 <?php
 
-use Obullo\Auth\MFA\User\Credentials;
-use Obullo\Auth\MFA\User\RememberMe;
-use Obullo\Auth\MFA\Adapter\Database\Database;
+use Obullo\Auth\User\Credentials;
+use Obullo\Auth\Adapter\Database\Database;
 
 class IdentityTest extends WebTestCase
 {
+    protected $db;
     protected $identity;
 
     /**
@@ -75,7 +75,7 @@ class IdentityTest extends WebTestCase
         );
         $this->assertEquals(
             'fgvH6hrlWNDeb9jz5L2P4xBW3vdrDP17',
-            $this->identity->hasRecallerCookie($rememberMe),
+            $this->identity->hasRecallerCookie($rememberMe->readToken()),
             "I expect that the value is fgvH6hrlWNDeb9jz5L2P4xBW3vdrDP17."
         );
     }
@@ -174,7 +174,7 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function makePermanent()
+    public function testMakePermanent()
     {
         $this->login();
 
@@ -182,7 +182,7 @@ class IdentityTest extends WebTestCase
         $this->identity->makePermanent();  // Make permanent user.
 
         $this->assertFalse($this->identity->isTemporary(), "I login as temporary.Then i set it identity as permanent and i expect that the value is false.");
-        $this->destroy();
+        $this->identity->destroy();
     }
 
     /**
@@ -190,7 +190,7 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function getTime()
+    public function testGetTime()
     {
         $this->login();
 
@@ -206,7 +206,7 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function getArray()
+    public function testGetArray()
     {
         $this->login();
 
@@ -216,34 +216,15 @@ class IdentityTest extends WebTestCase
     }
 
     /**
-     * Get the password needs rehash array.
-     *
-     * @return void
-     */
-    public function getPasswordNeedsReHash()
-    {
-        $this->login();
-
-        $this->identity->set('__passwordNeedsRehash', 1);
-        $this->identity->set('password', "$2y$06$6k9aYbbOiVnqgvksFR4zXO.kNBTXFt3cl8xhvZLWj4Qi/IpkYXeP.");
-
-        if ($this->identity->getPasswordNeedsReHash()) {
-            $this->assertEquals($this->identity->getPassword(), "$2y$06$6k9aYbbOiVnqgvksFR4zXO.kNBTXFt3cl8xhvZLWj4Qi/IpkYXeP.", "I expect identity password that is equal to $2y$06$6k9aYbbOiVnqgvksFR4zXO.kNBTXFt3cl8xhvZLWj4Qi/IpkYXeP.");
-        }
-        $this->identity->destroy();
-    }
-
-    /**
      * Returns to "1" user if used remember me
      *
      * @return void
      */
-    public function getRememberMe()
+    public function testGetRememberMe()
     {
         $this->login();
 
         $this->identity->set('__rememberMe', 1);
-
         $this->assertInternalType('integer', $this->identity->getRememberMe(), "I expect __rememberMe value that is an integer.");
         $this->assertEquals($this->identity->getRememberMe(), 1, "I expect __rememberMe value that is 1.");
         $this->identity->destroy();
@@ -254,17 +235,27 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function getRememberToken()
+    public function testGetRememberToken()
     {
         $this->login();
 
-        $token = Token::getRememberToken($this->container->get('cookie'), $this->container->get('user.params'));
+        $request    = $this->container->get('request');
+        $rememberMe = new RememberMe(
+            $request,
+            [
+                'name' => '__rm',
+                'domain' => '',
+                'path' => '/',
+                'secure' => false,
+                'httpOnly' => false,
+                'expire' => 6 * 30 * 24 * 3600,
+            ]
+        );
+        $token = $rememberMe->generateToken();
         $this->identity->set('__rememberToken', $token);
         $token = $this->identity->getRememberToken();
 
-        $this->assertInternalType('alnum', $token, "I login.I create remember me token and i expect that the type is alfanumeric.");
         $this->assertEquals(32, strlen($token), "I expect length of value that is equal to 32.");
-        
         $this->identity->destroy();
     }
 
@@ -273,16 +264,15 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function logout()
+    public function testLogout()
     {
         $this->login();
 
         $this->identity->logout();
-        $credentials = $this->user->storage->getCredentials();
+        $credentials = $this->identity->getArray();
 
         $this->assertArrayHasKey('__isAuthenticated', $credentials, "I expect user credentials has '__isAuthenticated' key.");
         $this->assertEquals($credentials['__isAuthenticated'], 0, "I expect value of '__isAuthenticated' that is equal to 0.");
-        
         $this->identity->destroy();
     }
 
@@ -291,12 +281,11 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function destroy()
+    public function testDestroy()
     {
         $this->login();
-
+        
         $this->identity->destroy();
-
         $this->assertFalse($this->identity->exists(), "I destroy the identiy and i expect that the value is false.");
     }
 
@@ -305,7 +294,7 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function updateTemporary()
+    public function testUpdateTemporary()
     {
         $this->login();
 
@@ -322,7 +311,7 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function destroyTemporary()
+    public function testDestroyTemporary()
     {
         $this->login();
 
@@ -337,42 +326,27 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function updateRememberToken()
+    public function testUpdateRememberToken()
     {
         $sql = 'SELECT remember_token FROM users WHERE id = 1';
         
         $this->login();
+        $this->db = $this->container->get('database:default');
 
         $this->identity->set('__rememberMe', 1);
-        $beforeRow = $this->db->query($sql)->rowArray();
+        $beforeRow = $this->db->query($sql)->fetch();
         $this->identity->updateRememberToken();
         $this->identity->set('__rememberMe', 0);
 
-        $afterRow = $this->db->query($sql)->rowArray();
-        $name = $this->container->get('user.params')['login']['rememberMe']['cookie']['name'];
-        $this->cookie->delete($name);
+        $afterRow = $this->db->query($sql)->fetch();
 
-        $this->assertNotEqual($beforeRow['remember_token'], $afterRow['remember_token'], "I check remember_token from database and i expect that the value is not equal to old value.");
-        $this->assertInternalType('alnum', $afterRow['remember_token'], "I expect that the value is alfanumeric.");
+        $this->assertNotEquals($beforeRow['remember_token'], $afterRow['remember_token'], "I check remember_token from database and i expect that the value is not equal to old value.");
+        
+        $alnum = ctype_alnum($afterRow['remember_token']);
+
+        $this->assertTrue($alnum, "I expect that the value is alfanumeric.");
         $this->assertEquals(strlen($afterRow['remember_token']), 32, "I expect length of value that is equal to 32.");
         $this->identity->destroy();
-    }
-
-    /**
-     * Removes "__rm" cookie from user browser
-     *
-     * @return void
-     */
-    public function forgetMe()
-    {
-        $this->identity->initialize();
-
-        $request = $this->container->get('request');
-        $request = $request->withCookieParams(['__rm' => 'fgvH6hrlWNDeb9jz5L2P4xBW3vdrDP17']);
-
-        $this->identity->forgetMe();
-
-        $this->assertArrayHasKey($cookieID, $headers, "I set a test-value to cookie headers then i do forgetMe and i expect the cookie id removed from cookie headers.");
     }
 
     /**
@@ -380,7 +354,7 @@ class IdentityTest extends WebTestCase
      *
      * @return void
      */
-    public function validate()
+    public function testValidate()
     {
         $this->login();
 

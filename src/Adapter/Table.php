@@ -1,20 +1,20 @@
 <?php
 
-namespace Obullo\Auth\MFA\Adapter\Database;
+namespace Obullo\Auth\Adapter;
 
-use Obullo\Auth\MFA\User\User;
-use Obullo\Auth\MFA\AuthResult;
-use Obullo\Auth\MFA\Adapter\AbstractAdapter;
+use Obullo\Auth\User\User;
+use Obullo\Auth\AuthResult;
+use Obullo\Auth\Adapter\AbstractAdapter;
 use Interop\Container\ContainerInterface as Container;
-use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
+use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
- * Database Adapter
+ * Database Table Adapter
  *
  * @copyright 2009-2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Database extends AbstractAdapter
+class Table extends AbstractAdapter
 {
     /**
      * Table
@@ -57,27 +57,13 @@ class Database extends AbstractAdapter
      * @var array
      */
     protected $resultRowArray = array();
-
-    /**
-     * Check temporary identity exists in storage
-     *
-     * @var boolean
-     */
-    protected $isTemporary = false;
-
+    
     /**
      * Failure switch
      *
      * @var boolean
      */
     protected $failure = false;
-
-    /**
-     * Whether to regenerate session id after login
-     *
-     * @var boolean
-     */
-    protected $regenerateSessionId = true;
 
     /**
      * Password needs rehash value
@@ -97,16 +83,6 @@ class Database extends AbstractAdapter
         $this->table     = $container->get('Auth:Table');
         $this->storage   = $container->get('Auth:Storage');
         $this->identity  = $container->get('Auth:Identity');
-    }
-
-    /**
-     * Set session regenerate id functionality
-     *
-     * @param boolean $enabled true or false
-     */
-    public function regenerateSessionId($enabled = true)
-    {
-        $this->regenerateSessionId = $enabled;
     }
 
     /**
@@ -141,8 +117,6 @@ class Database extends AbstractAdapter
      */
     public function authenticate(Credentials $credentials)
     {
-        $this->ignoreRecaller();  // Ignore recaller if user has remember cookie
-
         if ($this->checkCredentials($credentials) == false) {
             $message = 'Authentication requires username and plain password.';
             return new AuthResult(
@@ -166,8 +140,6 @@ class Database extends AbstractAdapter
      */
     public function validateCredentials(Credentials $credentials)
     {
-        $this->ignoreRecaller();  // Ignore recaller if user has remember cookie
-
         return $this->authenticationRequest($credentials, false);  // validate credentials
     }
 
@@ -186,7 +158,6 @@ class Database extends AbstractAdapter
     protected function authenticationRequest(Credentials $credentials, $login = true)
     {
         $storageResult = $this->storage->query();  // if identity exists returns to cached data
-
         /**
          * If cached identity does not exist in memory do SQL query
          */
@@ -196,7 +167,7 @@ class Database extends AbstractAdapter
             $plain = $credentials->getPasswordValue();
             $hash  = $this->resultRowArray[$this->table->getPasswordColumn()];
             
-            if ($this->verifyPassword($plain, $hash)) {
+            if ($this->passwordHash = $this->container->get('Auth:Password')->verify($plain, $hash)) {
             // In here hash may cause performance bottleneck
             // depending to passwordNeedHash "cost" value default is 6
             // for best performance, set 10-12 for max security.
@@ -221,7 +192,7 @@ class Database extends AbstractAdapter
      *
      * @return object
      */
-    public function authorizeUser(User $user)
+    public function authorize(User $user)
     {
         $credentials = $user->getCredentials();
         $resultRow   = $user->getResultRow();
@@ -239,11 +210,8 @@ class Database extends AbstractAdapter
          */
         $attributes = array_merge($resultRow, $attributes);
 
-        if ($this->regenerateSessionId) {
-            $this->sessionRegenerateId(true); // Delete old session after regenerate !
-        }
         if ($credentials->getRememberMeValue()) {  // If user choosed remember feature
-            $token = $this->container->get('Auth:RememberMe')->getToken();
+            $token = $this->container->get('Auth:RecallerToken')->create();
             $this->table->updateRememberToken($token, $credentials->getIdentityValue()); // refresh rememberToken
         }
         if ($this->identity->isTemporary()) {
@@ -283,7 +251,7 @@ class Database extends AbstractAdapter
     }
 
     /**
-     * Creates a Obullo\Auth\MFA\AuthResult object from the information that
+     * Creates a Obullo\Auth\AuthResult object from the information that
      * has been collected during the authenticate() attempt.
      *
      * @return AuthResult
@@ -298,28 +266,6 @@ class Database extends AbstractAdapter
         $result->setResultRow($this->resultRowArray);
         return $result;
     }
-    
-    /**
-     * Verify password hash
-     *
-     * @param string $plain plain  password
-     * @param string $hash  hashed password
-     *
-     * @return boolean | array
-     */
-    protected function verifyPassword($plain, $hash)
-    {
-        $cost = $this->container->get('Auth.PASSWORD_COST');
-        $algo = $this->container->get('Auth.PASSWORD_ALGORITHM');
-
-        if (password_verify($plain, $hash)) {
-            if (password_needs_rehash($hash, $algo, array('cost' => $cost))) {
-                $this->passwordHash = password_hash($plain, $algo, array('cost' => $cost));
-            }
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Returns to rehashed password if needs rehash
@@ -329,17 +275,5 @@ class Database extends AbstractAdapter
     public function passwordNeedsRehash()
     {
         return $this->passwordHash;
-    }
-
-    /**
-     * Remove recaller cookie and ignore recaller functionality.
-     *
-     * @return void
-     */
-    protected function ignoreRecaller()
-    {
-        if ($this->container->get('Auth:RememberMe')->readToken()) {
-            $_SESSION['Auth_IgnoreRecaller'] = 1;
-        }
     }
 }

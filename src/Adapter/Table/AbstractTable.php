@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\MFA\Adapter\Database;
+namespace Obullo\Auth\Adapter\Table;
 
 /**
  * Abstract Table

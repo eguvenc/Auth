@@ -15,15 +15,15 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) { // Perform 
 
     $rememberMe = isset($parsedBody['remember_me']) ? 1 : 0;
 
-    $authAdapter = new Obullo\Auth\MFA\Adapter\Database\Database($container);
-    $authAdapter->regenerateSessionId(true);
+    $authAdapter = new Obullo\Auth\Adapter\Table($container);
 
-    $credentials = new Obullo\Auth\MFA\User\Credentials;
+    $credentials = new Obullo\Auth\User\Credentials;
     $credentials->setIdentityValue($parsedBody['email']);
     $credentials->setPasswordValue($parsedBody['password']);
     $credentials->setRememberMeValue($rememberMe);
-
+    
     $authResult = $authAdapter->authenticate($credentials);
+    $authAdapter->regenerateSessionId(true);
 
     if (! $authResult->isValid()) {
         $messages = array();
@@ -59,7 +59,6 @@ if (isset($parsedBody['email']) && isset($parsedBody['password'])) { // Perform 
 
     $response = new HtmlResponse($html);
 }
-
 /**
  * Create server
  */
@@ -68,7 +67,6 @@ $server = Zend\Diactoros\Server::createServerfromRequest(
     $request,
     $response
 );
-
 /**
  * Emit response
  */

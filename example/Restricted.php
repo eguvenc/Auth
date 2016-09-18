@@ -11,44 +11,41 @@ $html = '<html>
 $identity = $container->get('Auth:Identity');
 $storage  = $container->get('Auth:Storage');
 
-print_r($_SESSION); // Session  siliniyor.
-
-var_dump($storage->getIdentifier());
 
 /**
- * Remember User
+ * Middleware: Recall User
  */
 if ($token = $identity->hasRecallerCookie()) {
-    $recaller = new Obullo\Auth\MFA\Recaller($container);
-    $user = $recaller->recallUser($token);
 
-    $authAdapter = new Obullo\Auth\MFA\Adapter\Database\Database($container);
-    $authAdapter->regenerateSessionId(true);
-    $authAdapter->authorizeUser($user);
+    $recaller = new Obullo\Auth\Recaller($container);
+    
+    if ($user = $recaller->recallUser($token)) {
+        $authAdapter = new Obullo\Auth\Adapter\Table($container);
+        $authAdapter->authorizeUser($user);
+        $authAdapter->regenerateSessionId(true);
+    }
 }
-
 /**
- * Temporary identity feature
+ * Middleware: Temporary identity
  */
 if ($identity->isTemporary()) {
     $response = new RedirectResponse("/example/Verify.php");
 }
 /**
-* Don't forget check to guest users in your all pages !
+* Middleware: Guest identity
 */
 if ($identity->guest()) {
-    // $response = new RedirectResponse("/example/index.php?error[]=Your session has expired.");
+    $response = new RedirectResponse("/example/index.php?error[]=Your session has expired.");
 }
-
 /**
- * If user authorized
- */
+* Middleware: Auth identity
+*/
 if ($identity->check()) {
     $html.= '<h2>User Identity</h2>';
     $html.= '<pre>'.print_r($identity->getArray(), true).'</pre>';
 
     $html.= '<a href="/example/Logout.php?action=logout">Logout</a> ( Standart Logout ) | ';
-    $html.= '<a href="/example/Logout.php?action=destroy">Destroy</a> ( Destroy Cached Identity ) |';
+    $html.= '<a href="/example/Logout.php?action=destroy">Destroy</a> ( Destroy Cached Identity ) | ';
     $html.= '<a href="/example/Logout.php?action=forgetMe">Forget Me</a> ( Remove Me From This Computer )';
 
     $html.= '<h2>User Sessions</h2>';
@@ -58,7 +55,6 @@ if ($identity->check()) {
     $html.= '<pre>'.print_r($sessions, true).'</pre>';
     $response = new HtmlResponse($html);
 }
-
 /**
  * Create server
  */
@@ -67,7 +63,6 @@ $server = Zend\Diactoros\Server::createServerfromRequest(
     $request,
     $response
 );
-
 /**
  * Emit response
  */

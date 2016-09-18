@@ -1,13 +1,13 @@
 <?php
 
-namespace Obullo\Auth\MFA;
+namespace Obullo\Auth;
 
-use Obullo\Auth\MFA\User\User;
-use Obullo\Auth\MFA\User\Credentials;
+use Obullo\Auth\User\User;
+use Obullo\Auth\User\Credentials;
 use Interop\Container\ContainerInterface as Container;
-use Obullo\Auth\MFA\Storage\StorageInterface as Storage;
-use Obullo\Auth\MFA\Identity\IdentityInterface as Identity;
-use Obullo\Auth\MFA\Adapter\Datababase\TableInterface as Table;
+
+// use Obullo\Auth\Storage\StorageInterface as Storage;
+// use Obullo\Auth\Adapter\Datababase\TableInterface as Table;
 
 /**
  * Recaller
@@ -67,7 +67,7 @@ class Recaller
 
         if (! is_array($resultRowArray) || empty($resultRowArray[$rememberTokenColumn])) {
             $this->storage->setIdentifier('Guest');   // Mark user as guest
-            $this->identity->forgetMe();
+            $this->container->get('Auth:RecallerToken')->remove();
             return;
         }
         $this->storage->setIdentifier($resultRowArray[$identityColumn]);

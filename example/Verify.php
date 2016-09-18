@@ -2,7 +2,6 @@
 <head><style type="text/css">ul { list-style-type: none; } p { line-height: 2px; }</style></head>
 <body>
 <?php
-
 include 'Header.php';
 
 $identity = $container->get('Auth:Identity');

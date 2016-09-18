@@ -10,15 +10,14 @@ Oturum açma işlemlerinde kullancıyı yetkilendirme işlemleri birden fazla a�
 
 MFA yani çoklu yetkilendirme yönteminde standart oturum açma işlevinden farklı olarak 2. aşamada kullanıcıdan  ile kimliğini doğrulaması istenir. Bir saldırgan yukarıda saydığımız kimlik doğrulama metotlarından kullanıcı parolasına sahip olsa bile MFA için yetkilendirilmiş güvenilir bir cihaza sahip olmadığından kimlik doğrulamayı geçemeyecektir. 
 
-## Auth-MFA 
+## MFA
 
-Auth-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. Auth-MFA paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.
-
+MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. Auth-MFA paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.
 
 ### Composer İle Yükleme
 
 ```
-composer require obullo/auth-mfa
+composer require obullo/mfa
 ```
 
 ### Özellikler
@@ -34,7 +33,7 @@ composer require obullo/auth-mfa
 
 Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarından nasıl geçtiği ve servisin nasıl çalıştığı hakkında size bir ön bilgi verecektir:
 
-![Authentication](https://github.com/obullo/Auth-MFA/blob/master/flowchart.png?raw=true "Authentication")
+![Authentication](https://github.com/obullo/mfa/blob/master/flowchart.png?raw=true "Authentication")
 
 Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.
 
@@ -66,7 +65,7 @@ Tüm auth konfigürasyonu <kbd>classes/ServiceProvider/Authentication</kbd> sın
 $container->share('Auth.PASSWORD_COST', 6);
 $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
 
-$container->share('Auth:Storage', 'Obullo\Auth\MFA\Storage\Redis')
+$container->share('Auth:Storage', 'Obullo\Auth\Storage\Redis')
     ->withArgument($container->get('redis:default'))
     ->withArgument($container->get('request'))
     ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
@@ -95,7 +94,7 @@ Desteklenen sürücüler
 Hafıza deposu servis konfigurasyonundan değiştirilebilir.
 
 ```php
-$container->share('Auth:Storage', 'Obullo\Auth\MFA\Storage\Memcached')
+$container->share('Auth:Storage', 'Obullo\Auth\Storage\Memcached')
     ->withArgument($container->get('memcached:default'))
 ```
 
@@ -149,7 +148,7 @@ $container->share('Auth:Table', 'My\Database\Table\Db')
 Mongo Db için örnek.
 
 ```php
-$container->share('Auth:Table', 'Obullo\Auth\MFA\Adapter\Database\Table\Mongo');
+$container->share('Auth:Table', 'Obullo\Auth\Adapter\Database\Table\Mongo');
 ```
 
 ### Oturum Açma
@@ -157,11 +156,11 @@ $container->share('Auth:Table', 'Obullo\Auth\MFA\Adapter\Database\Table\Mongo');
 Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.
 
 ```php
-$authAdapter = new Obullo\Auth\MFA\Adapter\Database\Database($container);
+$authAdapter = new Obullo\Auth\Adapter\Database\Database($container);
 $authAdapter->setRequest($request);
 $authAdapter->regenerateSessionId(true);
 
-$credentials = new Obullo\Auth\MFA\Credentials;
+$credentials = new Obullo\Auth\Credentials;
 $credentials->setIdentityValue('user@example.com');
 $credentials->setPasswordValue('123456');
 $credentials->setRememberMeValue(false);
@@ -545,6 +544,23 @@ Login denemesinden sonra tüm sonuçları bir dizi içerisinde verir.
 #### $authResult->getResultRow();
 
 Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada varsa önbellekte oluşturulmuş sorgu sonucuna geri döner.
+
+### Geri Çağırım (Recaller)
+
+Eğer kullanıcının daha önceden tarayıcısında beni hatırla çerezi varsa geri çağırım fonksiyonu kullanılarak kullanıcının oturum bilgilerini girmeden yetkilendirilmesi sağlanmış olur.
+
+```php
+if ($token = $identity->hasRecallerCookie()) {
+    
+    $recaller = new \Obullo\Auth\Recaller($container);
+
+    if ($user = $recaller->recallUser($token)) {
+        $authAdapter = new \Obullo\Auth\Adapter\Database\Database($container);
+        $authAdapter->authorizeUser($user);
+        $authAdapter->regenerateSessionId(true);
+    }
+}
+```
 
 ### Çoklu Yetkilendirme
 

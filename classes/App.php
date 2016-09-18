@@ -24,16 +24,7 @@ class App
     {
         $this->container = $container;
 
-        $this->done = function ($request, $response, $err = null) use ($container) {
-
-
-            // if ($container->hasShared('cookie')) {
-                $cookie = $container->get('cookie');
-
-
-                // $response = $response->withHeader('Set-Cookie', $cookie->toHeaders());
-            // }
-
+        $this->done = function ($request, $response, $err = null) {
             return $response;
         };
     }

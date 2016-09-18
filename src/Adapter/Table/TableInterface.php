@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Auth\MFA\Adapter\Database;
+namespace Obullo\Auth\Adapter\Table;
 
-use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
+use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
  * Auth Table Interface

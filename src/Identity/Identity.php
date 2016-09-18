@@ -1,10 +1,9 @@
 <?php
 
-namespace Obullo\Auth\MFA\Identity;
+namespace Obullo\Auth\Identity;
 
 use Interop\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Obullo\Auth\MFA\User\RememberMeInterface as RememberMe;
 
 /**
  * User Identity
@@ -20,6 +19,13 @@ class Identity extends AbstractIdentity
      * @var object
      */
     protected $table;
+
+    /**
+     * Request
+     *
+     * @var object
+     */
+    protected $request;
 
     /**
      * Storage
@@ -38,10 +44,11 @@ class Identity extends AbstractIdentity
     /**
      * Constructor
      *
-     * @param object $container container
+     * @param array  $params parameters
      */
-    public function __construct(Container $container)
+    public function __construct(Request $request, Container $container)
     {
+        $this->request   = $request;
         $this->container = $container;
         $this->table     = $container->get('Auth:Table');
         $this->storage   = $container->get('Auth:Storage');
@@ -70,23 +77,21 @@ class Identity extends AbstractIdentity
     /**
      * Returns true if user has recaller cookie (__rm).
      *
-     * @param object $rememberMe null|object
-     *
      * @return false|string token
      */
-    public function hasRecallerCookie($rememberMe = null)
+    public function hasRecallerCookie($token = false)
     {
-        if (! empty($_SESSION['Auth_IgnoreRecaller']) && $_SESSION['Auth_IgnoreRecaller'] == 1) {
-            unset($_SESSION['Auth_IgnoreRecaller']);
-        } else {
-            if ($rememberMe instanceof RememberMe) {
-                $token = $rememberMe->readToken();
-            } else {
-                $token = $this->container->get('Auth:RememberMe')->readToken();
+        $cookie = $this->container->get('Auth.RECALLER_COOKIE');
+        $rm     = $cookie['name'];
+
+        $cookies = $this->request->getCookieParams();
+        $token   = (empty($cookies[$rm])) ? $token : $cookies[$rm];
+
+        if ($this->validateRecaller($token)) { // Remember the user if cookie exists
+            if ($this->check()) {
+                return false;
             }
-            if ($this->validateRecaller($token)) { // Remember the user if cookie exists
-                return $token;
-            }
+            return $token;
         }
         return false;
     }
@@ -314,6 +319,16 @@ class Identity extends AbstractIdentity
     }
 
     /**
+     * Remove recaller cookie
+     *
+     * @return void
+     */
+    public function forgetMe()
+    {
+        $this->container->get('Auth:RecallerToken')->remove();
+    }
+
+    /**
      * Update remember token if it exists in the memory and browser header
      *
      * @return int|boolean
@@ -322,32 +337,12 @@ class Identity extends AbstractIdentity
     {
         if ($this->getRememberMe() == 1) {  // If user checked rememberMe option
 
-            $tokenValue = $this->refreshRememberToken();
-            $this->set($this->container->get('Auth:Table')->getRememberTokenColumn(), $tokenValue);
+            $tokenValue = $this->container->get('Auth:RecallerToken')->create();
+            $this->table->updateRememberToken($tokenValue, $this->getIdentifier());
+
+            $rememberColumn = $this->table->getRememberTokenColumn();
+            $this->set($rememberColumn, $tokenValue);
             return;
         }
-    }
-
-    /**
-     * Refresh the rememberMe token
-     *
-     * @return string
-     */
-    public function refreshRememberToken()
-    {
-        $tokenValue = $this->container->get('Auth:RememberMe')->getToken();
-        $this->container->get('Auth:Table')->updateRememberToken($tokenValue, $this->getIdentifier());
-
-        return $tokenValue;
-    }
-
-    /**
-     * Removes rememberMe cookie from user browser
-     *
-     * @return void
-     */
-    public function forgetMe()
-    {
-        $this->container->get('Auth:RememberMe')->removeToken();
     }
 }

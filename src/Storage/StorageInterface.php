@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\MFA\Storage;
+namespace Obullo\Auth\Storage;
 
 /**
  * Storage Interface

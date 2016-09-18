@@ -1,6 +1,6 @@
 <?php
 
-use Obullo\Auth\MFA\Storage\Redis as RedisStorage;
+use Obullo\Auth\Storage\Redis as RedisStorage;
 
 class RedisTest extends WebTestCase
 {
@@ -22,9 +22,10 @@ class RedisTest extends WebTestCase
         $this->request = $this->container->get('request');
 
         $this->storage = new RedisStorage(
-            $this->container->get('redis:default'),
-            $this->request
+            $this->container->get('redis:default')
         );
+        $this->storage->setContainer($this->container);
+        
         $this->credentials = [
             $this->table->getIdentityColumn() => 'user@example.com',
             $this->table->getPasswordColumn() => '12346',
@@ -198,7 +199,7 @@ class RedisTest extends WebTestCase
      */
     public function testGetLoginId()
     {
-        unset($_SESSION[$this->storage->getCacheKey().'_LoginId']);
+        unset($_SESSION[$this->storage->getStoreKey().'_LoginId']);
 
         $client    = $this->request->getAttribute('Auth_Client');
         $userAgent = substr($client['HTTP_USER_AGENT'], 0, 50); // First 50 characters of the user agent
@@ -206,7 +207,7 @@ class RedisTest extends WebTestCase
         list($usec, $sec) = explode(" ", microtime());
         $microtime = ((float)$usec + (float)$sec);
         $loginId = md5(trim($userAgent).$microtime);
-        $_SESSION[$this->storage->getCacheKey().'_LoginId'] = $loginId;
+        $_SESSION[$this->storage->getStoreKey().'_LoginId'] = $loginId;
         $expected  = $this->storage->getLoginId();
 
         $this->assertEquals($loginId, $expected, "I expect that the value is $loginId.");
@@ -234,7 +235,7 @@ class RedisTest extends WebTestCase
      */
     public function testGetCacheKey()
     {
-        $this->assertNotEmpty($this->storage->getCacheKey(), "I expect the storage key is not empty.");
+        $this->assertNotEmpty($this->storage->getStoreKey(), "I expect the storage key is not empty.");
 
         $this->storage->unsetIdentifier();
         $this->storage->unsetLoginId();
@@ -247,7 +248,7 @@ class RedisTest extends WebTestCase
      */
     public function testGetMemoryBlockKey()
     {
-        $block = $this->storage->getCacheKey(). ':' .$this->storage->getIdentifier();
+        $block = $this->storage->getStoreKey(). ':' .$this->storage->getIdentifier();
         $this->assertEquals($block, $this->storage->getMemoryBlockKey(), "I expect the block key equals to key '$block'.");
 
         $this->storage->unsetIdentifier();
@@ -261,7 +262,7 @@ class RedisTest extends WebTestCase
      */
     public function testGetUserKey()
     {
-        $block = $this->storage->getCacheKey(). ':' .$this->storage->getUserId();
+        $block = $this->storage->getStoreKey(). ':' .$this->storage->getUserId();
         $this->assertEquals($block, $this->storage->getUserKey(), "I expect the block key equals to key '$block'.");
 
         $this->storage->unsetIdentifier();

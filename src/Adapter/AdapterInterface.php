@@ -1,8 +1,9 @@
 <?php
 
-namespace Obullo\Auth\MFA\Adapter;
+namespace Obullo\Auth\Adapter;
 
-use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
+use Obullo\Auth\User\UserInterface as User;
+use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
  * Adapter Interface
@@ -20,4 +21,13 @@ interface AdapterInterface
      * @return object authResult
      */
     public function authenticate(Credentials $credentials);
+
+    /**
+     * Authorize user
+     *
+     * @param User $user user
+     *
+     * @return void
+     */
+    public function authorize(User $user);
 }

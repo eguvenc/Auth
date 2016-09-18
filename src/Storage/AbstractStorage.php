@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\MFA\Storage;
+namespace Obullo\Auth\Storage;
 
 use League\Container\ContainerAwareTrait;
 
@@ -19,7 +19,7 @@ abstract class AbstractStorage implements StorageInterface
      *
      * @var string
      */
-    protected $cacheKey;
+    protected $storeKey;
 
     /**
      * Identity lifetime
@@ -42,7 +42,7 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function __construct($options = array())
     {
-        $this->cacheKey = isset($options['cacheKey']) ? $options['cacheKey'] : 'Auth';
+        $this->storeKey = isset($options['storeKey']) ? $options['storeKey'] : 'Auth';
     }
 
     /**
@@ -94,7 +94,7 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function setIdentifier($identifier)
     {
-        $_SESSION[$this->getCacheKey().'_Identifier'] = $identifier;
+        $_SESSION[$this->getStoreKey().'_Identifier'] = $identifier;
     }
 
     /**
@@ -104,7 +104,7 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function getIdentifier()
     {
-        $key = $this->getCacheKey().'_Identifier';
+        $key = $this->getStoreKey().'_Identifier';
         
         return empty($_SESSION[$key]) ? null : $_SESSION[$key].':'.$this->getLoginId();
     }
@@ -116,7 +116,7 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function unsetIdentifier()
     {
-        unset($_SESSION[$this->getCacheKey().'_Identifier']);
+        unset($_SESSION[$this->getStoreKey().'_Identifier']);
     }
 
     /**
@@ -213,7 +213,7 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function getUserId()
     {
-        $key = $this->getCacheKey().'_Identifier';
+        $key = $this->getStoreKey().'_Identifier';
 
         if (empty($_SESSION[$key])) {
             return null;
@@ -228,7 +228,7 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function getLoginId()
     {
-        $key = $this->getCacheKey().'_LoginId';
+        $key = $this->getStoreKey().'_LoginId';
 
         if (empty($_SESSION[$key])) {
             return $this->setLoginId();
@@ -249,7 +249,7 @@ abstract class AbstractStorage implements StorageInterface
         $microtime = ((float)$usec + (float)$sec);
         $id = md5(trim($userAgent).$microtime);
         
-        $_SESSION[$this->getCacheKey().'_LoginId'] = $id;
+        $_SESSION[$this->getStoreKey().'_LoginId'] = $id;
         return $id;
     }
 
@@ -260,7 +260,7 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function unsetLoginId()
     {
-        unset($_SESSION[$this->getCacheKey().'_LoginId']);
+        unset($_SESSION[$this->getStoreKey().'_LoginId']);
     }
 
     /**
@@ -268,9 +268,9 @@ abstract class AbstractStorage implements StorageInterface
      *
      * @return string
      */
-    public function getCacheKey()
+    public function getStoreKey()
     {
-        return $this->cacheKey;
+        return $this->storeKey;
     }
 
     /**
@@ -284,7 +284,7 @@ abstract class AbstractStorage implements StorageInterface
          * In here memcached like storages use $this->storage->getUserId()
          * but redis like storages use $this->storage->getIdentifier();
          */
-        return $this->getCacheKey(). ':' .$this->getIdentifier();  // Create unique key
+        return $this->getStoreKey(). ':' .$this->getIdentifier();  // Create unique key
     }
 
     /**
@@ -294,6 +294,6 @@ abstract class AbstractStorage implements StorageInterface
      */
     public function getUserKey()
     {
-        return $this->getCacheKey(). ':' .$this->getUserId();
+        return $this->getStoreKey(). ':' .$this->getUserId();
     }
 }

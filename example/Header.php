@@ -5,27 +5,23 @@ ini_set('display_errors', 1);
 chdir(dirname(__DIR__));
 require_once "vendor/autoload.php";
 
-register_shutdown_function(
-    function () {
-        session_write_close();
-    }
-);
-session_name('sessions');
+session_name("sessions");
 session_set_cookie_params(
-    3600,
+    0,
     '/',
     '',
     false,
-    false
+    true
 );
+register_shutdown_function('session_write_close');
 session_start();
 
 $container = new League\Container\Container;
 $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
 $response = new Zend\Diactoros\Response;
 $container->share('request', $request);
+$container->share('response', $response);
 
-$container->addServiceProvider('ServiceProvider\Cookie');
 $container->addServiceProvider('ServiceProvider\Redis');
 $container->addServiceProvider('ServiceProvider\Memcached');
 $container->addServiceProvider('ServiceProvider\Database');

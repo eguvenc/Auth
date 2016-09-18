@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\MFA;
+namespace Obullo\Auth;
 
 /**
  * Auth Result Controller

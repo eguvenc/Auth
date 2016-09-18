@@ -1,9 +1,9 @@
 <?php
 
-namespace Obullo\Auth\MFA\Adapter;
+namespace Obullo\Auth\Adapter;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Obullo\Auth\MFA\User\CredentialsInterface as Credentials;
+use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
  * Abstract Adapater
@@ -55,11 +55,17 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @return string session_id
      */
-    public function sessionRegenerateId($deleteOldSession = true)
+    public function regenerateSessionId($deleteOldSession = true)
     {
         session_regenerate_id((bool) $deleteOldSession);
 
-        return session_id(); // new session_id
+        $sid = session_id(); // new session_id
+        
+        //  close the old and new sessions
+        session_write_close();
+        session_start();
+
+        return $sid;
     }
 
     /**

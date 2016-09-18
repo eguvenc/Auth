@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\MFA\Storage;
+namespace Obullo\Auth\Storage;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -188,7 +188,7 @@ class Redis extends AbstractStorage
     {
         $sessions   = array();
         $identifier = $this->getUserId();
-        $key        = $this->getCacheKey().':';
+        $key        = $this->getStoreKey().':';
         $dbSessions = $this->getActiveSessions();  // $this->redis->keys($key.$identifier.':*');
 
         if ($dbSessions == false) {
@@ -220,6 +220,6 @@ class Redis extends AbstractStorage
      */
     public function killSession($loginID)
     {
-        $this->redis->delete($this->getCacheKey().':'.$this->getUserId().':'.$loginID);
+        $this->redis->delete($this->getStoreKey().':'.$this->getUserId().':'.$loginID);
     }
 }

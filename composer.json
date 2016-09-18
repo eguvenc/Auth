@@ -1,7 +1,7 @@
 {
     "autoload": {
         "psr-4": {
-            "Obullo\\Auth\\MFA\\": "src/",
+            "Obullo\\Auth\\": "src/",
             "": "classes/"
         }
     },

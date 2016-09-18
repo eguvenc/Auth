@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Auth\MFA\Traits;
+namespace Obullo\Auth\Traits;
 
-use Obullo\Auth\MFA\Storage\StorageInterface as Storage;
+use Obullo\Auth\Storage\StorageInterface as Storage;
 
 trait UniqueSessionTrait
 {

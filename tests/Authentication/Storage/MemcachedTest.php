@@ -1,6 +1,6 @@
 <?php
 
-use Obullo\Auth\MFA\Storage\Memcached as MemcachedStorage;
+use Obullo\Auth\Storage\Memcached as MemcachedStorage;
 
 class MemcachedTest extends WebTestCase
 {
@@ -25,9 +25,10 @@ class MemcachedTest extends WebTestCase
         $microtime = ((float)$usec + (float)$sec);
 
         $this->storage = new MemcachedStorage(
-            $this->container->get('memcached:default'),
-            $this->request
+            $this->container->get('memcached:default')
         );
+        $this->storage->setContainer($this->container);
+        
         $this->credentials = [
             $this->table->getIdentityColumn() => 'user@example.com',
             $this->table->getPasswordColumn() => '12346',
@@ -205,7 +206,7 @@ class MemcachedTest extends WebTestCase
      */
     public function testGetLoginId()
     {
-        unset($_SESSION[$this->storage->getCacheKey().'_LoginId']);
+        unset($_SESSION[$this->storage->getStoreKey().'_LoginId']);
 
         $client    = $this->request->getAttribute('Auth_Client');
         $userAgent = substr($client['HTTP_USER_AGENT'], 0, 50); // First 50 characters of the user agent
@@ -213,7 +214,7 @@ class MemcachedTest extends WebTestCase
         list($usec, $sec) = explode(" ", microtime());
         $microtime = ((float)$usec + (float)$sec);
         $loginId = md5(trim($userAgent).$microtime);
-        $_SESSION[$this->storage->getCacheKey().'_LoginId'] = $loginId;
+        $_SESSION[$this->storage->getStoreKey().'_LoginId'] = $loginId;
         $expected  = $this->storage->getLoginId();
 
         $this->assertEquals($loginId, $expected, "I expect that the value is $loginId.");
@@ -241,7 +242,7 @@ class MemcachedTest extends WebTestCase
      */
     public function testGetCacheKey()
     {
-        $this->assertNotEmpty($this->storage->getCacheKey(), "I expect the storage key is not empty.");
+        $this->assertNotEmpty($this->storage->getStoreKey(), "I expect the storage key is not empty.");
 
         $this->storage->unsetIdentifier();
         $this->storage->unsetLoginId();
@@ -254,7 +255,7 @@ class MemcachedTest extends WebTestCase
      */
     public function testGetMemoryBlockKey()
     {
-        $block = $this->storage->getCacheKey(). ':' .$this->storage->getIdentifier();
+        $block = $this->storage->getStoreKey(). ':' .$this->storage->getIdentifier();
         $this->assertEquals($block, $this->storage->getMemoryBlockKey(), "I expect the block key equals to key '$block'.");
 
         $this->storage->unsetIdentifier();
@@ -268,7 +269,7 @@ class MemcachedTest extends WebTestCase
      */
     public function testGetUserKey()
     {
-        $block = $this->storage->getCacheKey(). ':' .$this->storage->getUserId();
+        $block = $this->storage->getStoreKey(). ':' .$this->storage->getUserId();
         $this->assertEquals($block, $this->storage->getUserKey(), "I expect the block key equals to key '$block'.");
 
         $this->storage->unsetIdentifier();

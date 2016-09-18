@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\MFA\Identity;
+namespace Obullo\Auth\Identity;
 
 /**
  * Common Identity Interface
@@ -92,21 +92,7 @@ interface IdentityInterface
     public function destroy();
 
     /**
-     * Update remember token if it exists in the memory and browser header
-     *
-     * @return int|boolean
-     */
-    public function updateRememberToken();
-
-    /**
-     * Refresh the rememberMe token value
-     *
-     * @return int|boolean
-     */
-    public function refreshRememberToken();
-
-    /**
-     * Removes recaller cookie from user browser
+     * Remove recaller cookie
      *
      * @return void
      */

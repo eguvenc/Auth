@@ -20,7 +20,7 @@ class Authentication extends AbstractServiceProvider
         'Auth:Table',
         'Auth:Storage',
         'Auth:Identity',
-        'Auth:RememberMe',
+        'Auth:RecallerToken',
     ];
 
     /**
@@ -39,6 +39,17 @@ class Authentication extends AbstractServiceProvider
 
         // Config
         //
+        $container->share(
+            'Auth.RECALLER_COOKIE',
+            [
+                'name' => '__rm',
+                'domain' => '',
+                'path' => '/',
+                'secure' => false,
+                'httpOnly' => false,
+                'expire' => 6 * 30 * 24 * 3600,
+            ]
+        );
         $container->share('Auth.PASSWORD_COST', 6);
         $container->share('Auth.PASSWORD_ALGORITHM', PASSWORD_BCRYPT);
         $container->share('Auth.REMOTE_ADDR', new RawArgument($server['REMOTE_ADDR']));
@@ -46,13 +57,16 @@ class Authentication extends AbstractServiceProvider
 
         // Services
         //
-        $container->share('Auth:Storage', 'Obullo\Auth\MFA\Storage\Redis')
+        $container->share('Auth:Password', 'Obullo\Auth\Password')
+            ->withArgument($container);
+
+        $container->share('Auth:Storage', 'Obullo\Auth\Storage\Redis')
             ->withArgument($container->get('redis:default'))
             ->withMethodCall('setContainer', [$container])
             ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
             ->withMethodCall('setTemporaryBlockLifetime', [300]);
 
-        $container->share('Auth:Table', 'Obullo\Auth\MFA\Adapter\Database\Table\Db')
+        $container->share('Auth:Table', 'Obullo\Auth\Adapter\Table\Db')
             ->withArgument($container->get('database:default'))
             ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
             ->withMethodCall('setTableName', ['users'])
@@ -60,19 +74,12 @@ class Authentication extends AbstractServiceProvider
             ->withMethodCall('setPasswordColumn', ['password'])
             ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 
-        $container->share('Auth:RememberMe', 'Obullo\Auth\MFA\User\RememberMe')
-            ->withArgument($container->get('cookie'))
-            ->withArgument(
-                [
-                    'name' => '__rm',
-                    'domain' => '',
-                    'path' => '/',
-                    'secure' => false,
-                    'httpOnly' => false,
-                    'expire' => 6 * 30 * 24 * 3600,
-                ]
-            );
-        $container->share('Auth:Identity', 'Obullo\Auth\MFA\Identity\Identity')
+        $container->share('Auth:RecallerToken', 'Obullo\Auth\RecallerToken')
+            ->withArgument($request)
+            ->withArgument($container);
+
+        $container->share('Auth:Identity', 'Obullo\Auth\Identity\Identity')
+            ->withArgument($request)
             ->withArgument($container);
     }
 }
