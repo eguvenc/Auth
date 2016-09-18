@@ -1,5 +1,24 @@
 
-## Php Multi Factor Web Authentication (MFA)
+## Php Web Authentication
+
+Auth yani paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve çoklu yetkilendirmeleri de destekler. Auth paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre orta veya büyük ölçekli uygulamalarda yönetilebilmeyi kolaylaştırmak için tasarlanmıştır.
+
+### Composer İle Yükleme
+
+```
+composer require obullo/auth
+```
+
+### Özellikler
+
+* Önbelleklenebilir kimlikler
+* Çoklu yetkilendirme (MFA)
+* Farklı davranışlar için adaptörler
+* Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve oturumları sonlandırabilme
+* Farklı veritabanları için tablo sınıfları
+* Beni hatırla özelliği
+
+### MFA Özelliği
 
 Oturum açma işlemlerinde kullancıyı yetkilendirme işlemleri birden fazla aşama ile yapılıyorsa bu çoklu yetkilendirme olarak adlandırılır. Multi-Factor Authentication güvenlik yöntemi; katmanlı bir yapıdan oluşur. Birden fazla kimlik doğrulama metoduyla saldırganların geçemeyeceği bir güvenlik kalkanı oluşturur. Bu metotlar aşağıdaki gibi olabilir : 
 
@@ -8,26 +27,9 @@ Oturum açma işlemlerinde kullancıyı yetkilendirme işlemleri birden fazla a�
 * Çağrı
 * Sms
 
-MFA yani çoklu yetkilendirme yönteminde standart oturum açma işlevinden farklı olarak 2. aşamada kullanıcıdan  ile kimliğini doğrulaması istenir. Bir saldırgan yukarıda saydığımız kimlik doğrulama metotlarından kullanıcı parolasına sahip olsa bile MFA için yetkilendirilmiş güvenilir bir cihaza sahip olmadığından kimlik doğrulamayı geçemeyecektir. 
+MFA yani çoklu yetkilendirme yönteminde standart oturum açma işlevinden farklı olarak 2. aşamada kullanıcıdan  ile kimliğini doğrulaması istenir. Bir saldırgan yukarıda saydığımız kimlik doğrulama metotlarından kullanıcı parolasına sahip olsa bile MFA için yetkilendirilmiş güvenilir bir cihaza sahip olmadığından kimlik doğrulamayı geçemeyecektir.
 
-## MFA
-
-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. Auth-MFA paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.
-
-### Composer İle Yükleme
-
-```
-composer require obullo/mfa
-```
-
-### Özellikler
-
-* Önbelleklenebilir kimlikler
-* Çoklu yetkilendirme
-* Farklı davranışlar için adaptörler
-* Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve oturumları sonlandırabilme
-* Farklı veritabanları için tablo sınıfları
-* Beni hatırla özelliği
+* Bu özellik opsiyoneldir.
 
 ### Akış Şeması
 
@@ -133,10 +135,10 @@ Test kullanıcı adı <kbd>user@example.com</kbd> ve şifre <kbd>123456</kbd> d�
 
 ### Auth Table
 
-Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\MultiAuthAuth\Adapter\Database\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.
+Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\Auth\Adapter\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.
 
 ```php
-$container->share('Auth:Table', 'My\Database\Table\Db')
+$container->share('Auth:Table', 'My\Table\Db')
     ->withArgument($container->get('database:default'))
     ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
     ->withMethodCall('setTableName', ['users'])
@@ -156,7 +158,7 @@ $container->share('Auth:Table', 'Obullo\Auth\Adapter\Database\Table\Mongo');
 Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.
 
 ```php
-$authAdapter = new Obullo\Auth\Adapter\Database\Database($container);
+$authAdapter = new Obullo\Auth\Adapter\Table($container);
 $authAdapter->setRequest($request);
 $authAdapter->regenerateSessionId(true);
 
@@ -555,7 +557,7 @@ if ($token = $identity->hasRecallerCookie()) {
     $recaller = new \Obullo\Auth\Recaller($container);
 
     if ($user = $recaller->recallUser($token)) {
-        $authAdapter = new \Obullo\Auth\Adapter\Database\Database($container);
+        $authAdapter = new \Obullo\Auth\Adapter\Table($container);
         $authAdapter->authorizeUser($user);
         $authAdapter->regenerateSessionId(true);
     }
