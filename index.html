@@ -2,7 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <title>Php Multi Factor Authentication by obullo</title>
+    <title>Php Web Authentication by obullo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -11,16 +11,39 @@
   </head>
   <body>
     <section class="page-header">
-      <h1 class="project-name">Php Multi Factor Authentication</h1>
-      <h2 class="project-tagline">Multi Factor authentication (mfa) for php.</h2>
-      <a href="https://github.com/obullo/Auth-MFA" class="btn">View on GitHub</a>
-      <a href="https://github.com/obullo/Auth-MFA/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/obullo/Auth-MFA/tarball/master" class="btn">Download .tar.gz</a>
+      <h1 class="project-name">Php Web Authentication</h1>
+      <h2 class="project-tagline">Php authentication with rich features.</h2>
+      <a href="https://github.com/obullo/Auth" class="btn">View on GitHub</a>
+      <a href="https://github.com/obullo/Auth/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/obullo/Auth/tarball/master" class="btn">Download .tar.gz</a>
     </section>
 
     <section class="main-content">
       <h2>
-<a id="php-multi-factor-web-authentication-mfa" class="anchor" href="#php-multi-factor-web-authentication-mfa" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Php Multi Factor Web Authentication (MFA)</h2>
+<a id="php-web-authentication" class="anchor" href="#php-web-authentication" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Php Web Authentication</h2>
+
+<p>Auth yani paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve çoklu yetkilendirmeleri de destekler. Auth paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre orta veya büyük ölçekli uygulamalarda yönetilebilmeyi kolaylaştırmak için tasarlanmıştır.</p>
+
+<h3>
+<a id="composer-İle-yükleme" class="anchor" href="#composer-%C4%B0le-y%C3%BCkleme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Composer İle Yükleme</h3>
+
+<pre><code>composer require obullo/auth
+</code></pre>
+
+<h3>
+<a id="Özellikler" class="anchor" href="#%C3%96zellikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Özellikler</h3>
+
+<ul>
+<li>Önbelleklenebilir kimlikler</li>
+<li>Çoklu yetkilendirme (MFA)</li>
+<li>Farklı davranışlar için adaptörler</li>
+<li>Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve oturumları sonlandırabilme</li>
+<li>Farklı veritabanları için tablo sınıfları</li>
+<li>Beni hatırla özelliği</li>
+</ul>
+
+<h3>
+<a id="mfa-Özelliği" class="anchor" href="#mfa-%C3%96zelli%C4%9Fi" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MFA Özelliği</h3>
 
 <p>Oturum açma işlemlerinde kullancıyı yetkilendirme işlemleri birden fazla aşama ile yapılıyorsa bu çoklu yetkilendirme olarak adlandırılır. Multi-Factor Authentication güvenlik yöntemi; katmanlı bir yapıdan oluşur. Birden fazla kimlik doğrulama metoduyla saldırganların geçemeyeceği bir güvenlik kalkanı oluşturur. Bu metotlar aşağıdaki gibi olabilir : </p>
 
@@ -31,29 +54,10 @@
 <li>Sms</li>
 </ul>
 
-<p>MFA yani çoklu yetkilendirme yönteminde standart oturum açma işlevinden farklı olarak 2. aşamada kullanıcıdan  ile kimliğini doğrulaması istenir. Bir saldırgan yukarıda saydığımız kimlik doğrulama metotlarından kullanıcı parolasına sahip olsa bile MFA için yetkilendirilmiş güvenilir bir cihaza sahip olmadığından kimlik doğrulamayı geçemeyecektir. </p>
-
-<h2>
-<a id="auth-mfa" class="anchor" href="#auth-mfa" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Auth-MFA</h2>
-
-<p>Auth-MFA yani çoklu yetkilendirme paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve tekil yetkilendirmeyi de destekler. Auth-MFA paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre yönetilebilmeyi sağlar.</p>
-
-<h3>
-<a id="composer-İle-yükleme" class="anchor" href="#composer-%C4%B0le-y%C3%BCkleme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Composer İle Yükleme</h3>
-
-<pre><code>composer require obullo/auth-mfa
-</code></pre>
-
-<h3>
-<a id="Özellikler" class="anchor" href="#%C3%96zellikler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Özellikler</h3>
+<p>MFA yani çoklu yetkilendirme yönteminde standart oturum açma işlevinden farklı olarak 2. aşamada kullanıcıdan  ile kimliğini doğrulaması istenir. Bir saldırgan yukarıda saydığımız kimlik doğrulama metotlarından kullanıcı parolasına sahip olsa bile MFA için yetkilendirilmiş güvenilir bir cihaza sahip olmadığından kimlik doğrulamayı geçemeyecektir.</p>
 
 <ul>
-<li>Önbelleklenebilir kimlikler</li>
-<li>Çoklu yetkilendirme</li>
-<li>Farklı davranışlar için adaptörler</li>
-<li>Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve oturumları sonlandırabilme</li>
-<li>Farklı veritabanları için tablo sınıfları</li>
-<li>Beni hatırla özelliği</li>
+<li>Bu özellik opsiyoneldir.</li>
 </ul>
 
 <h3>
@@ -61,7 +65,7 @@
 
 <p>Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarından nasıl geçtiği ve servisin nasıl çalıştığı hakkında size bir ön bilgi verecektir:</p>
 
-<p><img src="https://github.com/obullo/Auth-MFA/blob/master/flowchart.png?raw=true" alt="Authentication" title="Authentication"></p>
+<p><img src="https://github.com/obullo/mfa/blob/master/flowchart.png?raw=true" alt="Authentication" title="Authentication"></p>
 
 <p>Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.</p>
 
@@ -91,7 +95,7 @@
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth.PASSWORD_COST<span class="pl-pds">'</span></span>, <span class="pl-c1">6</span>);</span>
 <span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth.PASSWORD_ALGORITHM<span class="pl-pds">'</span></span>, <span class="pl-c1">PASSWORD_BCRYPT</span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\MFA\Storage\Redis<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\Storage\Redis<span class="pl-pds">'</span></span>)</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>redis:default<span class="pl-pds">'</span></span>))</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>request<span class="pl-pds">'</span></span>))</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setPermanentBlockLifetime<span class="pl-pds">'</span></span>, [<span class="pl-c1">3600</span>]) <span class="pl-c">// Should be same with app session lifetime.</span></span>
@@ -122,7 +126,7 @@
 
 <p>Hafıza deposu servis konfigurasyonundan değiştirilebilir.</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\MFA\Storage\Memcached<span class="pl-pds">'</span></span>)</span>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Storage<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\Storage\Memcached<span class="pl-pds">'</span></span>)</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>memcached:default<span class="pl-pds">'</span></span>))</span></pre></div>
 
 <p>Ayrıca anasayfadan servis sağlayıcınızı çağırmanız gerekir.</p>
@@ -158,9 +162,9 @@ use test;
 <h3>
 <a id="auth-table" class="anchor" href="#auth-table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Auth Table</h3>
 
-<p>Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\MultiAuthAuth\Adapter\Database\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.</p>
+<p>Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\Auth\Adapter\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>My\Database\Table\Db<span class="pl-pds">'</span></span>)</span>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>My\Table\Db<span class="pl-pds">'</span></span>)</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>database:default<span class="pl-pds">'</span></span>))</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setColumns<span class="pl-pds">'</span></span>, [<span class="pl-c1">array</span>(<span class="pl-s"><span class="pl-pds">'</span>username<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>remember_token<span class="pl-pds">'</span></span>)])</span>
 <span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setTableName<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>users<span class="pl-pds">'</span></span>])</span>
@@ -170,18 +174,18 @@ use test;
 
 <p>Mongo Db için örnek.</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\MFA\Adapter\Database\Table\Mongo<span class="pl-pds">'</span></span>);</span></pre></div>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\Adapter\Database\Table\Mongo<span class="pl-pds">'</span></span>);</span></pre></div>
 
 <h3>
 <a id="oturum-açma" class="anchor" href="#oturum-a%C3%A7ma" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Oturum Açma</h3>
 
 <p>Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\MFA\Adapter\Database\</span><span class="pl-c1">Database</span>(<span class="pl-smi">$container</span>);</span>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\Adapter\</span><span class="pl-c1">Table</span>(<span class="pl-smi">$container</span>);</span>
 <span class="pl-s1"><span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>setRequest(<span class="pl-smi">$request</span>);</span>
 <span class="pl-s1"><span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>regenerateSessionId(<span class="pl-c1">true</span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1"><span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\MFA\</span><span class="pl-c1">Credentials</span>;</span>
+<span class="pl-s1"><span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\</span><span class="pl-c1">Credentials</span>;</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setIdentityValue(<span class="pl-s"><span class="pl-pds">'</span>user@example.com<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setPasswordValue(<span class="pl-s"><span class="pl-pds">'</span>123456<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setRememberMeValue(<span class="pl-c1">false</span>);</span>
@@ -588,6 +592,22 @@ süresi (varsayılan 3600 saniye) sona erdiğinde veritabanına tekrar sorgu yap
 <p>Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada varsa önbellekte oluşturulmuş sorgu sonucuna geri döner.</p>
 
 <h3>
+<a id="geri-Çağırım-recaller" class="anchor" href="#geri-%C3%87a%C4%9F%C4%B1r%C4%B1m-recaller" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Geri Çağırım (Recaller)</h3>
+
+<p>Eğer kullanıcının daha önceden tarayıcısında beni hatırla çerezi varsa geri çağırım fonksiyonu kullanılarak kullanıcının oturum bilgilerini girmeden yetkilendirilmesi sağlanmış olur.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$token</span> <span class="pl-k">=</span> <span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>hasRecallerCookie()) {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-smi">$recaller</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">\Obullo\Auth\</span><span class="pl-c1">Recaller</span>(<span class="pl-smi">$container</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">if</span> (<span class="pl-smi">$user</span> <span class="pl-k">=</span> <span class="pl-smi">$recaller</span><span class="pl-k">-&gt;</span>recallUser(<span class="pl-smi">$token</span>)) {</span>
+<span class="pl-s1">        <span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">\Obullo\Auth\Adapter\</span><span class="pl-c1">Table</span>(<span class="pl-smi">$container</span>);</span>
+<span class="pl-s1">        <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>authorizeUser(<span class="pl-smi">$user</span>);</span>
+<span class="pl-s1">        <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>regenerateSessionId(<span class="pl-c1">true</span>);</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<h3>
 <a id="Çoklu-yetkilendirme" class="anchor" href="#%C3%87oklu-yetkilendirme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Çoklu Yetkilendirme</h3>
 
 <p>Çoklu yetkilendirme kullanıcının kimliğini sisteme giriş yaptıktan hemen sonra <b>mobil uygulama</b>, <b>çağrı</b> veya <b>sms</b> gibi yöntemlerle onaylamasını sağlar.</p>
@@ -616,7 +636,7 @@ süresi (varsayılan 3600 saniye) sona erdiğinde veritabanına tekrar sorgu yap
 <p>Eğer çoklu yetkilendirme yani geçici kimlik oluşturma fonksiyonu kullanılmıyorsa, sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.</p>
 
       <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/obullo/Auth-MFA">Php Multi Factor Authentication</a> is maintained by <a href="https://github.com/obullo">obullo</a>.</span>
+        <span class="site-footer-owner"><a href="https://github.com/obullo/Auth">Php Web Authentication</a> is maintained by <a href="https://github.com/obullo">obullo</a>.</span>
 
         <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
