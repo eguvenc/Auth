@@ -181,22 +181,23 @@ use test;
 
 <p>Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.</p>
 
-<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\Adapter\</span><span class="pl-c1">Table</span>(<span class="pl-smi">$container</span>);</span>
-<span class="pl-s1"><span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>setRequest(<span class="pl-smi">$request</span>);</span>
-<span class="pl-s1"><span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>regenerateSessionId(<span class="pl-c1">true</span>);</span>
-<span class="pl-s1"></span>
-<span class="pl-s1"><span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\</span><span class="pl-c1">Credentials</span>;</span>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\</span><span class="pl-c1">Credentials</span>;</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setIdentityValue(<span class="pl-s"><span class="pl-pds">'</span>user@example.com<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setPasswordValue(<span class="pl-s"><span class="pl-pds">'</span>123456<span class="pl-pds">'</span></span>);</span>
 <span class="pl-s1"><span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setRememberMeValue(<span class="pl-c1">false</span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1"><span class="pl-smi">$authResult</span> <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>authenticate(<span class="pl-smi">$credentials</span>);</span>
+<span class="pl-s1"><span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\Adapter\</span><span class="pl-c1">Table</span>(<span class="pl-smi">$container</span>);</span>
+<span class="pl-s1"><span class="pl-smi">$authResult</span>  <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>authenticate(<span class="pl-smi">$credentials</span>);</span>
+<span class="pl-s1"><span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>regenerateSessionId(<span class="pl-c1">true</span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-k">!</span> <span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>isValid()) {</span>
-<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-c1">false</span> <span class="pl-k">==</span> <span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>isValid()) {</span>
 <span class="pl-s1">    <span class="pl-c1">print_r</span>(<span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>getMessages());</span>
-<span class="pl-s1"></span>
 <span class="pl-s1">} <span class="pl-k">else</span> {</span>
+<span class="pl-s1">    <span class="pl-smi">$user</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\User\</span><span class="pl-c1">User</span>(<span class="pl-smi">$credentials</span>);</span>
+<span class="pl-s1">    <span class="pl-smi">$user</span><span class="pl-k">-&gt;</span>setResultRow(<span class="pl-smi">$authResult</span><span class="pl-k">-&gt;</span>getResultRow());</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-smi">$identity</span> <span class="pl-k">=</span> <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>authorize(<span class="pl-smi">$user</span>); <span class="pl-c">// Authorize user;</span></span>
+<span class="pl-s1"></span>
 <span class="pl-s1">    <span class="pl-c1">header</span>(<span class="pl-s"><span class="pl-pds">"</span>Location: /example/Restricted.php<span class="pl-pds">"</span></span>);</span>
 <span class="pl-s1">}</span></pre></div>
 
@@ -363,7 +364,7 @@ use test;
 <p>Kullanıcıyı yetkilendirmeden kimlik bilgilerinin doğruluğunu kontrol eder. Doğru ise true aksi durumda false değerine geri döner.</p>
 
 <h4>
-<a id="authadapter-authorizeuseruser-user" class="anchor" href="#authadapter-authorizeuseruser-user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;authorizeUser(User $user);</h4>
+<a id="authadapter-authorizeuser-user" class="anchor" href="#authadapter-authorizeuser-user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>$authAdapter-&gt;authorize(User $user);</h4>
 
 <p>User nesnesini kullanarak zaten kimlik bilgileri doğrulanmış Guest kullanıcıyı yetkilendirmek için kullanılır.</p>
 
@@ -598,19 +599,31 @@ süresi (varsayılan 3600 saniye) sona erdiğinde veritabanına tekrar sorgu yap
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">if</span> (<span class="pl-smi">$token</span> <span class="pl-k">=</span> <span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>hasRecallerCookie()) {</span>
 <span class="pl-s1"></span>
-<span class="pl-s1">    <span class="pl-smi">$recaller</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">\Obullo\Auth\</span><span class="pl-c1">Recaller</span>(<span class="pl-smi">$container</span>);</span>
+<span class="pl-s1">    <span class="pl-smi">$recaller</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\</span><span class="pl-c1">Recaller</span>(<span class="pl-smi">$container</span>);</span>
 <span class="pl-s1"></span>
-<span class="pl-s1">    <span class="pl-k">if</span> (<span class="pl-smi">$user</span> <span class="pl-k">=</span> <span class="pl-smi">$recaller</span><span class="pl-k">-&gt;</span>recallUser(<span class="pl-smi">$token</span>)) {</span>
-<span class="pl-s1">        <span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">\Obullo\Auth\Adapter\</span><span class="pl-c1">Table</span>(<span class="pl-smi">$container</span>);</span>
-<span class="pl-s1">        <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>authorizeUser(<span class="pl-smi">$user</span>);</span>
+<span class="pl-s1">    <span class="pl-k">if</span> (<span class="pl-smi">$resultRowArray</span> <span class="pl-k">=</span> <span class="pl-smi">$recaller</span><span class="pl-k">-&gt;</span>recallUser(<span class="pl-smi">$token</span>)) {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-smi">$credentials</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\User\</span><span class="pl-c1">Credentials</span>;</span>
+<span class="pl-s1">        <span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setIdentityValue(<span class="pl-smi">$resultRowArray</span>[<span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1">        <span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setPasswordValue(<span class="pl-smi">$resultRowArray</span>[<span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1">        <span class="pl-smi">$credentials</span><span class="pl-k">-&gt;</span>setRememberMeValue(<span class="pl-c1">true</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-smi">$user</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\User\</span><span class="pl-c1">User</span>(<span class="pl-smi">$credentials</span>);</span>
+<span class="pl-s1">        <span class="pl-smi">$user</span><span class="pl-k">-&gt;</span>setResultRow(<span class="pl-smi">$resultRowArray</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-smi">$authAdapter</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Obullo\Auth\Adapter\</span><span class="pl-c1">Table</span>(<span class="pl-smi">$container</span>);</span>
+<span class="pl-s1">        <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>authorize(<span class="pl-smi">$user</span>);</span>
 <span class="pl-s1">        <span class="pl-smi">$authAdapter</span><span class="pl-k">-&gt;</span>regenerateSessionId(<span class="pl-c1">true</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>initialize();</span>
 <span class="pl-s1">    }</span>
-<span class="pl-s1">}</span></pre></div>
+<span class="pl-s1">}</span>
+<span class="pl-s1"></span></pre></div>
 
 <h3>
 <a id="Çoklu-yetkilendirme" class="anchor" href="#%C3%87oklu-yetkilendirme" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Çoklu Yetkilendirme</h3>
 
-<p>Çoklu yetkilendirme kullanıcının kimliğini sisteme giriş yaptıktan hemen sonra <b>mobil uygulama</b>, <b>çağrı</b> veya <b>sms</b> gibi yöntemlerle onaylamasını sağlar.</p>
+<p>Çoklu yetkilendirme kullanıcının kimliğini sisteme giriş yaptıktan hemen sonra <b>OTP</b>, <b>Çağrı</b>, <b>Sms</b> yada <b>QRCode</b> gibi yöntemlerle onaylamasını kolaylaştırır.</p>
 
 <p>Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity-&gt;makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilmelidir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur.</p>
 
@@ -634,6 +647,28 @@ süresi (varsayılan 3600 saniye) sona erdiğinde veritabanına tekrar sorgu yap
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$identity</span><span class="pl-k">-&gt;</span>makePermanent();</span></pre></div>
 
 <p>Eğer çoklu yetkilendirme yani geçici kimlik oluşturma fonksiyonu kullanılmıyorsa, sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.</p>
+
+<h3>
+<a id="mongo-tablo-sürücüsü" class="anchor" href="#mongo-tablo-s%C3%BCr%C3%BCc%C3%BCs%C3%BC" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Mongo Tablo Sürücüsü</h3>
+
+<p>Tablo sürücünü mongo kullanmak istiyorsanız ortak dosyadan mongo servis sağlayıcısını ekleyin. Ayrıca servis sağlayıcısı içerisindeki bağlantı bilgilerini güncellemeyi unutmayın.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c">// $container-&gt;addServiceProvider('ServiceProvider\Database');</span></span>
+<span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>addServiceProvider(<span class="pl-s"><span class="pl-pds">'</span>ServiceProvider\Mongo<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<p>Authentication servisi içerisindeki ilk argümanı aşağıdaki gibi gönderin.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$this</span><span class="pl-k">-&gt;</span><span class="pl-smi">container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>mongo:default<span class="pl-pds">'</span></span>)<span class="pl-k">-&gt;</span>selectDB(<span class="pl-s"><span class="pl-pds">'</span>test<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<p>Servis sağlayıcısı içerisindeki değiştirilmesi gereken kısım aşağıdaki gibi olmalı.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$container</span><span class="pl-k">-&gt;</span>share(<span class="pl-s"><span class="pl-pds">'</span>Auth:Table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Obullo\Auth\Adapter\Table\Mongo<span class="pl-pds">'</span></span>)</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withArgument(<span class="pl-smi">$this</span><span class="pl-k">-&gt;</span><span class="pl-smi">container</span><span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>mongo:default<span class="pl-pds">'</span></span>)<span class="pl-k">-&gt;</span>selectDB(<span class="pl-s"><span class="pl-pds">'</span>test<span class="pl-pds">'</span></span>))</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setColumns<span class="pl-pds">'</span></span>, [<span class="pl-c1">array</span>(<span class="pl-s"><span class="pl-pds">'</span>username<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>remember_token<span class="pl-pds">'</span></span>)])</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setTableName<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>users<span class="pl-pds">'</span></span>])</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setIdentityColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>])</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setPasswordColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>password<span class="pl-pds">'</span></span>])</span>
+<span class="pl-s1">    <span class="pl-k">-&gt;</span>withMethodCall(<span class="pl-s"><span class="pl-pds">'</span>setRememberTokenColumn<span class="pl-pds">'</span></span>, [<span class="pl-s"><span class="pl-pds">'</span>remember_token<span class="pl-pds">'</span></span>]);</span></pre></div>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/obullo/Auth">Php Web Authentication</a> is maintained by <a href="https://github.com/obullo">obullo</a>.</span>
