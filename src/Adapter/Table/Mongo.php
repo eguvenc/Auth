@@ -8,17 +8,17 @@ use Obullo\Auth\User\CredentialsInterface as Credentials;
 /**
  * Mongo AbstractTable
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Mongo extends AbstractTable
 {
      /**
-     * Db collection
+     * Db
      *
      * @var object
      */
-    protected $collection;
+    protected $database;
 
     /**
      * Constructor
@@ -27,11 +27,21 @@ class Mongo extends AbstractTable
      */
     public function __construct($database)
     {
-        $collection = $this->getTableName();
-
-        $this->collection = $database->{$collection};
+        $this->database = $database;
     }
     
+    /**
+     * Returns to collection object
+     *
+     * @return object
+     */
+    public function getCollection()
+    {
+        $table = $this->getTableName();
+
+        return $this->database->{$table};
+    }
+
     /**
      * Execute mongo query
      *
@@ -41,11 +51,11 @@ class Mongo extends AbstractTable
      */
     public function query(Credentials $credentials)
     {
-        $row = $this->collection->findOne(
+        $row = $this->getCollection()->findOne(
             array(
                 $this->getIdentityColumn() => $credentials->getIdentityValue()
             ),
-            implode(", ", $this->getColumns())
+            $this->getColumns()
         );
         if (empty($row)) {
             return false;
@@ -63,11 +73,11 @@ class Mongo extends AbstractTable
      */
     public function recall($tokenValue)
     {
-        $row = $this->collection->finOne(
+        $row = $this->getCollection()->findOne(
             array(
                 $this->getRememberTokenColumn() => $tokenValue
             ),
-            implode(", ", $this->getColumns())
+            $this->getColumns()
         );
         if (empty($row)) {
             return false;
@@ -86,7 +96,7 @@ class Mongo extends AbstractTable
      */
     public function updateRememberToken($tokenValue, $identityValue)
     {
-        return $this->collection->update(
+        return $this->getCollection()->update(
             [
                 $this->getIdentityColumn() => $identityValue
             ],

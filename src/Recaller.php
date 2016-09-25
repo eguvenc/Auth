@@ -2,17 +2,13 @@
 
 namespace Obullo\Auth;
 
-use Obullo\Auth\User\User;
 use Obullo\Auth\User\Credentials;
 use Interop\Container\ContainerInterface as Container;
-
-// use Obullo\Auth\Storage\StorageInterface as Storage;
-// use Obullo\Auth\Adapter\Datababase\TableInterface as Table;
 
 /**
  * Recaller
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Recaller
@@ -39,6 +35,13 @@ class Recaller
     protected $container;
 
     /**
+     * User query result data
+     *
+     * @var array
+     */
+    protected $resultRowArray;
+
+    /**
      * Constructor
      *
      * @param object Container $container
@@ -55,20 +58,19 @@ class Recaller
      *
      * @param string $token recaller token
      *
-     * @return void
+     * @return array|false
      */
     public function recallUser($tokenValue)
     {
         $resultRowArray = $this->table->recall($tokenValue);
 
         $identityColumn      = $this->table->getIdentityColumn();
-        $passwordColumn      = $this->table->getPasswordColumn();
         $rememberTokenColumn = $this->table->getRememberTokenColumn();
 
         if (! is_array($resultRowArray) || empty($resultRowArray[$rememberTokenColumn])) {
             $this->storage->setIdentifier('Guest');   // Mark user as guest
             $this->container->get('Auth:RecallerToken')->remove();
-            return;
+            return false;
         }
         $this->storage->setIdentifier($resultRowArray[$identityColumn]);
 
@@ -79,15 +81,17 @@ class Recaller
             '__isTemporary' => 0
         ];
         $this->storage->setCredentials($data, null);
-        
-        $credentials = new Credentials;
-        $credentials->setIdentityValue($resultRowArray[$identityColumn]);
-        $credentials->setPasswordValue($resultRowArray[$passwordColumn]);
-        $credentials->setRememberMeValue(true);
+        return $this->resultRowArray = $resultRowArray;
+    }
 
-        $user = new User($credentials);
-        $user->setResultRow($resultRowArray);
-        return $user;
+    /**
+     * Returns to user row data
+     *
+     * @return array
+     */
+    public function getResultRow()
+    {
+        return $this->resultRowArray;
     }
 
     /**

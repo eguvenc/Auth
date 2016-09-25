@@ -33,11 +33,6 @@ class RedisTest extends WebTestCase
         $this->storage->setIdentifier('user@example.com');
     }
     
-    /**
-     * Sets identifier value to session
-     *
-     * @return void
-     */
     public function testSetIdentifier()
     {
         $this->storage->setIdentifier('test@example.com');
@@ -48,11 +43,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Returns to user identifier
-     *
-     * @return mixed string|id
-     */
     public function testGetIdentifier()
     {
         $this->storage->setIdentifier('test@example.com');
@@ -63,11 +53,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Unset identifier from session
-     *
-     * @return void
-     */
     public function testUnsetIdentifier()
     {
         $this->storage->setIdentifier('test@example.com');
@@ -78,11 +63,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Unset identifier from session
-     *
-     * @return void
-     */
     public function testHasIdentifier()
     {
         $this->storage->setIdentifier('test@example.com');
@@ -94,11 +74,6 @@ class RedisTest extends WebTestCase
         $this->assertFalse($this->storage->hasIdentifier(), "I remove the fake identifier and i expect that the value is false.");
     }
 
-    /**
-     * Register credentials as temporary
-     *
-     * @return void
-     */
     public function testCreateTemporary()
     {
         $this->storage->createTemporary($this->credentials);
@@ -115,11 +90,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Register credentials to permanent storage
-     *
-     * @return void
-     */
     public function testCreatePermanent()
     {
         $this->storage->createPermanent($this->credentials);
@@ -136,11 +106,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Makes temporary credentials as permanent and authenticate the user.
-     *
-     * @return void
-     */
     public function testMakePermanent()
     {
         $this->storage->createTemporary($this->credentials);
@@ -158,11 +123,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Makes permanent credentials as temporary and unauthenticate the user.
-     *
-     * @return void
-     */
     public function testMakeTemporary()
     {
         $this->storage->createPermanent($this->credentials);
@@ -180,11 +140,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Get id of identifier without random Id value
-     *
-     * @return void
-     */
     public function testGetUserId()
     {
         $this->assertEquals($this->storage->getUserId(), "user@example.com", "I expect that the value is user@example.com.");
@@ -192,11 +147,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Get random id
-     *
-     * @return void
-     */
     public function testGetLoginId()
     {
         unset($_SESSION[$this->storage->getStoreKey().'_LoginId']);
@@ -215,11 +165,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Create login id
-     *
-     * @return string
-     */
     public function testSetLoginId()
     {
         $id = strlen($this->storage->getLoginId());
@@ -228,11 +173,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Gey cache key
-     *
-     * @return string
-     */
     public function testGetCacheKey()
     {
         $this->assertNotEmpty($this->storage->getStoreKey(), "I expect the storage key is not empty.");
@@ -241,11 +181,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Get valid memory segment key
-     *
-     * @return void
-     */
     public function testGetMemoryBlockKey()
     {
         $block = $this->storage->getStoreKey(). ':' .$this->storage->getIdentifier();
@@ -255,11 +190,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Returns to storage prefix key of identity data
-     *
-     * @return string
-     */
     public function testGetUserKey()
     {
         $block = $this->storage->getStoreKey(). ':' .$this->storage->getUserId();
@@ -269,11 +199,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Returns to memory block lifetime
-     *
-     * @return integer
-     */
     public function testGetMemoryBlockLifetime()
     {
         $this->storage->setTemporaryBlockLifetime(400);
@@ -293,11 +218,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Returns true if temporary credentials does "not" exists
-     *
-     * @return void
-     */
     public function testIsEmpty()
     {
         $this->storage->createPermanent($this->credentials);
@@ -310,11 +230,6 @@ class RedisTest extends WebTestCase
         $this->assertTrue($this->storage->isEmpty(), "I delete identity and i expect that the value is true.");
     }
 
-    /**
-     * Match the user credentials.
-     *
-     * @return void
-     */
     public function testQuery()
     {
         $this->storage->createPermanent($this->credentials);
@@ -340,11 +255,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Update credentials
-     *
-     * @return void
-     */
     public function testSetCredentials()
     {
         $data = [
@@ -374,11 +284,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Deletes memory block completely
-     *
-     * @return void
-     */
     public function testDeleteCredentials()
     {
         $this->storage->setCredentials($this->credentials, array(), 60);
@@ -391,11 +296,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Update data
-     *
-     * @return void
-     */
     public function testUpdate()
     {
         $identifier = $this->table->getIdentityColumn();
@@ -416,11 +316,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Remove data
-     *
-     * @return void
-     */
     public function testRemove()
     {
         $identifier = $this->table->getIdentityColumn();
@@ -441,11 +336,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Returns to all keys
-     *
-     * @return void
-     */
     public function testActiveSessions()
     {
         $data = [
@@ -464,11 +354,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Return to all sessions of current user
-     *
-     * @return array
-     */
     public function testGetUserSessions()
     {
         list($usec, $sec) = explode(" ", microtime());
@@ -489,11 +374,6 @@ class RedisTest extends WebTestCase
         $this->storage->unsetLoginId();
     }
 
-    /**
-     * Kill session using by login id
-     *
-     * @return void
-     */
     public function testKillSession()
     {
         $this->storage->createPermanent($this->credentials);

@@ -18,6 +18,7 @@ class Authentication extends AbstractServiceProvider
      */
     protected $provides = [
         'Auth:Table',
+        'Auth:Password',
         'Auth:Storage',
         'Auth:Identity',
         'Auth:RecallerToken',
@@ -75,11 +76,10 @@ class Authentication extends AbstractServiceProvider
             ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 
         $container->share('Auth:RecallerToken', 'Obullo\Auth\RecallerToken')
-            ->withArgument($request)
             ->withArgument($container);
 
         $container->share('Auth:Identity', 'Obullo\Auth\Identity\Identity')
-            ->withArgument($request)
-            ->withArgument($container);
+            ->withArgument($container)
+            ->withMethodCall('setRequest', [$request]);
     }
 }

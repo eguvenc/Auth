@@ -8,28 +8,11 @@ use Obullo\Auth\User\CredentialsInterface as Credentials;
 /**
  * Abstract Adapater
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 abstract class AbstractAdapter implements AdapterInterface
 {
-    /**
-     * Request
-     *
-     * @var object
-     */
-    protected $request;
-
-    /**
-     * Set request
-     *
-     * @param Request $request object
-     */
-    public function setRequest(Request $request)
-    {
-        $this->request = $request;
-    }
-
     /**
      * Combine credentials with real column names
      *
@@ -58,12 +41,7 @@ abstract class AbstractAdapter implements AdapterInterface
     public function regenerateSessionId($deleteOldSession = true)
     {
         session_regenerate_id((bool) $deleteOldSession);
-
         $sid = session_id(); // new session_id
-        
-        //  close the old and new sessions
-        session_write_close();
-        session_start();
 
         return $sid;
     }

@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 /**
  * Memcached storage
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Memcached extends AbstractStorage

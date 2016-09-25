@@ -5,7 +5,7 @@ namespace Obullo\Auth\Identity;
 /**
  * Abstract Identity
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 abstract class AbstractIdentity implements IdentityInterface
@@ -66,10 +66,7 @@ abstract class AbstractIdentity implements IdentityInterface
     public function get($key)
     {
         $attributes = $this->getArray();
-
-        // if (! isset($attributes['__isAuthenticated']) || $attributes['__isAuthenticated'] < 1) {
-        //     return false;
-        // }
+        
         return isset($attributes[$key]) ? $attributes[$key] : false;
     }
 

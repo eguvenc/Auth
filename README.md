@@ -158,22 +158,23 @@ $container->share('Auth:Table', 'Obullo\Auth\Adapter\Database\Table\Mongo');
 Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.
 
 ```php
-$authAdapter = new Obullo\Auth\Adapter\Table($container);
-$authAdapter->setRequest($request);
-$authAdapter->regenerateSessionId(true);
-
 $credentials = new Obullo\Auth\Credentials;
 $credentials->setIdentityValue('user@example.com');
 $credentials->setPasswordValue('123456');
 $credentials->setRememberMeValue(false);
 
-$authResult = $authAdapter->authenticate($credentials);
+$authAdapter = new Obullo\Auth\Adapter\Table($container);
+$authResult  = $authAdapter->authenticate($credentials);
+$authAdapter->regenerateSessionId(true);
 
-if (! $authResult->isValid()) {
-        
+if (false == $authResult->isValid()) {
     print_r($authResult->getMessages());
-
 } else {
+    $user = new Obullo\Auth\User\User($credentials);
+    $user->setResultRow($authResult->getResultRow());
+
+    $identity = $authAdapter->authorize($user); // Authorize user;
+
     header("Location: /example/Restricted.php");
 }
 ```
@@ -344,7 +345,7 @@ Kullanıcı giriş yaptıktan sonra oturum id sinin yeniden yaratılıp yaratıl
 
 Kullanıcıyı yetkilendirmeden kimlik bilgilerinin doğruluğunu kontrol eder. Doğru ise true aksi durumda false değerine geri döner.
 
-#### $authAdapter->authorizeUser(User $user);
+#### $authAdapter->authorize(User $user);
 
 User nesnesini kullanarak zaten kimlik bilgileri doğrulanmış Guest kullanıcıyı yetkilendirmek için kullanılır.
 
@@ -553,20 +554,32 @@ Eğer kullanıcının daha önceden tarayıcısında beni hatırla çerezi varsa
 
 ```php
 if ($token = $identity->hasRecallerCookie()) {
-    
-    $recaller = new \Obullo\Auth\Recaller($container);
 
-    if ($user = $recaller->recallUser($token)) {
-        $authAdapter = new \Obullo\Auth\Adapter\Table($container);
-        $authAdapter->authorizeUser($user);
+    $recaller = new Obullo\Auth\Recaller($container);
+    
+    if ($resultRowArray = $recaller->recallUser($token)) {
+
+        $credentials = new Obullo\Auth\User\Credentials;
+        $credentials->setIdentityValue($resultRowArray['email']);
+        $credentials->setPasswordValue($resultRowArray['password']);
+        $credentials->setRememberMeValue(true);
+
+        $user = new Obullo\Auth\User\User($credentials);
+        $user->setResultRow($resultRowArray);
+
+        $authAdapter = new Obullo\Auth\Adapter\Table($container);
+        $authAdapter->authorize($user);
         $authAdapter->regenerateSessionId(true);
+
+        $identity->initialize();
     }
 }
+
 ```
 
 ### Çoklu Yetkilendirme
 
-Çoklu yetkilendirme kullanıcının kimliğini sisteme giriş yaptıktan hemen sonra <b>mobil uygulama</b>, <b>çağrı</b> veya <b>sms</b> gibi yöntemlerle onaylamasını sağlar.
+Çoklu yetkilendirme kullanıcının kimliğini sisteme giriş yaptıktan hemen sonra <b>OTP</b>, <b>Çağrı</b>, <b>Sms</b> yada <b>QRCode</b> gibi yöntemlerle onaylamasını kolaylaştırır.
 
 Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity->makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilmelidir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur.
 
@@ -597,3 +610,31 @@ $identity->makePermanent();
 ```
 
 Eğer çoklu yetkilendirme yani geçici kimlik oluşturma fonksiyonu kullanılmıyorsa, sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.
+
+
+### Mongo Tablo Sürücüsü
+
+Tablo sürücünü mongo kullanmak istiyorsanız ortak dosyadan mongo servis sağlayıcısını ekleyin. Ayrıca servis sağlayıcısı içerisindeki bağlantı bilgilerini güncellemeyi unutmayın.
+
+```php
+// $container->addServiceProvider('ServiceProvider\Database');
+$container->addServiceProvider('ServiceProvider\Mongo');
+```
+
+Authentication servisi içerisindeki ilk argümanı aşağıdaki gibi gönderin.
+
+```php
+$this->container->get('mongo:default')->selectDB('test');
+```
+
+Servis sağlayıcısı içerisindeki değiştirilmesi gereken kısım aşağıdaki gibi olmalı.
+
+```php
+$container->share('Auth:Table', 'Obullo\Auth\Adapter\Table\Mongo')
+    ->withArgument($this->container->get('mongo:default')->selectDB('test'))
+    ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
+    ->withMethodCall('setTableName', ['users'])
+    ->withMethodCall('setIdentityColumn', ['email'])
+    ->withMethodCall('setPasswordColumn', ['password'])
+    ->withMethodCall('setRememberTokenColumn', ['remember_token']);
+```

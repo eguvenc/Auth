@@ -5,7 +5,7 @@ namespace Obullo\Auth\Adapter\Table;
 /**
  * Abstract Table
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 abstract class AbstractTable implements TableInterface

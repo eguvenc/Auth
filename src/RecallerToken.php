@@ -8,18 +8,11 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 /**
  * Remember me token generator
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class RecallerToken
 {
-    /**
-     * Request
-     *
-     * @var object
-     */
-    protected $request;
-
     /**
      * Container
      *
@@ -32,9 +25,8 @@ class RecallerToken
      *
      * @param array  $params parameters
      */
-    public function __construct(Request $request, Container $container)
+    public function __construct(Container $container)
     {
-        $this->request = $request;
         $this->container = $container;
     }
 

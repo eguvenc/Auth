@@ -8,7 +8,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 /**
  * User Identity
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Identity extends AbstractIdentity
@@ -46,14 +46,25 @@ class Identity extends AbstractIdentity
      *
      * @param array  $params parameters
      */
-    public function __construct(Request $request, Container $container)
+    public function __construct(Container $container)
     {
-        $this->request   = $request;
         $this->container = $container;
         $this->table     = $container->get('Auth:Table');
         $this->storage   = $container->get('Auth:Storage');
 
         $this->initialize();
+    }
+    
+    /**
+     * Set http request
+     *
+     * @param object $request request
+     *
+     * @return void
+     */
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
     }
 
     /**

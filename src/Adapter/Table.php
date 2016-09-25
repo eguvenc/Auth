@@ -4,6 +4,7 @@ namespace Obullo\Auth\Adapter;
 
 use Obullo\Auth\User\User;
 use Obullo\Auth\AuthResult;
+use Obullo\Auth\User\UserInterface;
 use Obullo\Auth\Adapter\AbstractAdapter;
 use Interop\Container\ContainerInterface as Container;
 use Obullo\Auth\User\CredentialsInterface as Credentials;
@@ -11,7 +12,7 @@ use Obullo\Auth\User\CredentialsInterface as Credentials;
 /**
  * Database Table Adapter
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Table extends AbstractAdapter
@@ -140,7 +141,7 @@ class Table extends AbstractAdapter
      */
     public function validateCredentials(Credentials $credentials)
     {
-        return $this->authenticationRequest($credentials, false);  // validate credentials
+        return $this->authenticationRequest($credentials);  // validate credentials
     }
 
     /**
@@ -150,12 +151,11 @@ class Table extends AbstractAdapter
      * If memory login fail it will connect to "database table" and run sql
      * query to find a record matching the provided identity.
      *
-     * @param array   $credentials username and plain password
-     * @param array   $login       whether to generate user
+     * @param array $credentials username and plain password
      *
      * @return object
      */
-    protected function authenticationRequest(Credentials $credentials, $login = true)
+    protected function authenticationRequest(Credentials $credentials)
     {
         $storageResult = $this->storage->query();  // if identity exists returns to cached data
         /**
@@ -163,20 +163,17 @@ class Table extends AbstractAdapter
          */
         $this->resultRowArray = ($storageResult === false) ? $this->table->query($credentials) : $storageResult;
 
-        if (is_array($this->resultRowArray) && isset($this->resultRowArray[$this->table->getIdentityColumn()])) {
+        $id   = $this->table->getIdentityColumn();
+        $pass = $this->table->getPasswordColumn();
+
+        if (is_array($this->resultRowArray) && isset($this->resultRowArray[$id])) {
             $plain = $credentials->getPasswordValue();
-            $hash  = $this->resultRowArray[$this->table->getPasswordColumn()];
+            $hash  = $this->resultRowArray[$pass];
             
             if ($this->passwordHash = $this->container->get('Auth:Password')->verify($plain, $hash)) {
             // In here hash may cause performance bottleneck
             // depending to passwordNeedHash "cost" value default is 6
             // for best performance, set 10-12 for max security.
-
-                if ($login) {  // If login is allowed.
-                    $user = new User($credentials);
-                    $user->setResultRow($this->resultRowArray);
-                    $this->authorizeUser($user);
-                }
                 return true;
             }
         }
@@ -190,9 +187,9 @@ class Table extends AbstractAdapter
      *
      * @param object User $user
      *
-     * @return object
+     * @return object of identity
      */
-    public function authorize(User $user)
+    public function authorize(UserInterface $user)
     {
         $credentials = $user->getCredentials();
         $resultRow   = $user->getResultRow();
@@ -219,6 +216,7 @@ class Table extends AbstractAdapter
         } else {
             $this->storage->createPermanent($attributes); // If user has NOT got a temporay identity
         }
+        return $this->identity;
     }
 
     /**

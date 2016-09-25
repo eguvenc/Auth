@@ -6,7 +6,7 @@ use Zend\Diactoros\ServerRequestFactory;
 /**
  * We create a Web test case for PHP Unit
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class WebTestCase extends \PHPUnit_Framework_TestCase
@@ -26,7 +26,7 @@ class WebTestCase extends \PHPUnit_Framework_TestCase
         /**
          * Create test server
          */
-        $server['HTTP_USER_AGENT'] = "Authentication Package Web Test Case";
+        $server['HTTP_USER_AGENT'] = "Authentication Web Test Case";
         $server['REMOTE_ADDR'] = "127.0.0.1";
 
         $this->container->share('request', ServerRequestFactory::fromGlobals($server));
