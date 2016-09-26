@@ -3,47 +3,49 @@
 
 Auth yani paketi yetki adaptörleri ile birlikte çeşitli ortak senaryolar yazılmış ölçeklenebilir bir yetkilendirme arayüzüdür ve çoklu yetkilendirmeleri de destekler. Auth paketi Redis veya Memcached benzeri sürücüler sayesinde belleklenen kimlikleri oturum numaralarına göre orta veya büyük ölçekli uygulamalarda yönetilebilmeyi kolaylaştırmak için tasarlanmıştır.
 
-### Composer İle Yükleme
+### Loading with Composer
 
 ```
 composer require obullo/auth
 ```
 
-### Özellikler
+### Features
 
-* Önbelleklenebilir kimlikler
-* Çoklu yetkilendirme (MFA)
-* Farklı davranışlar için adaptörler
-* Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve oturumları sonlandırabilme
-* Farklı veritabanları için tablo sınıfları
-* Beni hatırla özelliği
+* Cachable Identities
+* Multiple Authorization (MFA)
+* Adapters for varied behaviors
+* Ability to see the users opening sessions with different computers and terminate the sessions
+* Table classes for different databases
+* 'Remember Me' feature
 
-### MFA Özelliği
+### MFA Feature 
 
 Oturum açma işlemlerinde kullancıyı yetkilendirme işlemleri birden fazla aşama ile yapılıyorsa bu çoklu yetkilendirme olarak adlandırılır. Multi-Factor Authentication güvenlik yöntemi; katmanlı bir yapıdan oluşur. Birden fazla kimlik doğrulama metoduyla saldırganların geçemeyeceği bir güvenlik kalkanı oluşturur. Bu metotlar aşağıdaki gibi olabilir : 
 
+In login operations, if authorizing the users includes more than one step, it is called multiple authorization. The method Multi-Factor Authenticaiton consists of a multi-layered structure. It provides a shield which the attackers cannot get through with several authentication methods. These methods may be like below ones:
+
 * OTP
 * QR Code
-* Çağrı
+* Call
 * Sms
 
-MFA yani çoklu yetkilendirme yönteminde standart oturum açma işlevinden farklı olarak 2. aşamada kullanıcıdan  ile kimliğini doğrulaması istenir. Bir saldırgan yukarıda saydığımız kimlik doğrulama metotlarından kullanıcı parolasına sahip olsa bile MFA için yetkilendirilmiş güvenilir bir cihaza sahip olmadığından kimlik doğrulamayı geçemeyecektir.
+MFA, multiple authorization method, has a second step which get users required to authenticate their identities unlike standard login functions. Even if an attacker has a user password, he cannot pass the authentication since he does not have a secure device authorized for MFA.  
 
-* Bu özellik opsiyoneldir.
+* This feature is optional.
 
-### Akış Şeması
+### Flow Chart
 
-Aşağıdaki akış şeması bir kullanıcının yetki doğrulama aşamalarından nasıl geçtiği ve servisin nasıl çalıştığı hakkında size bir ön bilgi verecektir:
+The below diagram will give you a prior knowledge about how a user pass the authorization verification steps and how the server works:
 
 ![Authentication](https://github.com/obullo/mfa/blob/master/flowchart.png?raw=true "Authentication")
 
-Şemada görüldüğü üzere <kbd>Guest</kbd> ve <kbd>User</kbd> olarak iki farklı durumu olan bir kullanıcı sözkonusudur. Guest <kbd>yetkilendirilmemiş</kbd> User ise servis tarafından <kbd>yetkilendirilmiş</kbd> kullanıcıdır.
+As seen on schema, two users are at the issue as <kbd>Guest</kbd> and <kbd>User</kbd>. Guest is <kbd>unauthorized</kbd> and user is <kbd>authorized</kbd> on the service side.
 
-Akış şemasına göre Guest login butonuna bastığı anda ilk önce önbelleğe bir sorgu yapılır ve daha önceden kullanıcının önbellekte kalıcı bir kimliği olup olmadığında bakılır. Eğer hafıza bloğunda kalıcı yetki var ise kullanıcı kimliği buradan okunur yok ise veritabanına sorgu gönderilir ve elde edilen kimlik kartı tekrar önbelleğe yazılır.
+According to the schema, as soon as the Guest clicks the login button, firstly the cache is queried and checked if the user has already had a permanent identity. If there are permanent authorization on the memory block, the user idendity is read from here. If not, the database is queried and retrieved identity card is  re-written into cache.
 
 <a name="configuration"></a>
 
-### Konfigürasyon
+### Configuration
 
 Authenticaiton sınıfı varsayılan olarak <a href="http://container.thephpleague.com/" target="_blank">Php League Container</a> paketi ile çalışır.
 
