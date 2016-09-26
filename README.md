@@ -20,8 +20,6 @@ composer require obullo/auth
 
 ### MFA Feature 
 
-Oturum açma işlemlerinde kullancıyı yetkilendirme işlemleri birden fazla aşama ile yapılıyorsa bu çoklu yetkilendirme olarak adlandırılır. Multi-Factor Authentication güvenlik yöntemi; katmanlı bir yapıdan oluşur. Birden fazla kimlik doğrulama metoduyla saldırganların geçemeyeceği bir güvenlik kalkanı oluşturur. Bu metotlar aşağıdaki gibi olabilir : 
-
 In login operations, if authorizing the users includes more than one step, it is called multiple authorization. The method Multi-Factor Authenticaiton consists of a multi-layered structure. It provides a shield which the attackers cannot get through with several authentication methods. These methods may be like below ones:
 
 * OTP
