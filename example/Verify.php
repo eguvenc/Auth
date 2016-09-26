@@ -21,14 +21,14 @@ if (false == $identity->isTemporary()) {
 }
 if ($request->getMethod() == 'GET') {
     $identity->makeTemporary(300);  // Refresh ttl
-    $get = $request->getQueryParams();
+    $queryParams = $request->getQueryParams();
     /**
      * User has 5 request credit to send new code request.
      * After 5 times we kill the session. Click f5 button 5 times and see the result.
      */
     $_SESSION['VerificationRequestLimit'] = $_SESSION['VerificationRequestLimit'] - 1;
 
-    if (! empty($get['send_code'])) {
+    if (! empty($queryParams['send_code'])) {
         echo "<span style=\"color:green;\">New code has been sent.</span>";
     }
 }
