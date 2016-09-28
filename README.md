@@ -45,7 +45,7 @@ According to the schema, as soon as the Guest clicks the login button, firstly t
 
 ### Configuration
 
-Authenticaiton sınıfı varsayılan olarak <a href="http://container.thephpleague.com/" target="_blank">Php League Container</a> paketi ile çalışır.
+Authentication class works with <a href="http://container.thephpleague.com/" target="_blank">Php League Container</a> package by default.
 
 ```php
 require_once "vendor/autoload.php";
@@ -61,7 +61,7 @@ $container->addServiceProvider('ServiceProvider\Database');
 $container->addServiceProvider('ServiceProvider\Authentication');
 ```
 
-Tüm auth konfigürasyonu <kbd>classes/ServiceProvider/Authentication</kbd> sınıfı register metodu içerisinden düzenlenebilir.
+All the configuration of the auth can be edited in the register method in the <kbd>classes/ServiceProvider/Authentication</kbd> class.
 
 ```php
 $container->share('Auth.PASSWORD_COST', 6);
@@ -76,31 +76,32 @@ $container->share('Auth:Storage', 'Obullo\Auth\Storage\Redis')
 
 <a name="adapters"></a>
 
-### Adaptörler
+### Adapters
 
-Yetki doğrulama adaptörleri uygulamaya esneklik kazandıran sorgulama arabirimleridir, yetki doğrulamanın bir veritabanı ile mi yoksa farklı bir protokol üzerinden mi yapılacağını belirleyen sınıflardır. Varsayılan arabirim türü <kbd>Database</kbd> dir. ( RDBMS veya NoSQL türündeki veritabanları için ortak kullanılır ).
+Identity verification adapters are interfaces adding flexibility to applications, which specify identity is verified with either a database or over a different protocol. The defaul interface is <kbd>Database</kbd> (It is used commonly for both RDBMS  and NoSQL  databases).  
 
-Farklı adaptörlerin farklı seçenekler ve davranışları olması muhtemeldir , ama bazı temel şeyler kimlik doğrulama adaptörleri arasında ortaktır. Örneğin, kimlik doğrulama hizmeti sorgularını gerçekleştirmek ve sorgulardan dönen sonuçlar yetki doğrulama adaptörleri için ortak kullanılır.
+It is possible that different adapters have different behaviors and options, however, some basic procedures are common among the identity verification adapters such as performing the queries for identity verification service and results returned by these queries. 
 
 <a name="storages"></a>
 
-### Hafıza Depoları
+### Storages
 
-Hazıfa deposu yetki doğrulama esnasında kullanıcı kimliğini ön belleğe alır ve tekrar tekrar oturum açıldığında database ile bağlantı kurmayarak uygulamanın performans kaybetmesini önler. 
+Storage caches the user identity while verifying the identity and prevents the application from losing performance not connecting to the database when user logs in again and again.
 
-Desteklenen sürücüler
+Supported Drivers
 
 * Redis
 * Memcached
 
-Hafıza deposu servis konfigurasyonundan değiştirilebilir.
+Storages can be changed in the service configuration.
 
 ```php
 $container->share('Auth:Storage', 'Obullo\Auth\Storage\Memcached')
     ->withArgument($container->get('memcached:default'))
 ```
 
-Ayrıca anasayfadan servis sağlayıcınızı çağırmanız gerekir.
+Also, you need to call your service provider from the mainpage.
+
 
 ```php
 $container->addServiceProvider('ServiceProvider\Memcached');
@@ -110,7 +111,8 @@ $container->addServiceProvider('ServiceProvider\Authentication');
 
 ### Database
 
-Mysql benzeri ilişkili bir database kullanıyorsanız aşağıdaki sql kodunu çalıştırarak demo için bir tablo yaratın.
+If you use a relational database like MySQL, run the below SQL code to create a table.
+
 
 ```sql
 CREATE DATABASE IF NOT EXISTS test;
@@ -131,11 +133,11 @@ INSERT INTO `users` (`id`, `username`, `password`, `remember_token`) VALUES
 (1, 'user@example.com', '$2y$06$6k9aYbbOiVnqgvksFR4zXO.kNBTXFt3cl8xhvZLWj4Qi/IpkYXeP.', '');
 ```
 
-Test kullanıcı adı <kbd>user@example.com</kbd> ve şifre <kbd>123456</kbd> dır.
+The name of the test user is <kbd>user@example.com</kbd> and the password is <kbd>123456</kbd>.
 
 ### Auth Table
 
-Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\Auth\Adapter\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.
+If you want to change the queries or want to use a NoSQL solution, you can replace the value <kbd>Obullo\Auth\Adapter\Table\Db</kbd> of the key Auth:Table with your table class from the Authentication service provider.
 
 ```php
 $container->share('Auth:Table', 'My\Table\Db')
@@ -147,15 +149,15 @@ $container->share('Auth:Table', 'My\Table\Db')
     ->withMethodCall('setRememberTokenColumn', ['remember_token']);
 ```
 
-Mongo Db için örnek.
+An example for Mongo Db.
 
 ```php
 $container->share('Auth:Table', 'Obullo\Auth\Adapter\Database\Table\Mongo');
 ```
 
-### Oturum Açma
+### Login
 
-Oturum açma girişimi login metodu üzerinden gerçekleşir bu metot çalıştıktan sonra oturum açma sonuçlarını kontrol eden <kbd>AuthResult</kbd> nesnesi elde edilmiş olur.
+The login operation is performed over the login method and this method returns an <kbd>AuthResult</kbd> object checking the results of the login.
 
 ```php
 $credentials = new Obullo\Auth\Credentials;
@@ -179,7 +181,8 @@ if (false == $authResult->isValid()) {
 }
 ```
 
-Oturum açma sonucunun doğruluğu <kbd>AuthResult->isValid()</kbd> metodu ile kontrol edilir eğer oturum açma denemesi başarısız ise dönen tüm hata mesajlarına getArray() metodu ile ulaşılabilir.
+The login success is checked with the method <kbd>AuthResult->isValid()</kbd> and if the login fails, all the returning error messages can be reached with the method getArray().
+
 
 ```php
 if ($auhtResult->isValid()) {
@@ -194,40 +197,40 @@ if ($auhtResult->isValid()) {
 }
 ```
 
-**Not:** <kbd>example</kbd> klasörü içerisinde oluşturulmuş örneğe göz atmayı unutmayın.
+**Note:** Remember take a look at the example created in the <kbd>example</kbd> folder.
 
 <a name="login-error-results"></a>
 
-### Hata Tablosu
+### Error Table
 
 <table>
     <thead>
         <tr>
-            <th>Kod</th>    
-            <th>Sabit</th>    
-            <th>Açıklama</th>
+            <th>Code</th>    
+            <th>Constant</th>    
+            <th>Description</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>0</td>
             <td>AuthResult::FAILURE</td>
-            <td>Genel başarısız yetki doğrulama.</td>
+            <td>Failed general authorization verification</td>
         </tr>
         <tr>
             <td>-1</td>
             <td>AuthResult::FAILURE_IDENTITY_AMBIGUOUS</td>
-            <td>Kimlik belirsiz olması nedeniyle başarısız yetki doğrulama.( Sorgu sonucunda 1 den fazla kimlik bulunduğunu gösterir ).</td>
+            <td>Failed authorization verification due to indefinite identity(Shows that the query results includes more than one identity).</td>
         </tr>
         <tr>
             <td>-2</td>
             <td>AuthResult::FAILURE_CREDENTIAL_INVALID</td>
-            <td>Geçersiz kimlik bilgileri girildiğini gösterir.</td>
+            <td>Shows that invalid credentials are entered</td>
         </tr>
         <tr>
             <td>1</td>
             <td>AuthResult::SUCCESS</td>
-            <td>Yetki doğrulama başarılıdır.</td>
+            <td>Successful authorization verification</td>
         </tr>
 
     </tbody>
@@ -235,22 +238,22 @@ if ($auhtResult->isValid()) {
 
 <a name="identities"></a>
 
-### Kimlikler
+### Identities
 
-Kimlik sınıfı kullanıcı kimliğine ait <kbd>okuma</kbd> ve <kbd>yazma</kbd> işlemlerini yürütür. Kimliğe veri kaydetmek için set metodu,
+Identity class executes <kbd>read</kbd> and <kbd>write</kbd> operations of the user identity. The set method is used to save a value to the identity:
 
 ```php
 $identity->set('test', 'my_value');
 ```
 
-Kimlik bilgilerini elde etmek için ise get metodu kullanılır.
+The get method is used to retrieve the value from the credentials: 
 
 
 ```php
 echo $identity->get('test');  // my_value
 ```
 
-Kimliğe ait tüm bilgileri almak için ise aşağıdaki metot kullanılır.
+The below method is used to get all the credentials:
 
 ```php
 print_r($identity->getArray());
@@ -275,49 +278,49 @@ Array
 
 <a name="identity-keys"></a>
 
-### Kimlik anahtarları
+### Identity Keys
 
 <table>
     <thead>
         <tr>
-            <th>Anahtar</th>    
-            <th>Açıklama</th>
+            <th>Key</th>    
+            <th>Description</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>__isAuthenticated</td>
-            <td>Eğer kullanıcı yetkilendirilmiş ise bu anahtar <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerini içerir.</td>
+            <td>If the user is authorized this key contains the value <kbd>1</kbd>, otherwise <kbd>0</kbd>.</td>
         </tr>
         <tr>
             <td>__isTemporary</td>
-            <td>Yetki doğrulama onay özelliği için kullanılır.</td>
+            <td>It is used for the feature of authorization verification.</td>
         </tr>
         <tr>
             <td>__rememberMe</td>
-            <td>Kullanıcı giriş yaparken beni hatırla özelliğini kullandıysa bu değer <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerini alır.</td>
+            <td>If the user has used this feature when login, this contains <kbd>1</kbd>, otherwise <kbd>0</kbd>.</td>
         </tr>
         <tr>
             <td>__time</td>
-            <td>Kimliğin ilk oluşturulma zamanıdır. Unix microtime() formatında kaydedilir.</td>
+            <td>Time when the identity is created. It is saved in the format of Unix microtime().</td>
         </tr>
         <tr>
             <td>__ip</td>
-            <td>Kullanıcının en son giriş yaptığı ip adresi.</td>
+            <td>The IP address which the user logins lastly.</td>
         </tr>
         <tr>
             <td>__agent</td>
-            <td>Kullanıcının kullandığı tarayıcı ve işletim sistemi bilgisi.</td>
+            <td>The browser and operation system information that the user has</td>
         </tr>
         <tr>
             <td>__lastActivity</td>
-            <td>Kullanıcının en son aktivite zamanı.</td>
+            <td>The time of the last activity.</td>
         </tr>
     </tbody>
 </table>
 
 
-### Şifre Yenileme
+### Passord Change
 
 Eğer login aşamasından sonra giriş başarısız ise <kbd>$authAdapter->passwordNeedsRehash()</kbd> metodu ile kullanıcının şifresinin yenilenip yenilenmeyeceğine karar verilir.Bu metot php <kbd>password_needs_rehash()</kbd> ve <kbd>password_hash()</kbd> metotlarını kullanarak yenilenen şifrenin hash değerine döner.
 
