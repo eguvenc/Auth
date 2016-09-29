@@ -12,7 +12,7 @@ composer require obullo/auth
 ### Features
 
 * Cachable Identities
-* Multiple Authorization (MFA)
+* Multifactor Authentication (MFA)
 * Adapters for varied behaviors
 * Ability to see the users opening sessions with different computers and terminate the sessions
 * Table classes for different databases
