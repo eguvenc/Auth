@@ -20,7 +20,7 @@ composer require obullo/auth
 
 ### MFA Feature 
 
-In login operations, if authorizing the users includes more than one step, it is called multiple authorization. The method Multi-Factor Authenticaiton consists of a multi-layered structure. It provides a shield which the attackers cannot get through with several authentication methods. These methods may be like below ones:
+In login operations, if authorizing the users includes more than one step, it is called multiple authorization. The method Multi-Factor Authentication consists of a multi-layered structure. It provides a shield which the attackers cannot get through with several authentication methods. These methods may be like below ones:
 
 * OTP
 * QR Code
