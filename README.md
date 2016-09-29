@@ -1,7 +1,7 @@
 
 ## Php Web Authentication
 
-Auth paketi çeşitli ortak senaryolar için yazılmış yetkilendirme (authentication) adaptörlerini kullanarak, ölçeklenebilir bir arayüz sağlar ve çoklu yetkilendirme (multifactor authentication) özelliğini de destekler. Auth paketi önbellek sürücüleri sayesinde kullanıcı kimliklerini oturum numaralarına bellekleyerek orta veya büyük ölçekli uygulamalar için yetkilendirme yönetimini kolaylaştırmak için tasarlanmıştır.
+Auth paketi çeşitli ortak senaryolar için yazılmış yetkilendirme (authentication) adaptörlerini kullanarak, ölçeklenebilir bir arayüz sağlar ve çoklu yetkilendirme (multifactor authentication) özelliğini de destekler. Auth paketi önbellek sürücüleri sayesinde kullanıcı kimliklerini oturum numaralarına göre bellekleyerek orta veya büyük ölçekli uygulamalar için yetkilendirme yönetimini kolaylaştırmak için tasarlanmıştır.
 
 ### Installing with Composer
 
