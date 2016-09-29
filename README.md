@@ -1,7 +1,7 @@
 
 ## Php Web Authentication
 
-Obullo Auth paketi önbellek sürücüleri sayesinde kullanıcı kimliklerini oturum numaralarına göre bellekleyerek orta veya büyük ölçekli uygulamalar için yetkilendirme yönetimini kolaylaştırmak için tasarlanmıştır. Auth paketi çeşitli ortak senaryolar için yazılmış yetkilendirme (authentication) adaptörlerini kullanarak, ölçeklenebilir bir çözüm olmayı hedefler ve çoklu yetkilendirme (multifactor authentication) özelliğini de destekler. 
+Obullo Auth package is designed to ease the management of authorization in the medium and large-scale applications caching the user identities according to their session numbers with the help of cache drivers. Auth package aims to be a scalable solution using the authentication adapters written for various common scenarios and supports multifactor authentication.
 
 ### Installing with Composer
 
@@ -320,9 +320,9 @@ Array
 </table>
 
 
-### Passord Change
+### Password Change
 
-Eğer login aşamasından sonra giriş başarısız ise <kbd>$authAdapter->passwordNeedsRehash()</kbd> metodu ile kullanıcının şifresinin yenilenip yenilenmeyeceğine karar verilir.Bu metot php <kbd>password_needs_rehash()</kbd> ve <kbd>password_hash()</kbd> metotlarını kullanarak yenilenen şifrenin hash değerine döner.
+If login has failed, the password renewal is decided with the method  <kbd>$authAdapter->passwordNeedsRehash()</kbd>. This method returns the hash value of the new password using the <kbd>password_needs_rehash()</kbd> and <kbd>password_hash()</kbd> methods of php.
 
 ```php
 if ($hash = $authAdapter->passwordNeedsRehash()) {
@@ -330,7 +330,7 @@ if ($hash = $authAdapter->passwordNeedsRehash()) {
 }
 ```
 
-Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash değeri ile yenilenmelidir.
+If method does not return false, the user password should be replace with the returned hash.
 
 ### Adapter
 
@@ -338,19 +338,19 @@ Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash d
 
 #### $authAdapter->authenticate(Credentials $credentials);
 
-Girilen kullanıcı bilgileri ile yetki doğrulaması yaparak AuthResult nesnesine geri döner.
+Returns to the AuthResult object after verifying the authorization with the user information.
 
 #### $authAdapter->regenerateSessionId(true);
 
-Kullanıcı giriş yaptıktan sonra oturum id sinin yeniden yaratılıp yaratılmayacağını belirler.
+Specifies if the session id will be re-created or not after login.
 
 #### $authAdapter->validateCredentials(Credentials $credentials);
 
-Kullanıcıyı yetkilendirmeden kimlik bilgilerinin doğruluğunu kontrol eder. Doğru ise true aksi durumda false değerine geri döner.
+Verifies the credentials without authorizing the user and returns true or false accordingly.
 
 #### $authAdapter->authorize(User $user);
 
-User nesnesini kullanarak zaten kimlik bilgileri doğrulanmış Guest kullanıcıyı yetkilendirmek için kullanılır.
+Used to authorize guest user whose credentials has already been verified with user object.
 
 <a name="identity-method-reference"></a>
 
@@ -360,31 +360,31 @@ User nesnesini kullanarak zaten kimlik bilgileri doğrulanmış Guest kullanıc�
 
 #### $identity->check();
 
-Kullanıcı yetki doğrulamadan geçmiş ise <kbd>true</kbd> aksi durumda <kbd>false</kbd> değerine döner.
+Returns <kbd>true</kbd> if the user passes authorization verification, otherwise <kbd>false</kbd>.
 
 #### $identity->guest();
 
-Kullanıcının yetkisi doğrulanmamış kullanıcı, yani bir ziyaretçi olup olmadığını kontrol eder. Ziyaretçi ise <kbd>true</kbd> değilse <kbd>false</kbd> değerine döner.
+Checks if the user is a guest, whose authorization has not been verified. If guest, returns <kbd>true</kbd>, otherwise <kbd>false</kbd>.
 
 #### $identity->set($key, $value);
 
-Kimlik dizisine girilen anahtara bir değer atar.
+Sets a value to the key entered to the idendity array.
 
 #### $identity->get($key);
 
-Kimlik dizisinden girilen anahtara ait değere geri döner. Anahtar yoksa false değerine döner.
+Returns the value of the key entered from the identity array. Returns fakse if no key is found.
 
 #### $identity->remove($key);
 
-Kimlik dizisinden varolan anahtarı siler.
+Removes the existent key from the idendity array.
 
 #### $identity->expire($ttl);
 
-Kullanıcı kimliğinin girilen süre göre geçtikten sonra yok olması için __expire anahtarı içerisine sona erme süresini kaydeder.
+Sets the expiring time to the __expire key in order for user idendity to be expired when the time passes.  
 
 #### $identity->isExpired();
 
-Kimliğe expire() metodu ile kaydedilmiş süre sona erdiyse <kbd>true</kbd> aksi durumda <kbd>false</kbd> değerine döner. Bu method Http Auth katmanında aşağıdaki gibi kullanılabilir.
+Returns <kbd>true</kbd> if the time set by the method expire() is expired and returns <kbd>false</kbd> otherwise. This method can be used on the Http Auth Layer as below: 
 
 ```php
 if ($identity->isExpired()) {
@@ -394,69 +394,67 @@ if ($identity->isExpired()) {
 
 #### $identity->makeTemporary($expire = 300);
 
-Başarılı giriş yapmış bir kullanıcı kimliğini çoklu yetkilendirme için belirlenen sona erme süresine göre geçici hale getirir. Süre sona erdiğinde kimlik hafıza deposundan silinir.
+Makes the user idendity which has logged in successfully temporary according to the time specified for the multifactor authentication. When expired, idendity is removed from the storage.
 
 #### $identity->makePermanent();
 
-Çoklu yetkilendirmeyi geçmiş bir kullanıcıya ait geçici kimliği kalıcı hale getirir. Kalıcı kimlik 
-süresi (varsayılan 3600 saniye) sona erdiğinde veritabanına tekrar sorgu yapılarak kimlik tekrar hafızaya kaydedilir.
+Makes the temporary identity of the user who has passed the multifactor authentication permanent. When the permanent idendity time(3600 seconds by default) expires, the database is re-queried and the idendity saves into memory. 
 
 #### $identity->isTemporary();
 
-Çoklu yetkilendirmede kullanıcı kimliğinin geçici olup olmadığını gösterir, geçici ise <kbd>1</kbd> aksi durumda <kbd>0</kbd> değerine döner.
+Shows either user idendity is temporary or permanent in multifactor authentication, returns <kbd>1</kbd> if temporary, otherwise <kbd>0</kbd>. 
 
 #### $identity->updateTemporary(string $key, mixed $val);
 
-Çoklu yetkilendirmede geçici olarak oluşturulmuş kimlik bilgilerini güncellemenize olanak tanır.
+Enables to update the temporary credentials in multifactor authentication.
 
 #### $identity->logout();
 
-Önbellekteki <kbd>isAuthenticated</kbd> anahtarını <kbd>0</kbd> değeri ile güncelleyerek oturumu kapatır. Bu method önbellekteki kullanıcı kimliğini bütünü ile silmez sadece kullanıcıyı oturumu kapattı olarak kaydeder. Önbellekleme sayesinde <kbd>3600</kbd> saniye içerisinde kullanıcı bir daha sisteme giriş yaptığında <kbd>isAuthenticated</kbd> değeri <kbd>1</kbd> olarak güncellenir ve veritabanı sorgusunun önüne geçilmiş olur.
+Logs out while updating the <kbd>isAuthenticated</kbd> key in the cache with <kbd>0</kbd>. This method does not completely removes the user idendity from the cache, it just saves the user as if he has ended the session. Thanks to caching, when the user logs in again within <kbd>3600</kbd> seconds, <kbd>isAuthenticated</kbd> value is updated to <kbd>1</kbd> and the database query is prevented.
 
 #### $identity->destroy();
 
-Önbellekteki kimliği bütünüyle yok eder.
+Destroys the user idendity completely.
 
 #### $identity->forgetMe();
 
-Beni hatırla çerezini kullanıcı tarayıcısından siler.
+Removes the cookie 'remember me' from the browser.
 
 #### $identity->refreshRememberToken();
 
-Beni hatırla çerezini yenileyerek veritabanı ve çereze tekrar kaydeder.
+Refreshes the cookie 'rememeber me' and saves into database and cookie again.
 
 #### $identity->getIdentifier();
 
-Kullanıcın kimlik tanımlayıcısına geri döner. Tanımlayıcı genellikle <kbd>username</kbd> yada <kbd>email</kbd> değeridir.
+Returns the identifier of the user. It is generally <kbd>username</kbd> or <kbd>email</kbd>.
 
 #### $identity->getPassword();
 
-Kullanıcının hash edilmiş şifresine geri döner.
+Returns the hashed password of the user.
 
 #### $identity->getRememberMe();
 
-Eğer kullanıcı beni hatırla özelliğini kullanıyorsa <kbd>1</kbd> değerine aksi durumda <kbd>0</kbd> değerine döner.
+Returns <kbd>1</kbd> if the user uses the feature 'remember me', otherwise returns <kbd>0</kbd>.
 
 #### $identity->getTime();
 
-Kimliğin ilk yaratılma zamanını verir. ( Unix microtime ).
+Returns the first creation time of the idendity (Unix microtime).
 
 #### $identity->getRememberMe();
 
-Kullanıcı beni hatırla özelliğini kullandı ise <kbd>1</kbd> değerine, kullanmadı ise <kbd>0</kbd> değerine döner.
+If the user has used the feature 'remember me' results <kbd>1</kbd>, otherwise returns <kbd>0</kbd>.
 
 #### $identity->getRememberToken();
 
-Beni hatırla çerezi değerine döner.
+Returns the value of the cookie 'rememeber me'.
 
 #### $identity->getLoginId();
 
-Bir veya birden fazla oturumlar numaralandırılır. Giriş yapmış kullanıcıya ait oturum numarasına aksi durumda false değerine döner.
+One or more sessions are numbered and returns returns the session number of the user logged in, otherwise returns false.
 
 #### $identity->getArray()
 
-Kullanıcının tüm kimlik değerlerine bir dizi içerisinde geri döner.
-
+Returns all the credentials within an array.
 
 ### Storage
 
@@ -464,13 +462,13 @@ Kullanıcının tüm kimlik değerlerine bir dizi içerisinde geri döner.
 
 #### $storage->getUserSessions();
 
-Kullanıcının bir yada birden fazla oturumu varsa bir dizi içerisinde bu oturumlara geri döner.
+If user has one or more sessions, returns these sessions within an array.
 
 ```php
 $sessions = $storage->getUserSessions();
 ```
 
-Bir kullanıcının iki farklı tarayıcıdan oturum açtığını varsayarsak bu metot aşağıdaki gibi bir çıktı verir.
+If a user logs in with two different browsers, the output of this method is similar to below. 
 
 ```php
 print_r($sesssion);
@@ -503,15 +501,13 @@ Array
 
 #### $storage->killSession($loginID);
 
-Oturum id değerine göre kullanıcın seçilen oturumunu sonlandırır.
-
+Terminates the user session according to session id.
 
 ```php
 $storage->killSession("1dd468dbea32e8ed6f58cb00b40af76c");
 ```
 
-Bir önceki örnekte Firefox tarayıcısına ait login ID değerini bu metoda gönderdiğimizde Firefox tarayıcısında açılmış bu oturum sonlandırılır.
-
+In the previous example, when login ID belonging to Firefox browser value is sent to this method, the session on the Firefox browser is terminated.
 
 <a name="authResult-reference"></a>
 
