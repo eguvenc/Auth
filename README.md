@@ -517,39 +517,39 @@ In the previous example, when login ID belonging to Firefox browser value is sen
 
 #### $authResult->isValid();
 
-Login attempt methodundan geri dönen hata kodu <kbd>0</kbd> değerinden büyük ise <kbd>true</kbd> küçük ise <kbd>false</kbd> değerine döner. Başarılı oturum açma işlermlerinde hata kodu <kbd>1</kbd> değerine döner diğer durumlarda negatif değerlere döner.
+Returns <kbd>true</kbd> if the error code returning from the method login attempt greater than <kbd>0</kbd>, otherwise <kbd>false</kbd>. Successfull login operations returns the error code <kbd>1</kbd> and the other situations returns negative values.
 
 #### $authResult->getCode();
 
-Login denemesinden sonra geçerli hata koduna geri döner.
+Returns the error code after login attempt.
 
 #### $authResult->getIdentifier();
 
-Login denemesinden sonra geçerli kullanıcı kimliğine göre döner. ( id, username, email gibi. )
+Returns the credentials like id, username, email after login attempt.
 
 #### $authResult->getMessages();
 
-Login denemesinden sonra hata mesajlarına geri döner.
+Returns the error messages after the login attempt.
 
 #### $authResult->setCode(int $code);
 
-Login denemesinden varsayılan sonuca hata kodu ekler.
+Sets an error code to default result from the login attempt.
 
 #### $authResult->setMessage(string $message);
 
-Login denemesinden sonra sonuçlara bir hata mesajı ekler.
+Sets error messages to results returning from the login attempt.
 
 #### $authResult->getArray();
 
-Login denemesinden sonra tüm sonuçları bir dizi içerisinde verir.
+Returns all the results in an array from the login attempt.
 
 #### $authResult->getResultRow();
 
-Login denemesinden sonra geçerli veritabanı adaptörü sorgu sonucuna yada varsa önbellekte oluşturulmuş sorgu sonucuna geri döner.
+Returns the valid database adapter after the login attempt  according to query result either from database or cache if it exists.  
 
-### Geri Çağırım (Recaller)
+### Recall (Recaller)
 
-Eğer kullanıcının daha önceden tarayıcısında beni hatırla çerezi varsa geri çağırım fonksiyonu kullanılarak kullanıcının oturum bilgilerini girmeden yetkilendirilmesi sağlanmış olur.
+If the user has already had a cookie 'remember me', the user can be authorized without entering the user information using the recaller function.
 
 ```php
 if ($token = $identity->hasRecallerCookie()) {
@@ -576,19 +576,19 @@ if ($token = $identity->hasRecallerCookie()) {
 
 ```
 
-### Çoklu Yetkilendirme
+### Multifactor Authentication
 
-Çoklu yetkilendirme kullanıcının kimliğini sisteme giriş yaptıktan hemen sonra <b>OTP</b>, <b>Çağrı</b>, <b>Sms</b> yada <b>QRCode</b> gibi yöntemlerle onaylamasını kolaylaştırır.
+Multifactor authentication makes the identity confirmation easier with the methods <b>OTP</b>, <b>Çağrı</b>, <b>Sms</b> or <b>QRCode</b> after a user logs in.
 
-Kullanıcı başarılı olarak giriş yaptıktan sonra kimliği kalıcı olarak ( varsayılan 3600 saniye ) önbelleklenir. Eğer kullanıcı onay adımından geçirilmek isteniyorsa kalıcı kimlikler <kbd>$identity->makeTemporary()</kbd> metodu ile geçici hale ( varsayılan 300 saniye ) getirilmelidir. Geçici olan bir kimlik 300 saniye içerisinde kendiliğinden yokolur.
+After a successful login, the user identity is cached permanently(3600 seconds by default). If the user is wanted to be approved,  permanent identities must be become temporary with the method <kbd>$identity->makeTemporary()</kbd> (300 seconds by default). A temporary idendity expires within 300 seconds itself. 
 
-Çoklu yetkilendirmede kullanıcı sisteme giriş yaptıktan sonra,
+In multifactor authentication, after user logs in,
 
 ```php
 $identity->makeTemporary(300);
 ```
 
-metodu ile kimliği geçici hale getirilir ve kullanıcı sisteme giriş yapamaz. Kullanıcının geçici kimliğini onaylaması için ona bir doğrulama kodu gönderilmelidir.
+using the method above, user idendity is made temporary and user cannot log in. The user must be sent verification code to approve his temporary idendity.
 
 ```php
 if ($authResult->isValid()) {
@@ -601,32 +601,31 @@ if ($authResult->isValid()) {
 }
 ```
 
-Eğer kullanıcı verify sayfasında kimliğini onaylarsa geçici kimliğin <kbd>$identity->makePermanent()</kbd> metodu ile kalıcı hale getirilmesi gereklidir. Bir kimlik kalıcı yapıldığında kullanıcı sisteme başarılı bir şekilde giriş yapmış olur.
-
+If verified, the temporary idendity must be set as permanent with the method <kbd>$identity->makePermanent()</kbd>. A permanent idendity means the user has successfully logged in.
 
 ```php
 $identity->makePermanent();
 ```
 
-Eğer çoklu yetkilendirme yani geçici kimlik oluşturma fonksiyonu kullanılmıyorsa, sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.
+If multifactor authentication is not used, system saves all identities as <kbd>permanent</kbd>.
 
 
-### Mongo Tablo Sürücüsü
+### Mongo Table Driver
 
-Tablo sürücünü mongo kullanmak istiyorsanız ortak dosyadan mongo servis sağlayıcısını ekleyin. Ayrıca servis sağlayıcısı içerisindeki bağlantı bilgilerini güncellemeyi unutmayın.
+If you want to use Mongo table driver, add the Mongo service provider from the commong file. Remember updating the connection information in the service provider.
 
 ```php
 // $container->addServiceProvider('ServiceProvider\Database');
 $container->addServiceProvider('ServiceProvider\Mongo');
 ```
 
-Authentication servisi içerisindeki ilk argümanı aşağıdaki gibi gönderin.
+Send the first argument in the authentication service as below.
 
 ```php
 $this->container->get('mongo:default')->selectDB('test');
 ```
 
-Servis sağlayıcısı içerisindeki değiştirilmesi gereken kısım aşağıdaki gibi olmalı.
+The part needing to be chaned in the service provider should be like below.
 
 ```php
 $container->share('Auth:Table', 'Obullo\Auth\Adapter\Table\Mongo')
