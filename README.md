@@ -625,7 +625,7 @@ Send the first argument in the authentication service as below.
 $this->container->get('mongo:default')->selectDB('test');
 ```
 
-The part needing to be chaned in the service provider should be like below.
+The part needing to be changed in the service provider should be like below.
 
 ```php
 $container->share('Auth:Table', 'Obullo\Auth\Adapter\Table\Mongo')
