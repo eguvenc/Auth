@@ -1,6 +1,7 @@
 <?php
 
 use Obullo\Auth\User\User;
+use Obullo\Auth\WebTestCase;
 use Obullo\Auth\User\Credentials;
 
 class UserTest extends WebTestCase

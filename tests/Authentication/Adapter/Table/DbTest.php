@@ -1,5 +1,6 @@
 <?php
 
+use Obullo\Auth\WebTestCase;
 use Obullo\Auth\Adapter\Table\Db;
 use Obullo\Auth\User\Credentials;
 

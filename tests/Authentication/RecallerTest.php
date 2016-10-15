@@ -1,6 +1,7 @@
 <?php
 
 use Obullo\Auth\Recaller;
+use Obullo\Auth\WebTestCase;
 
 class RecallerTest extends WebTestCase
 {

@@ -1,5 +1,7 @@
 <?php
 
+use Obullo\Auth\WebTestCase;
+
 class RecallerTokenTest extends WebTestCase
 {
     protected $recallerToken;

@@ -1,6 +1,7 @@
 <?php
 
 use Obullo\Auth\Password;
+use Obullo\Auth\WebTestCase;
 
 class PasswordTest extends WebTestCase
 {

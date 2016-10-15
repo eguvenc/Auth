@@ -9,6 +9,14 @@ Obullo Auth paketi önbellek sürücüleri sayesinde kullanıcı kimliklerini ot
 composer require obullo/auth
 ```
 
+### Demo Uygulamayı Yüklemek
+
+```
+git clone git@github.com:obullo/Auth-Demo.git auth-demo
+```
+
+Gerçek örneklere göz atmak için demo uygulamayı yüklemeyi deneyin.
+
 ### Özellikler
 
 * Önbelleklenebilir kimlikler

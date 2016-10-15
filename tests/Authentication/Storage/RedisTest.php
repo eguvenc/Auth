@@ -1,5 +1,6 @@
 <?php
 
+use Obullo\Auth\WebTestCase;
 use Obullo\Auth\Storage\Redis as RedisStorage;
 
 class RedisTest extends WebTestCase

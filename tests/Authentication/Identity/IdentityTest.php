@@ -1,6 +1,7 @@
 <?php
 
 use Obullo\Auth\Password;
+use Obullo\Auth\WebTestCase;
 use Obullo\Auth\Adapter\Table;
 use Obullo\Auth\RecallerToken;
 use Obullo\Auth\User\Credentials;

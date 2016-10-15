@@ -1,5 +1,6 @@
 <?php
 
+use Obullo\Auth\WebTestCase;
 use Obullo\Auth\User\Credentials;
 use Obullo\Auth\Adapter\Table\Mongo;
 

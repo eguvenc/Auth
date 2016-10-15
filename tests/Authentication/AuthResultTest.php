@@ -1,6 +1,7 @@
 <?php
 
 use Obullo\Auth\AuthResult;
+use Obullo\Auth\WebTestCase;
 
 class AuthResultTest extends WebTestCase
 {

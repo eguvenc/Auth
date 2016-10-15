@@ -9,6 +9,14 @@ Obullo Auth package is designed to ease the management of authorization in the m
 composer require obullo/auth
 ```
 
+### Installing Demo Application
+
+```
+git clone git@github.com:obullo/Auth-Demo.git auth-demo
+```
+
+To look over the real examples try to install demo application.
+
 ### Features
 
 * Cachable Identities
