@@ -26,8 +26,6 @@ if ($token = $identity->hasRecallerCookie()) {
         $authAdapter = new Obullo\Auth\Adapter\Table($container);
         $authAdapter->authorize($user);
         $authAdapter->regenerateSessionId(true);
-
-        $identity->initialize();
     }
 }
 /**

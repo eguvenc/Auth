@@ -319,7 +319,7 @@ Array
 
 ### Şifre Yenileme
 
-Eğer login aşamasından sonra giriş başarısız ise <kbd>$authAdapter->passwordNeedsRehash()</kbd> metodu ile kullanıcının şifresinin yenilenip yenilenmeyeceğine karar verilir.Bu metot php <kbd>password_needs_rehash()</kbd> ve <kbd>password_hash()</kbd> metotlarını kullanarak yenilenen şifrenin hash değerine döner.
+Eğer login aşamasından sonra giriş başarısız ise <kbd>$authAdapter->passwordNeedsRehash()</kbd> metodu ile kullanıcının şifre algoritmasının yenilenip yenilenmeyeceğine karar verilir.Bu metot php <kbd>password_needs_rehash()</kbd> ve <kbd>password_hash()</kbd> metotlarını kullanarak yenilenmiş hash değerine geri döner.
 
 ```php
 if ($hash = $authAdapter->passwordNeedsRehash()) {
@@ -327,7 +327,7 @@ if ($hash = $authAdapter->passwordNeedsRehash()) {
 }
 ```
 
-Eğer metot false değerine dönmüyorsa kullanıcı şifresi dönen yeni hash değeri ile yenilenmelidir.
+Eğer metot false değerine dönmüyorsa kullanıcı şifresi veritabanında dönen yeni hash değeri ile yenilenmelidir.
 
 ### Adapter
 
@@ -570,8 +570,6 @@ if ($token = $identity->hasRecallerCookie()) {
         $authAdapter = new Obullo\Auth\Adapter\Table($container);
         $authAdapter->authorize($user);
         $authAdapter->regenerateSessionId(true);
-
-        $identity->initialize();
     }
 }
 

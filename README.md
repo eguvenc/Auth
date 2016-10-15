@@ -78,7 +78,7 @@ $container->share('Auth:Storage', 'Obullo\Auth\Storage\Redis')
 
 ### Adapters
 
-Identity verification adapters are interfaces adding flexibility to applications, which specify identity is verified with either a database or over a different protocol. The defaul interface is <kbd>Database</kbd> (It is used commonly for both RDBMS  and NoSQL  databases).  
+Identity verification adapters are interfaces adding flexibility to applications, which specify identity is verified with either a database or over a different protocol. The default interface is <kbd>Database</kbd> (It is used commonly for both RDBMS  and NoSQL  databases).  
 
 It is possible that different adapters have different behaviors and options, however, some basic procedures are common among the identity verification adapters such as performing the queries for identity verification service and results returned by these queries. 
 
@@ -320,9 +320,9 @@ Array
 </table>
 
 
-### Password Change
+### Password Rehash
 
-If login has failed, the password renewal is decided with the method  <kbd>$authAdapter->passwordNeedsRehash()</kbd>. This method returns the hash value of the new password using the <kbd>password_needs_rehash()</kbd> and <kbd>password_hash()</kbd> methods of php.
+If login has failed, the password rehash is decided with the method  <kbd>$authAdapter->passwordNeedsRehash()</kbd>. This method returns the new hash value of the password using the <kbd>password_needs_rehash()</kbd> and <kbd>password_hash()</kbd> methods of php.
 
 ```php
 if ($hash = $authAdapter->passwordNeedsRehash()) {
@@ -330,7 +330,7 @@ if ($hash = $authAdapter->passwordNeedsRehash()) {
 }
 ```
 
-If method does not return false, the user password should be replace with the returned hash.
+If method does not return false, the user password should be replace in db with the returned hash.
 
 ### Adapter
 
@@ -569,8 +569,6 @@ if ($token = $identity->hasRecallerCookie()) {
         $authAdapter = new Obullo\Auth\Adapter\Table($container);
         $authAdapter->authorize($user);
         $authAdapter->regenerateSessionId(true);
-
-        $identity->initialize();
     }
 }
 

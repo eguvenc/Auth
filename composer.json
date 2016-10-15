@@ -1,4 +1,18 @@
 {
+    "name": "obullo/auth",
+    "type": "library",
+    "description": "Php web authentication for scalable applications.",
+    "keywords": ["auth","multi factor", "authentication"],
+    "homepage": "https://obullo.github.io/Auth/",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ersin Guvenc",
+            "email": "eguvenc@gmail.com",
+            "homepage": "http://obullo.com",
+            "role": "Developer"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Obullo\\Auth\\": "src/",
