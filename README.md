@@ -584,9 +584,9 @@ if ($token = $identity->hasRecallerCookie()) {
 
 ### Multifactor Authentication
 
-Multifactor authentication makes the identity confirmation easier with the methods <b>OTP</b>, <b>Çağrı</b>, <b>Sms</b> or <b>QRCode</b> after a user logs in.
+Multifactor authentication makes the identity confirmation easier with the methods <b>OTP</b>, <b>Call</b>, <b>Sms</b> or <b>QRCode</b> after a user logs in.
 
-After a successful login, the user identity is cached permanently(3600 seconds by default). If the user is wanted to be approved,  permanent identities must be become temporary with the method <kbd>$identity->makeTemporary()</kbd> (300 seconds by default). A temporary idendity expires within 300 seconds itself. 
+After a successful login, the user identity is cached permanently (3600 seconds by default). If the user is wanted to be approved,  permanent identities must be become temporary with the method <kbd>$identity->makeTemporary()</kbd> (300 seconds by default). A temporary idendity expires within 300 seconds itself. 
 
 In multifactor authentication, after user logs in,
 
@@ -594,7 +594,7 @@ In multifactor authentication, after user logs in,
 $identity->makeTemporary(300);
 ```
 
-using the method above, user idendity is made temporary and user cannot log in. The user must be sent verification code to approve his temporary idendity.
+using the method above, user idendity is made temporary and user cannot log in. The user must be sent verification code to approve his temporary identity.
 
 ```php
 if ($authResult->isValid()) {
@@ -607,7 +607,7 @@ if ($authResult->isValid()) {
 }
 ```
 
-If verified, the temporary idendity must be set as permanent with the method <kbd>$identity->makePermanent()</kbd>. A permanent idendity means the user has successfully logged in.
+If verified, the temporary identity must be set as permanent with the method <kbd>$identity->makePermanent()</kbd>. A permanent identity means the user has successfully logged in.
 
 ```php
 $identity->makePermanent();
@@ -618,7 +618,7 @@ If multifactor authentication is not used, system saves all identities as <kbd>p
 
 ### Mongo Table Driver
 
-If you want to use Mongo table driver, add the Mongo service provider from the commong file. Remember updating the connection information in the service provider.
+If you want to use Mongo table driver, add the Mongo service provider from the common file. Remember updating the connection information in the service provider.
 
 ```php
 // $container->addServiceProvider('ServiceProvider\Database');
