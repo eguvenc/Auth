@@ -1,5 +1,5 @@
 
-## Php Web Authentication
+## Php Multiple Authentication
 
 Obullo Auth paketi önbellek sürücüleri sayesinde kullanıcı kimliklerini oturum numaralarına göre bellekleyerek orta veya büyük ölçekli uygulamalar için yetkilendirme yönetimini kolaylaştırmak için tasarlanmıştır. Auth paketi çeşitli ortak senaryolar için yazılmış yetkilendirme (authentication) adaptörlerini kullanarak, ölçeklenebilir bir çözüm olmayı hedefler ve çoklu yetkilendirme (multifactor authentication) özelliğini de destekler. 
 
