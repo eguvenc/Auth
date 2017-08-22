@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\Adapter\Table;
+namespace Obullo\Auth\Provider;
 
 /**
  * Abstract Table
@@ -8,7 +8,7 @@ namespace Obullo\Auth\Adapter\Table;
  * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-abstract class AbstractTable implements TableInterface
+abstract class AbstractProvider implements TableInterface
 {
     /**
      * Columns ( db select fields )

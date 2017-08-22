@@ -1,16 +1,16 @@
 <?php
 
-namespace Obullo\Auth\Adapter\Table;
+namespace Obullo\Auth\Provider;
 
 use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
- * Auth Table Interface
+ * Auth Provider Interface
  *
  * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-interface TableInterface
+interface ProviderInterface
 {
     /**
      * Execute query

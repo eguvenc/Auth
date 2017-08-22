@@ -1,9 +1,9 @@
 <?php
 
-namespace Obullo\Auth\Adapter;
+namespace Obullo\Auth;
 
-use Obullo\Auth\User\UserInterface as User;
-use Obullo\Auth\User\CredentialsInterface as Credentials;
+use Obullo\Auth\UserInterface as User;
+use Obullo\Auth\CredentialsInterface as Credentials;
 
 /**
  * Adapter Interface

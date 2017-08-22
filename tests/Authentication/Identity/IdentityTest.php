@@ -2,14 +2,15 @@
 
 use Obullo\Auth\Password;
 use Obullo\Auth\WebTestCase;
-use Obullo\Auth\Adapter\Table;
+use Obullo\Auth\AuthAdapter;
 use Obullo\Auth\RecallerToken;
-use Obullo\Auth\User\Credentials;
+use Obullo\Auth\Credentials;
 
 class IdentityTest extends WebTestCase
 {
     protected $db;
     protected $identity;
+    protected $provider;
 
     /**
      * Setup variables
@@ -21,7 +22,7 @@ class IdentityTest extends WebTestCase
         parent::setUp();
 
         $this->identity = $this->container->get("Auth:Identity");
-        $this->table    = $this->container->get("Auth:Table");
+        $this->provider = $this->container->get("Auth:Provider");
     }
 
     /**
@@ -33,7 +34,7 @@ class IdentityTest extends WebTestCase
      */
     protected function login($rememberMe = 0)
     {
-        $authAdapter = new Table($this->container);
+        $authAdapter = new AuthAdapter($this->container);
 
         $credentials = new Credentials;
         $credentials->setIdentityValue("user@example.com");
@@ -50,7 +51,7 @@ class IdentityTest extends WebTestCase
             trigger_error(implode("\n", $messages));
             return false;
         }
-        $user = new Obullo\Auth\User\User($credentials);
+        $user = new Obullo\Auth\User($credentials);
         $user->setResultRow($authResult->getResultRow());
 
         $identity = $authAdapter->authorize($user); // Authorize user

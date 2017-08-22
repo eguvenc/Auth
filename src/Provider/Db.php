@@ -1,18 +1,18 @@
 <?php
 
-namespace Obullo\Auth\Adapter\Table;
+namespace Obullo\Auth\Provider;
 
 use Doctrine\DBAL\Driver\Connection;
-use Obullo\Auth\Adapter\Table\AbstractTable;
+use Obullo\Auth\Provider\AbstractProvider;
 use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
- * Pdo Adapter
+ * Doctrine DBAL PDO Adapter
  *
  * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Db extends AbstractTable
+class Db extends AbstractProvider
 {
     /**
      * Db connection

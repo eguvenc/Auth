@@ -1,5 +1,5 @@
 
-## Php Web Authentication
+## Php Multiple Authentication
 
 Obullo Auth package is designed to ease the management of authorization in the medium and large-scale applications caching the user identities according to their session numbers with the help of cache drivers. Auth package aims to be a scalable solution using the authentication adapters written for various common scenarios and supports multifactor authentication.
 
@@ -9,35 +9,16 @@ Obullo Auth package is designed to ease the management of authorization in the m
 composer require obullo/auth
 ```
 
-### Installing Demo Application
-
-```
-git clone git@github.com:obullo/Auth-Demo.git auth-demo
-```
-
 To look over the real examples try to install demo application.
 
 ### Features
 
 * Cachable Identities
-* Multifactor Authentication (MFA)
+* Mulitple Authentication (Ability to see the users opening sessions with different computers and terminate the all)
+* Multifactor Authentication Support
 * Adapters for varied behaviors
-* Ability to see the users opening sessions with different computers and terminate the sessions
-* Table classes for different databases
+* Auth Providers for different databases
 * 'Remember Me' feature
-
-### MFA Feature 
-
-In login operations, if authorizing the users includes more than one step, it is called multiple authorization. The method Multi-Factor Authentication consists of a multi-layered structure. It provides a shield which the attackers cannot get through with several authentication methods. These methods may be like below ones:
-
-* OTP
-* QR Code
-* Call
-* Sms
-
-MFA, multiple authorization method, has a second step which get users required to authenticate their identities unlike standard login functions. Even if an attacker has a user password, he cannot pass the authentication since he does not have a secure device authorized for MFA.  
-
-* This feature is optional.
 
 ### Flow Chart
 
@@ -143,12 +124,12 @@ INSERT INTO `users` (`id`, `username`, `password`, `remember_token`) VALUES
 
 The name of the test user is <kbd>user@example.com</kbd> and the password is <kbd>123456</kbd>.
 
-### Auth Table
+### Auth Provider
 
-If you want to change the queries or want to use a NoSQL solution, you can replace the value <kbd>Obullo\Auth\Adapter\Table\Db</kbd> of the key Auth:Table with your table class from the Authentication service provider.
+If you want to change the queries or want to use a NoSQL solution, you can replace the value <kbd>Obullo\Auth\Adapter\Provider\Db</kbd> of the key Auth:Provider with your table class from the Authentication service provider.
 
 ```php
-$container->share('Auth:Table', 'My\Table\Db')
+$container->share('Auth:Provider', 'My\Provider\Db')
     ->withArgument($container->get('database:default'))
     ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
     ->withMethodCall('setTableName', ['users'])
@@ -160,7 +141,7 @@ $container->share('Auth:Table', 'My\Table\Db')
 An example for Mongo Db.
 
 ```php
-$container->share('Auth:Table', 'Obullo\Auth\Adapter\Database\Table\Mongo');
+$container->share('Auth:Provider', 'Obullo\Auth\Provider\Mongo');
 ```
 
 ### Login
@@ -173,14 +154,14 @@ $credentials->setIdentityValue('user@example.com');
 $credentials->setPasswordValue('123456');
 $credentials->setRememberMeValue(false);
 
-$authAdapter = new Obullo\Auth\Adapter\Table($container);
+$authAdapter = new Obullo\Auth\AuthAdapter($container);
 $authResult  = $authAdapter->authenticate($credentials);
 $authAdapter->regenerateSessionId(true);
 
 if (false == $authResult->isValid()) {
     print_r($authResult->getMessages());
 } else {
-    $user = new Obullo\Auth\User\User($credentials);
+    $user = new Obullo\Auth\User($credentials);
     $user->setResultRow($authResult->getResultRow());
 
     $identity = $authAdapter->authorize($user); // Authorize user;
@@ -566,15 +547,15 @@ if ($token = $identity->hasRecallerCookie()) {
     
     if ($resultRowArray = $recaller->recallUser($token)) {
 
-        $credentials = new Obullo\Auth\User\Credentials;
+        $credentials = new Obullo\Auth\Credentials;
         $credentials->setIdentityValue($resultRowArray['email']);
         $credentials->setPasswordValue($resultRowArray['password']);
         $credentials->setRememberMeValue(true);
 
-        $user = new Obullo\Auth\User\User($credentials);
+        $user = new Obullo\Auth\User($credentials);
         $user->setResultRow($resultRowArray);
 
-        $authAdapter = new Obullo\Auth\Adapter\Table($container);
+        $authAdapter = new Obullo\Auth\AuthAdapter($container);
         $authAdapter->authorize($user);
         $authAdapter->regenerateSessionId(true);
     }
@@ -582,9 +563,19 @@ if ($token = $identity->hasRecallerCookie()) {
 
 ```
 
-### Multifactor Authentication
 
-Multifactor authentication makes the identity confirmation easier with the methods <b>OTP</b>, <b>Çağrı</b>, <b>Sms</b> or <b>QRCode</b> after a user logs in.
+### MFA Feature (Optional)
+
+In login operations, if authorizing the users includes more than one step, it is called multiple authorization. The method Multi-Factor Authentication consists of a multi-layered structure. It provides a shield which the attackers cannot get through with several authentication methods. These methods may be like below ones:
+
+* OTP
+* QR Code
+* Call
+* Sms
+
+MFA, multiple authorization method, has a second step which get users required to authenticate their identities unlike standard login functions. Even if an attacker has a user password, he cannot pass the authentication since he does not have a secure device authorized for MFA.  
+
+* This feature is optional.
 
 After a successful login, the user identity is cached permanently(3600 seconds by default). If the user is wanted to be approved,  permanent identities must be become temporary with the method <kbd>$identity->makeTemporary()</kbd> (300 seconds by default). A temporary idendity expires within 300 seconds itself. 
 
@@ -616,9 +607,9 @@ $identity->makePermanent();
 If multifactor authentication is not used, system saves all identities as <kbd>permanent</kbd>.
 
 
-### Mongo Table Driver
+### Mongo Provider
 
-If you want to use Mongo table driver, add the Mongo service provider from the commong file. Remember updating the connection information in the service provider.
+If you want to use Mongo table driver, add the Mongo service provider from the common file. Remember updating the connection information in the service provider.
 
 ```php
 // $container->addServiceProvider('ServiceProvider\Database');
@@ -634,7 +625,7 @@ $this->container->get('mongo:default')->selectDB('test');
 The part needing to be changed in the service provider should be like below.
 
 ```php
-$container->share('Auth:Table', 'Obullo\Auth\Adapter\Table\Mongo')
+$container->share('Auth:Provider', 'Obullo\Auth\Provider\Mongo')
     ->withArgument($this->container->get('mongo:default')->selectDB('test'))
     ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
     ->withMethodCall('setTableName', ['users'])

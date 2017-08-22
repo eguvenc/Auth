@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Auth\Adapter\Table;
+namespace Obullo\Auth\Provider;
 
-use Obullo\Auth\Adapter\Table\AbstractTable;
+use Obullo\Auth\Provider\AbstractProvider;
 use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
@@ -11,7 +11,7 @@ use Obullo\Auth\User\CredentialsInterface as Credentials;
  * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Mongo extends AbstractTable
+class Mongo extends AbstractProvider
 {
      /**
      * Db

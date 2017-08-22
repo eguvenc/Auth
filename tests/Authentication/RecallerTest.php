@@ -5,7 +5,7 @@ use Obullo\Auth\WebTestCase;
 
 class RecallerTest extends WebTestCase
 {
-    protected $table;
+    protected $provider;
     protected $password;
 
     /**
@@ -17,14 +17,14 @@ class RecallerTest extends WebTestCase
     {
         parent::setUp();
 
-        $this->table = $this->container->get('Auth:Table');
+        $this->provider = $this->container->get('Auth:Provider');
         $this->recaller = new Recaller($this->container);
     }
 
     public function testRecallUser()
     {
         $token = 'T1KPlDSWFZjG1v5BYHifEfmwzZoWd0A4';
-        $this->table->updateRememberToken($token, 'user@example.com');
+        $this->provider->updateRememberToken($token, 'user@example.com');
 
         $resultRow = $this->recaller->recallUser($token);
 
@@ -42,7 +42,7 @@ class RecallerTest extends WebTestCase
     public function testGetResultRow()
     {
         $token = 'T1KPlDSWFZjG1v5BYHifEfmwzZoWd0A4';
-        $this->table->updateRememberToken($token, 'user@example.com');
+        $this->provider->updateRememberToken($token, 'user@example.com');
 
         $this->recaller->recallUser($token);
         $resultRow = $this->recaller->getResultRow();

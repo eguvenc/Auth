@@ -1,9 +1,9 @@
 <?php
 
-namespace Obullo\Auth\Adapter;
+namespace Obullo\Auth;
 
+use Obullo\Auth\CredentialsInterface as Credentials;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
  * Abstract Adapater

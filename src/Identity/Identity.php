@@ -14,11 +14,11 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class Identity extends AbstractIdentity
 {
     /**
-     * Table
+     * Provider
      *
      * @var object
      */
-    protected $table;
+    protected $provider;
 
     /**
      * Request
@@ -49,7 +49,7 @@ class Identity extends AbstractIdentity
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->table     = $container->get('Auth:Table');
+        $this->provider  = $container->get('Auth:Provider');
         $this->storage   = $container->get('Auth:Storage');
 
         $this->initialize();
@@ -240,7 +240,7 @@ class Identity extends AbstractIdentity
      */
     public function getRememberToken()
     {
-        return $this->get($this->table->getRememberTokenColumn());
+        return $this->get($this->provider->getRememberTokenColumn());
     }
 
     /**
@@ -349,9 +349,9 @@ class Identity extends AbstractIdentity
         if ($this->getRememberMe() == 1) {  // If user checked rememberMe option
 
             $tokenValue = $this->container->get('Auth:RecallerToken')->create();
-            $this->table->updateRememberToken($tokenValue, $this->getIdentifier());
+            $this->provider->updateRememberToken($tokenValue, $this->getIdentifier());
 
-            $rememberColumn = $this->table->getRememberTokenColumn();
+            $rememberColumn = $this->provider->getRememberTokenColumn();
             $this->set($rememberColumn, $tokenValue);
             return;
         }

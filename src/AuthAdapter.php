@@ -1,28 +1,27 @@
 <?php
 
-namespace Obullo\Auth\Adapter;
+namespace Obullo\Auth;
 
-use Obullo\Auth\User\User;
+use Obullo\Auth\User;
 use Obullo\Auth\AuthResult;
-use Obullo\Auth\User\UserInterface;
-use Obullo\Auth\Adapter\AbstractAdapter;
+use Obullo\Auth\UserInterface;
+use Obullo\Auth\CredentialsInterface as Credentials;
 use Interop\Container\ContainerInterface as Container;
-use Obullo\Auth\User\CredentialsInterface as Credentials;
 
 /**
- * Database Table Adapter
+ * Auth Adapter
  *
  * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Table extends AbstractAdapter
+class AuthAdapter extends AbstractAdapter
 {
     /**
-     * Table
+     * Provider
      *
      * @var object
      */
-    protected $table;
+    protected $provider;
     
     /**
      * Storage
@@ -81,7 +80,7 @@ class Table extends AbstractAdapter
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->table     = $container->get('Auth:Table');
+        $this->provider  = $container->get('Auth:Provider');
         $this->storage   = $container->get('Auth:Storage');
         $this->identity  = $container->get('Auth:Identity');
     }
@@ -161,10 +160,11 @@ class Table extends AbstractAdapter
         /**
          * If cached identity does not exist in memory do SQL query
          */
-        $this->resultRowArray = ($storageResult === false) ? $this->table->query($credentials) : $storageResult;
+        $this->resultRowArray = ($storageResult === false) ? $this->provider->query($credentials) : $storageResult;
 
-        $id   = $this->table->getIdentityColumn();
-        $pass = $this->table->getPasswordColumn();
+        $id   = $this->provider->getIdentityColumn();
+        $pass = $this->provider->getPasswordColumn();
+
 
         if (is_array($this->resultRowArray) && isset($this->resultRowArray[$id])) {
             $plain = $credentials->getPasswordValue();
@@ -195,8 +195,8 @@ class Table extends AbstractAdapter
         $resultRow   = $user->getResultRow();
 
         $attributes = array(
-            $this->table->getIdentityColumn() => $credentials->getIdentityValue(),
-            $this->table->getPasswordColumn() => $resultRow[$this->table->getPasswordColumn()],
+            $this->provider->getIdentityColumn() => $credentials->getIdentityValue(),
+            $this->provider->getPasswordColumn() => $resultRow[$this->provider->getPasswordColumn()],
             '__rememberMe' => $credentials->getRememberMeValue(),
             '__time' => $this->getMicrotime(),
             '__agent' => $this->container->get('Auth.HTTP_USER_AGENT')->getValue(),
@@ -209,7 +209,7 @@ class Table extends AbstractAdapter
 
         if ($credentials->getRememberMeValue()) {  // If user choosed remember feature
             $token = $this->container->get('Auth:RecallerToken')->create();
-            $this->table->updateRememberToken($token, $credentials->getIdentityValue()); // refresh rememberToken
+            $this->provider->updateRememberToken($token, $credentials->getIdentityValue()); // refresh rememberToken
         }
         if ($this->identity->isTemporary()) {
             $this->storage->createTemporary($attributes); // If user has a temporay identity go on as temporary.
@@ -238,7 +238,7 @@ class Table extends AbstractAdapter
             $this->results['messages'][] = 'Supplied credential is invalid.';
             return $this->createResult();
         }
-        if (isset($this->resultRowArray[1][$this->table->getIdentityColumn()])) {
+        if (isset($this->resultRowArray[1][$this->provider->getIdentityColumn()])) {
             $this->results['code'] = AuthResult::FAILURE_IDENTITY_AMBIGUOUS;
             $this->results['messages'][] = 'More than one record matches the supplied identity.';
             return $this->createResult();

@@ -5,7 +5,7 @@ use Obullo\Auth\Storage\Redis as RedisStorage;
 
 class RedisTest extends WebTestCase
 {
-    protected $table;
+    protected $provider;
     protected $request;
     protected $storage;
     protected $credentials;
@@ -19,8 +19,8 @@ class RedisTest extends WebTestCase
     {
         parent::setUp();
 
-        $this->table   = $this->container->get('Auth:Table');
-        $this->request = $this->container->get('request');
+        $this->provider = $this->container->get('Auth:Provider');
+        $this->request  = $this->container->get('request');
 
         $this->storage = new RedisStorage(
             $this->container->get('redis:default')
@@ -28,8 +28,8 @@ class RedisTest extends WebTestCase
         $this->storage->setContainer($this->container);
         
         $this->credentials = [
-            $this->table->getIdentityColumn() => 'user@example.com',
-            $this->table->getPasswordColumn() => '12346',
+            $this->provider->getIdentityColumn() => 'user@example.com',
+            $this->provider->getPasswordColumn() => '12346',
         ];
         $this->storage->setIdentifier('user@example.com');
     }
@@ -236,8 +236,8 @@ class RedisTest extends WebTestCase
         $this->storage->createPermanent($this->credentials);
         $result = $this->storage->query();
 
-        $identifier = $this->table->getIdentityColumn();
-        $password   = $this->table->getPasswordColumn();
+        $identifier = $this->provider->getIdentityColumn();
+        $password   = $this->provider->getPasswordColumn();
 
         if ($this->assertArrayHasKey('__isAuthenticated', $result, "I create fake credentials i expect query array has '__isAuthenticated' key.")) {
             $this->assertEquals($result['__isAuthenticated'], 1, "I expect that the value is equal to 1.");
@@ -265,8 +265,8 @@ class RedisTest extends WebTestCase
         $this->storage->setCredentials($this->credentials, $data, 60);
         $result = $this->storage->getCredentials();
 
-        $identifier = $this->table->getIdentityColumn();
-        $password   = $this->table->getPasswordColumn();
+        $identifier = $this->provider->getIdentityColumn();
+        $password   = $this->provider->getPasswordColumn();
 
         if ($this->assertArrayHasKey('__isAuthenticated', $result, "I create fake credentials and i expect storage array has '__isAuthenticated' key.")) {
             $this->assertEquals($result['__isAuthenticated'], 1, "I expect that the value is equal to 1.");
@@ -299,7 +299,7 @@ class RedisTest extends WebTestCase
 
     public function testUpdate()
     {
-        $identifier = $this->table->getIdentityColumn();
+        $identifier = $this->provider->getIdentityColumn();
 
         $data = [
             '__isAuthenticated' => 1,
@@ -319,7 +319,7 @@ class RedisTest extends WebTestCase
 
     public function testRemove()
     {
-        $identifier = $this->table->getIdentityColumn();
+        $identifier = $this->provider->getIdentityColumn();
 
         $data = [
             '__isAuthenticated' => 1,

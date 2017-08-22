@@ -141,12 +141,12 @@ INSERT INTO `users` (`id`, `username`, `password`, `remember_token`) VALUES
 
 Test kullanıcı adı <kbd>user@example.com</kbd> ve şifre <kbd>123456</kbd> dır.
 
-### Auth Table
+### Auth Provider
 
-Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Table anahtarındakı <kbd>Obullo\Auth\Adapter\Table\Db</kbd> değerini kendi tablo sınıfınız ile değiştirebilirsiniz.
+Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Provider anahtarındakı <kbd>Obullo\Auth\Provider\Db</kbd> değerini kendi provider sınıfınız ile değiştirebilirsiniz.
 
 ```php
-$container->share('Auth:Table', 'My\Table\Db')
+$container->share('Auth:Provider', 'My\Table\Db')
     ->withArgument($container->get('database:default'))
     ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
     ->withMethodCall('setTableName', ['users'])
@@ -158,7 +158,7 @@ $container->share('Auth:Table', 'My\Table\Db')
 Mongo Db için örnek.
 
 ```php
-$container->share('Auth:Table', 'Obullo\Auth\Adapter\Database\Table\Mongo');
+$container->share('Auth:Provider', 'Obullo\Auth\Provider\Mongo');
 ```
 
 ### Oturum Açma
@@ -618,9 +618,9 @@ $identity->makePermanent();
 Eğer çoklu yetkilendirme yani geçici kimlik oluşturma fonksiyonu kullanılmıyorsa, sistem her kimliği <kbd>kalıcı</kbd> olarak kaydeder.
 
 
-### Mongo Tablo Sürücüsü
+### Mongo Provider
 
-Tablo sürücünü mongo kullanmak istiyorsanız ortak dosyadan mongo servis sağlayıcısını ekleyin. Ayrıca servis sağlayıcısı içerisindeki bağlantı bilgilerini güncellemeyi unutmayın.
+Mongo provider kullanmak istiyorsanız ortak dosyadan mongo servis sağlayıcısını ekleyin. Ayrıca servis sağlayıcısı içerisindeki bağlantı bilgilerini güncellemeyi unutmayın.
 
 ```php
 // $container->addServiceProvider('ServiceProvider\Database');
@@ -636,7 +636,7 @@ $this->container->get('mongo:default')->selectDB('test');
 Servis sağlayıcısı içerisindeki değiştirilmesi gereken kısım aşağıdaki gibi olmalı.
 
 ```php
-$container->share('Auth:Table', 'Obullo\Auth\Adapter\Table\Mongo')
+$container->share('Auth:Provider', 'Obullo\Auth\Provider\Mongo')
     ->withArgument($this->container->get('mongo:default')->selectDB('test'))
     ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
     ->withMethodCall('setTableName', ['users'])

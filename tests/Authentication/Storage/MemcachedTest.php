@@ -5,7 +5,7 @@ use Obullo\Auth\Storage\Memcached as MemcachedStorage;
 
 class MemcachedTest extends WebTestCase
 {
-    protected $table;
+    protected $provider;
     protected $request;
     protected $storage;
     protected $credentials;
@@ -19,8 +19,8 @@ class MemcachedTest extends WebTestCase
     {
         parent::setUp();
 
-        $this->table   = $this->container->get('Auth:Table');
-        $this->request = $this->container->get('request');
+        $this->provider = $this->container->get('Auth:Provider');
+        $this->request  = $this->container->get('request');
 
         list($usec, $sec) = explode(" ", microtime());
         $microtime = ((float)$usec + (float)$sec);
@@ -31,8 +31,8 @@ class MemcachedTest extends WebTestCase
         $this->storage->setContainer($this->container);
         
         $this->credentials = [
-            $this->table->getIdentityColumn() => 'user@example.com',
-            $this->table->getPasswordColumn() => '12346',
+            $this->provider->getIdentityColumn() => 'user@example.com',
+            $this->provider->getPasswordColumn() => '12346',
             '__time' => $microtime,
             '__ip' => "127.0.0.1",
             '__agent' => null,
@@ -243,8 +243,8 @@ class MemcachedTest extends WebTestCase
         $this->storage->createPermanent($this->credentials);
         $result = $this->storage->query();
 
-        $identifier = $this->table->getIdentityColumn();
-        $password   = $this->table->getPasswordColumn();
+        $identifier = $this->provider->getIdentityColumn();
+        $password   = $this->provider->getPasswordColumn();
 
         if ($this->assertArrayHasKey('__isAuthenticated', $result, "I create fake credentials i expect query array has '__isAuthenticated' key.")) {
             $this->assertEquals($result['__isAuthenticated'], 1, "I expect that the value is equal to 1.");
@@ -272,8 +272,8 @@ class MemcachedTest extends WebTestCase
         $this->storage->setCredentials($this->credentials, $data, 60);
         $result = $this->storage->getCredentials();
 
-        $identifier = $this->table->getIdentityColumn();
-        $password   = $this->table->getPasswordColumn();
+        $identifier = $this->provider->getIdentityColumn();
+        $password   = $this->provider->getPasswordColumn();
 
         if ($this->assertArrayHasKey('__isAuthenticated', $result, "I create fake credentials and i expect storage array has '__isAuthenticated' key.")) {
             $this->assertEquals($result['__isAuthenticated'], 1, "I expect that the value is equal to 1.");
@@ -306,7 +306,7 @@ class MemcachedTest extends WebTestCase
 
     public function testUpdate()
     {
-        $identifier = $this->table->getIdentityColumn();
+        $identifier = $this->provider->getIdentityColumn();
 
         $data = [
             '__isAuthenticated' => 1,
@@ -326,7 +326,7 @@ class MemcachedTest extends WebTestCase
 
     public function testRemove()
     {
-        $identifier = $this->table->getIdentityColumn();
+        $identifier = $this->provider->getIdentityColumn();
 
         $data = [
             '__isAuthenticated' => 1,

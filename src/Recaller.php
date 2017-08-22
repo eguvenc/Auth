@@ -2,23 +2,22 @@
 
 namespace Obullo\Auth;
 
-use Obullo\Auth\User\Credentials;
 use Interop\Container\ContainerInterface as Container;
 
 /**
  * Recaller
  *
- * @copyright 2016 Obullo
+ * @copyright 2017 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Recaller
 {
     /**
-     * Table
+     * Provider
      *
      * @var object
      */
-    protected $table;
+    protected $provider;
 
     /**
      * Storage
@@ -49,7 +48,7 @@ class Recaller
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->table     = $container->get('Auth:Table');
+        $this->provider  = $container->get('Auth:Provider');
         $this->storage   = $container->get('Auth:Storage');
     }
 
@@ -62,10 +61,10 @@ class Recaller
      */
     public function recallUser($tokenValue)
     {
-        $resultRowArray = $this->table->recall($tokenValue);
+        $resultRowArray = $this->provider->recall($tokenValue);
 
-        $identityColumn      = $this->table->getIdentityColumn();
-        $rememberTokenColumn = $this->table->getRememberTokenColumn();
+        $identityColumn      = $this->provider->getIdentityColumn();
+        $rememberTokenColumn = $this->provider->getRememberTokenColumn();
 
         if (! is_array($resultRowArray) || empty($resultRowArray[$rememberTokenColumn])) {
             $this->storage->setIdentifier('Guest');   // Mark user as guest

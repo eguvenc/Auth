@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Auth\User;
+namespace Obullo\Auth;
 
 /**
  * User Credentials
