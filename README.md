@@ -563,7 +563,6 @@ if ($token = $identity->hasRecallerCookie()) {
 
 ```
 
-
 ### MFA Feature (Optional)
 
 In login operations, if authorizing the users includes more than one step, it is called multiple authorization. The method Multi-Factor Authentication consists of a multi-layered structure. It provides a shield which the attackers cannot get through with several authentication methods. These methods may be like below ones:
@@ -577,7 +576,9 @@ MFA, multiple authorization method, has a second step which get users required t
 
 * This feature is optional.
 
-After a successful login, the user identity is cached permanently(3600 seconds by default). If the user is wanted to be approved,  permanent identities must be become temporary with the method <kbd>$identity->makeTemporary()</kbd> (300 seconds by default). A temporary idendity expires within 300 seconds itself. 
+Multifactor authentication makes the identity confirmation easier with the methods <b>OTP</b>, <b>Call</b>, <b>Sms</b> or <b>QRCode</b> after a user logs in.
+
+After a successful login, the user identity is cached permanently (3600 seconds by default). If the user is wanted to be approved,  permanent identities must be become temporary with the method <kbd>$identity->makeTemporary()</kbd> (300 seconds by default). A temporary idendity expires within 300 seconds itself. 
 
 In multifactor authentication, after user logs in,
 
@@ -585,7 +586,7 @@ In multifactor authentication, after user logs in,
 $identity->makeTemporary(300);
 ```
 
-using the method above, user idendity is made temporary and user cannot log in. The user must be sent verification code to approve his temporary idendity.
+using the method above, user idendity is made temporary and user cannot log in. The user must be sent verification code to approve his temporary identity.
 
 ```php
 if ($authResult->isValid()) {
@@ -598,7 +599,7 @@ if ($authResult->isValid()) {
 }
 ```
 
-If verified, the temporary idendity must be set as permanent with the method <kbd>$identity->makePermanent()</kbd>. A permanent idendity means the user has successfully logged in.
+If verified, the temporary identity must be set as permanent with the method <kbd>$identity->makePermanent()</kbd>. A permanent identity means the user has successfully logged in.
 
 ```php
 $identity->makePermanent();
