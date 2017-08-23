@@ -68,7 +68,7 @@ if (! $authResult->isValid()) {
     if ($hash = $authAdapter->passwordNeedsRehash()) {
         // Set new user password to db
     }
-    $user = new Obullo\Auth\User\User($credentials);
+    $user = new Obullo\Auth\User($credentials);
     $user->setResultRow($authResult->getResultRow());
 
     $identity = $authAdapter->authorize($user); // Authorize user

@@ -7,7 +7,7 @@ use Doctrine\DBAL\DriverManager;
 
 use League\Container\ServiceProvider\AbstractServiceProvider;
 
-class Database extends AbstractServiceProvider
+class Doctrine extends AbstractServiceProvider
 {
     /**
      * The provides array is a way to let the container
@@ -19,7 +19,7 @@ class Database extends AbstractServiceProvider
      * @var array
      */
     protected $provides = [
-        'database:default'
+        'doctrine:default'
     ];
 
     /**
@@ -44,6 +44,6 @@ class Database extends AbstractServiceProvider
         );
         $conn = DriverManager::getConnection($connectionParams, $config);
 
-        $container->share('database:default', $conn);
+        $container->share('doctrine:default', $conn);
     }
 }

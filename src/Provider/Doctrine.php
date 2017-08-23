@@ -12,7 +12,7 @@ use Obullo\Auth\User\CredentialsInterface as Credentials;
  * @copyright 2016 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Db extends AbstractProvider
+class Doctrine extends AbstractProvider
 {
     /**
      * Db connection

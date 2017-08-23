@@ -126,7 +126,7 @@ The name of the test user is <kbd>user@example.com</kbd> and the password is <kb
 
 ### Auth Provider
 
-If you want to change the queries or want to use a NoSQL solution, you can replace the value <kbd>Obullo\Auth\Adapter\Provider\Db</kbd> of the key Auth:Provider with your table class from the Authentication service provider.
+If you want to change the queries or want to use a NoSQL solution, you can replace the value <kbd>Obullo\Auth\Provider\Doctrine</kbd> of the key Auth:Provider with your provider class from the Authentication service provider.
 
 ```php
 $container->share('Auth:Provider', 'My\Provider\Db')

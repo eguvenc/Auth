@@ -67,8 +67,8 @@ class Authentication extends AbstractServiceProvider
             ->withMethodCall('setPermanentBlockLifetime', [3600]) // Should be same with app session lifetime.
             ->withMethodCall('setTemporaryBlockLifetime', [300]);
 
-        $container->share('Auth:Provider', 'Obullo\Auth\Provider\Db')
-            ->withArgument($container->get('database:default'))
+        $container->share('Auth:Provider', 'Obullo\Auth\Provider\Doctrine')
+            ->withArgument($container->get('doctrine:default'))
             ->withMethodCall('setColumns', [array('username', 'password', 'email', 'remember_token')])
             ->withMethodCall('setTableName', ['users'])
             ->withMethodCall('setIdentityColumn', ['email'])

@@ -24,6 +24,6 @@ $container->share('request', $request);
 
 $container->addServiceProvider('ServiceProvider\Redis');
 $container->addServiceProvider('ServiceProvider\Memcached');
-$container->addServiceProvider('ServiceProvider\Database');
+$container->addServiceProvider('ServiceProvider\Doctrine');
 // $container->addServiceProvider('ServiceProvider\Mongo');
 $container->addServiceProvider('ServiceProvider\Authentication');

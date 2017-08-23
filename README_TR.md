@@ -143,7 +143,7 @@ Test kullanıcı adı <kbd>user@example.com</kbd> ve şifre <kbd>123456</kbd> d�
 
 ### Auth Provider
 
-Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Provider anahtarındakı <kbd>Obullo\Auth\Provider\Db</kbd> değerini kendi provider sınıfınız ile değiştirebilirsiniz.
+Eğer mevcut database sorgularında değişiklik yapmak yada bir NoSQL çözümü kullanmak istiyorsanız Authentication servis sağlayıcısından Auth:Provider anahtarındakı <kbd>Obullo\Auth\Provider\Doctrine</kbd> değerini kendi provider sınıfınız ile değiştirebilirsiniz.
 
 ```php
 $container->share('Auth:Provider', 'My\Table\Db')
