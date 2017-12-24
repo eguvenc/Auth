@@ -14,7 +14,7 @@ To look over the real examples try to install demo application.
 ### Features
 
 * Cachable Identities
-* Mulitple Authentication (Ability to see the users opening sessions with different computers and terminate the all)
+* Multiple Authentication (Ability to see the users opening sessions with different computers and terminate the all)
 * Multifactor Authentication Support
 * Adapters for varied behaviors
 * Auth Providers for different databases
