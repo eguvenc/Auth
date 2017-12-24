@@ -14,11 +14,11 @@ To look over the real examples try to install demo application.
 ### Features
 
 * Cachable Identities
-* Multiple Authentication (Ability to see the users opening sessions with different computers and terminate the all)
+* Multiple Sessions (Ability to see the users opening sessions with different computers and terminate the all)
 * Multifactor Authentication Support
 * Adapters for varied behaviors
 * Auth Providers for different databases
-* 'Remember Me' feature
+* Remember Me feature
 
 ### Flow Chart
 
