@@ -20,6 +20,7 @@ Gerçek örneklere göz atmak için demo uygulamayı yüklemeyi deneyin.
 ### Özellikler
 
 * Önbelleklenebilir kimlikler
+* Çoklu oturum (Farklı bilgisayarlarda oturum açabilme ve bu oturumları sonlandırabilme)
 * Çoklu yetkilendirme (MFA)
 * Farklı davranışlar için adaptörler
 * Farklı bilgisayarlardan oturum açan kullanıcıları görebilme ve oturumları sonlandırabilme
